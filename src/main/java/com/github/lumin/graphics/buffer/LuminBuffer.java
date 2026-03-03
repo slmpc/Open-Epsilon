@@ -48,6 +48,7 @@ public class LuminBuffer {
         mappedBuffer = RenderSystem.getDevice().createCommandEncoder().mapBuffer(
                 gpuBuffer, false, true
         );
+        mapped = true;
     }
 
     /**

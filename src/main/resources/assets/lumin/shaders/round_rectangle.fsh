@@ -1,4 +1,4 @@
-#version 450 core
+#version 410 core
 
 smooth in vec2 f_Position;
 smooth in vec4 f_Color;
