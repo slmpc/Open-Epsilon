@@ -1,5 +1,6 @@
 package com.github.lumin.gui.clickgui.panel;
 
+import com.github.lumin.graphics.renderers.BlurRenderer;
 import com.github.lumin.graphics.text.StaticFontLoader;
 import com.github.lumin.gui.IComponent;
 import com.github.lumin.modules.Category;
@@ -7,6 +8,7 @@ import com.github.lumin.modules.impl.client.ClickGui;
 import com.github.lumin.utils.render.MouseUtils;
 import com.github.lumin.utils.render.animation.Animation;
 import com.github.lumin.utils.render.animation.Easing;
+import com.mojang.blaze3d.textures.GpuSampler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -15,18 +17,9 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.sounds.SoundEvents;
 
-import com.github.lumin.graphics.LuminTexture;
-import com.github.lumin.graphics.renderers.BlurRenderer;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.AddressMode;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuSampler;
-
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalDouble;
 import java.util.function.Consumer;
 
 public class Sidebar implements IComponent {
@@ -76,8 +69,8 @@ public class Sidebar implements IComponent {
         float width = this.width * guiScale;
         float height = this.height * guiScale;
 
-            BlurRenderer.getInstance().drawBlurRect(x, y, width, height, radius, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
-        
+        BlurRenderer.getInstance().drawBlur(x, y, width, height, radius, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
+
         set.bottomRoundRect().addRoundRect(x, y, width, height, radius, 0, 0, radius, applyAlpha(new Color(0x5F000000, true), alpha));
 
         var player = mc.player;

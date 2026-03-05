@@ -2,6 +2,7 @@ package com.github.lumin.graphics.renderers;
 
 import com.github.lumin.graphics.LuminRenderPipelines;
 import com.github.lumin.graphics.LuminRenderSystem;
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -12,7 +13,6 @@ import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.ProjectionType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.TextureTransform;
 import net.minecraft.util.Mth;
@@ -102,7 +102,6 @@ public class BlurRenderer implements AutoCloseable {
         lastWidth = width;
         lastHeight = height;
 
-        // Clear old targets
         for (RenderTarget target : targets) {
             target.destroyBuffers();
         }
@@ -112,7 +111,6 @@ public class BlurRenderer implements AutoCloseable {
             outputTarget = null;
         }
 
-        // Create new targets for downsampling
         int currentW = width;
         int currentH = height;
         for (int i = 0; i < 5; i++) {
@@ -136,18 +134,15 @@ public class BlurRenderer implements AutoCloseable {
 
         if (targets.isEmpty()) return null;
 
-        // Determine number of passes based on radius
         int passes = Mth.clamp((int) radius, 1, targets.size());
 
         RenderTarget mainTarget = mc.getMainRenderTarget();
 
-        // Backup projection
         RenderSystem.backupProjectionMatrix();
-        // Set identity projection
-        // We write identity to our projection buffer and bind it
+
         try (var pointer = RenderSystem.getDevice().createCommandEncoder().mapBuffer(projectionBuffer, false, true)) {
             ByteBuffer buf = pointer.data();
-            for(int i=0; i<16; i++) {
+            for (int i = 0; i < 16; i++) {
                 buf.putFloat(i % 5 == 0 ? 1.0f : 0.0f);
             }
         }
@@ -162,7 +157,6 @@ public class BlurRenderer implements AutoCloseable {
         }
 
         // 2. Upsample passes
-        // If outputToScreen is false, we render the last pass to outputTarget instead of mainTarget
         for (int i = passes - 1; i >= 0; i--) {
             RenderTarget dest;
             if (i == 0) {
@@ -184,11 +178,11 @@ public class BlurRenderer implements AutoCloseable {
         blur(radius, true);
     }
 
-    public void drawBlurRect(float x, float y, float width, float height, float radius, float blurRadius) {
-        drawBlurRect(x, y, width, height, radius, radius, radius, radius, blurRadius);
+    public void drawBlur(float x, float y, float width, float height, float radius, float blurRadius) {
+        drawBlur(x, y, width, height, radius, radius, radius, radius, blurRadius);
     }
 
-    public void drawBlurRect(float x, float y, float width, float height, float rTL, float rTR, float rBR, float rBL, float blurRadius) {
+    public void drawBlur(float x, float y, float width, float height, float rTL, float rTR, float rBR, float rBL, float blurRadius) {
         if (blurRadius <= 0) return;
 
         RenderTarget blurred = blur(blurRadius, false);
@@ -209,33 +203,21 @@ public class BlurRenderer implements AutoCloseable {
         float u1 = (realX + realW) / screenW;
         float v1 = realY / screenH; // Flip V
 
-        // Vertex Format in TextureRenderer:
-        // Position (3) + Color (1) + UV (2) + InnerRect (4) + Radius (4) = 14 floats = 56 bytes
-        // 4 vertices = 224 bytes.
-
-        // Wait, TextureRenderer uses LuminVertexFormats.TEXTURE.
-        // We should reuse that pipeline if we want rounded corners.
-
-        // Calculate inner rect for rounded corners
         ByteBuffer buf = MemoryUtil.memAlloc(224);
 
         float x2 = x + width;
         float y2 = y + height;
-        float rectX1 = x;
-        float rectY1 = y;
-        float rectX2 = x2;
-        float rectY2 = y2;
 
         int color = 0xFFFFFFFF; // White
 
         // Vertex 0: x, y
-        writeVertex(buf, x, y, u0, v0, color, rectX1, rectY1, rectX2, rectY2, rTL, rTR, rBR, rBL);
+        writeVertex(buf, x, y, u0, v0, color, x, y, x2, y2, rTL, rTR, rBR, rBL);
         // Vertex 1: x, y2
-        writeVertex(buf, x, y2, u0, v1, color, rectX1, rectY1, rectX2, rectY2, rTL, rTR, rBR, rBL);
+        writeVertex(buf, x, y2, u0, v1, color, x, y, x2, y2, rTL, rTR, rBR, rBL);
         // Vertex 2: x2, y2
-        writeVertex(buf, x2, y2, u1, v1, color, rectX1, rectY1, rectX2, rectY2, rTL, rTR, rBR, rBL);
+        writeVertex(buf, x2, y2, u1, v1, color, x, y, x2, y2, rTL, rTR, rBR, rBL);
         // Vertex 3: x2, y
-        writeVertex(buf, x2, y, u1, v0, color, rectX1, rectY1, rectX2, rectY2, rTL, rTR, rBR, rBL);
+        writeVertex(buf, x2, y, u1, v0, color, x, y, x2, y2, rTL, rTR, rBR, rBL);
 
         buf.flip();
 

@@ -94,10 +94,10 @@ public class TextureRenderer implements IRenderer {
         // But with varying radii, the inner rect concept is tricky.
         // We will pass the OUTER Rect as InnerRect (as per shader modification plan)
         // and pass the radii vector.
-        
+
         // Shader expects: InnerRect = Outer Bounds (x, y, x2, y2)
         // Shader expects: Radius = (TL, TR, BR, BL)
-        
+
         float rectX1 = x;
         float rectY1 = y;
         float rectX2 = x2;

@@ -757,7 +757,7 @@ public class ContentPanel implements IComponent {
     public void render(RendererSet set, int mouseX, int mouseY, float deltaTicks, float alpha) {
         float guiScale = ClickGui.INSTANCE.scale.getValue().floatValue();
         float radius = guiScale * 20f;
-        BlurRenderer.getInstance().drawBlurRect(x, y, this.width * guiScale, this.height * guiScale, 0, radius, radius, 0, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
+        BlurRenderer.getInstance().drawBlur(x, y, this.width * guiScale, this.height * guiScale, 0, radius, radius, 0, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
 
         targetState = (isSettingsActive() && !this.closeSettingsRequested) ? 1 : 0;
 

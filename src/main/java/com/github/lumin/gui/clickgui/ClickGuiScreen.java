@@ -1,6 +1,5 @@
 package com.github.lumin.gui.clickgui;
 
-import com.github.lumin.graphics.renderers.RectRenderer;
 import com.github.lumin.gui.clickgui.component.impl.ColorSettingComponent;
 import com.github.lumin.gui.clickgui.panel.Panel;
 import com.github.lumin.modules.impl.client.ClickGui;
@@ -13,8 +12,6 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
-
-import java.awt.*;
 
 public class ClickGuiScreen extends Screen {
 

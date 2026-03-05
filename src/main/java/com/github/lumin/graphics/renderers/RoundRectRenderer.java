@@ -29,32 +29,30 @@ public class RoundRectRenderer implements IRenderer {
     public void addRoundRect(float x, float y, float width, float height, float rTL, float rTR, float rBR, float rBL, Color color) {
         buffer.tryMap();
         float x2 = x + width, y2 = y + height;
-        int argb = color.getRGB();
-        float radius = Math.max(Math.max(rTL, rTR), Math.max(rBR, rBL));
-        float innerX1 = x + (Math.max(rTL, rBL) > 0 ? radius : 0);
-        float innerY1 = y + (Math.max(rTL, rTR) > 0 ? radius : 0);
-        float innerX2 = x2 - (Math.max(rTR, rBR) > 0 ? radius : 0);
-        float innerY2 = y2 - (Math.max(rBL, rBR) > 0 ? radius : 0);
+        int argb = ARGB.toABGR(color.getRGB());
 
-        addVertex(x, y, innerX1, innerY1, innerX2, innerY2, radius, argb);
-        addVertex(x, y2, innerX1, innerY1, innerX2, innerY2, radius, argb);
-        addVertex(x2, y2, innerX1, innerY1, innerX2, innerY2, radius, argb);
-        addVertex(x2, y, innerX1, innerY1, innerX2, innerY2, radius, argb);
+        addVertex(x, y, x, y, x2, y2, rTL, rTR, rBR, rBL, argb);
+        addVertex(x, y2, x, y, x2, y2, rTL, rTR, rBR, rBL, argb);
+        addVertex(x2, y2, x, y, x2, y2, rTL, rTR, rBR, rBL, argb);
+        addVertex(x2, y, x, y, x2, y2, rTL, rTR, rBR, rBL, argb);
     }
 
-    private void addVertex(float vx, float vy, float ix1, float iy1, float ix2, float iy2, float radius, int color) {
+    private void addVertex(float vx, float vy, float rx1, float ry1, float rx2, float ry2, float r1, float r2, float r3, float r4, int color) {
         long baseAddr = MemoryUtil.memAddress(buffer.getMappedBuffer());
         long p = baseAddr + currentOffset;
         MemoryUtil.memPutFloat(p, vx);
         MemoryUtil.memPutFloat(p + 4, vy);
         MemoryUtil.memPutFloat(p + 8, 0.0f);
-        MemoryUtil.memPutInt(p + 12, ARGB.toABGR(color));
-        MemoryUtil.memPutFloat(p + 16, ix1);
-        MemoryUtil.memPutFloat(p + 20, iy1);
-        MemoryUtil.memPutFloat(p + 24, ix2);
-        MemoryUtil.memPutFloat(p + 28, iy2);
-        MemoryUtil.memPutFloat(p + 32, radius);
-        currentOffset += 36;
+        MemoryUtil.memPutInt(p + 12, color);
+        MemoryUtil.memPutFloat(p + 16, rx1);
+        MemoryUtil.memPutFloat(p + 20, ry1);
+        MemoryUtil.memPutFloat(p + 24, rx2);
+        MemoryUtil.memPutFloat(p + 28, ry2);
+        MemoryUtil.memPutFloat(p + 32, r1);
+        MemoryUtil.memPutFloat(p + 36, r2);
+        MemoryUtil.memPutFloat(p + 40, r3);
+        MemoryUtil.memPutFloat(p + 44, r4);
+        currentOffset += 48;
         vertexCount++;
     }
 
