@@ -69,7 +69,7 @@ public class Sidebar implements IComponent {
         float width = this.width * guiScale;
         float height = this.height * guiScale;
 
-        BlurRenderer.getInstance().drawBlur(x, y, width, height, radius, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
+        BlurRenderer.getInstance().drawBlur(x, y, width, height, radius, 0, 0, radius, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
 
         set.bottomRoundRect().addRoundRect(x, y, width, height, radius, 0, 0, radius, applyAlpha(new Color(0x5F000000, true), alpha));
 

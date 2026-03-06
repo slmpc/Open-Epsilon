@@ -110,7 +110,7 @@ public class NoSlow extends Module {
             for (KeyMapping k : new KeyMapping[]{mc.options.keyUp, mc.options.keyLeft, mc.options.keyDown, mc.options.keyRight}) {
                 k.setDown(isPhysicalKeyDown(k));
             }
-            
+
             mc.options.keyJump.setDown(isPhysicalKeyDown(mc.options.keyJump));
             mc.options.keyUp.setDown(isPhysicalKeyDown(mc.options.keyUp));
 
@@ -162,7 +162,7 @@ public class NoSlow extends Module {
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent.RightClickItem event) {
         if (!event.getLevel().isClientSide()) return;
-        
+
         if (this.delay > 0) {
             ((IMinecraft) mc).setRightClickDelay(0);
             event.setCanceled(true);
@@ -250,7 +250,7 @@ public class NoSlow extends Module {
         Packet<?> packet = packetFactory.apply(sequence);
         mc.getConnection().send(packet);
     }
-    
+
     private ClickType getClickType(ServerboundContainerClickPacket packet) {
         try {
             return ((IServerboundContainerClickPacket) (Object) packet).getClickType();
@@ -261,7 +261,7 @@ public class NoSlow extends Module {
                 return packet.clickType();
             } catch (NoSuchMethodError | Exception e) {
             }
-            
+
             Field field = ServerboundContainerClickPacket.class.getDeclaredField("clickType");
             field.setAccessible(true);
             return (ClickType) field.get(packet);

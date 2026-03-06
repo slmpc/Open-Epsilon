@@ -42,8 +42,6 @@ public class BlurRenderer implements AutoCloseable {
     private final List<RenderTarget> targets = new ArrayList<>();
     private RenderTarget outputTarget;
     private GpuBuffer quadBuffer;
-    private GpuBuffer uniformBuffer;
-    private GpuBuffer projectionBuffer;
     private GpuSampler linearSampler;
     private int lastWidth, lastHeight;
 
@@ -73,20 +71,6 @@ public class BlurRenderer implements AutoCloseable {
                 buffer
         );
         MemoryUtil.memFree(buffer);
-
-        // Init Uniform Buffer (32 bytes)
-        uniformBuffer = RenderSystem.getDevice().createBuffer(
-                () -> "Blur Info",
-                GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
-                32
-        );
-
-        // Init Projection Buffer (Identity)
-        projectionBuffer = RenderSystem.getDevice().createBuffer(
-                () -> "Blur Projection",
-                GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
-                RenderSystem.PROJECTION_MATRIX_UBO_SIZE
-        );
 
         linearSampler = RenderSystem.getDevice().createSampler(
                 AddressMode.CLAMP_TO_EDGE,
@@ -140,32 +124,37 @@ public class BlurRenderer implements AutoCloseable {
 
         RenderSystem.backupProjectionMatrix();
 
-        try (var pointer = RenderSystem.getDevice().createCommandEncoder().mapBuffer(projectionBuffer, false, true)) {
-            ByteBuffer buf = pointer.data();
-            for (int i = 0; i < 16; i++) {
-                buf.putFloat(i % 5 == 0 ? 1.0f : 0.0f);
-            }
+        ByteBuffer projBuf = MemoryUtil.memAlloc(RenderSystem.PROJECTION_MATRIX_UBO_SIZE);
+        for (int i = 0; i < 16; i++) {
+            projBuf.putFloat(i % 5 == 0 ? 1.0f : 0.0f);
         }
-        RenderSystem.setProjectionMatrix(projectionBuffer.slice(), ProjectionType.ORTHOGRAPHIC);
+        projBuf.flip();
 
-        // 1. Downsample passes
-        RenderTarget source = mainTarget;
-        for (int i = 0; i < passes; i++) {
-            RenderTarget dest = targets.get(i);
-            renderPass(source, dest, i, true, radius);
-            source = dest;
-        }
+        try (GpuBuffer projectionBuffer = RenderSystem.getDevice().createBuffer(() -> "Blur Projection", GpuBuffer.USAGE_UNIFORM, projBuf)) {
+            MemoryUtil.memFree(projBuf);
+            GpuBufferSlice projectionSlice = projectionBuffer.slice();
 
-        // 2. Upsample passes
-        for (int i = passes - 1; i >= 0; i--) {
-            RenderTarget dest;
-            if (i == 0) {
-                dest = outputToScreen ? mainTarget : outputTarget;
-            } else {
-                dest = targets.get(i - 1);
+            RenderSystem.setProjectionMatrix(projectionSlice, ProjectionType.ORTHOGRAPHIC);
+
+            // 1. Downsample passes
+            RenderTarget source = mainTarget;
+            for (int i = 0; i < passes; i++) {
+                RenderTarget dest = targets.get(i);
+                renderPass(source, dest, i, true, radius, projectionSlice);
+                source = dest;
             }
-            renderPass(source, dest, i, false, radius);
-            source = dest;
+
+            // 2. Upsample passes
+            for (int i = passes - 1; i >= 0; i--) {
+                RenderTarget dest;
+                if (i == 0) {
+                    dest = outputToScreen ? mainTarget : outputTarget;
+                } else {
+                    dest = targets.get(i - 1);
+                }
+                renderPass(source, dest, i, false, radius, projectionSlice);
+                source = dest;
+            }
         }
 
         RenderSystem.restoreProjectionMatrix();
@@ -199,9 +188,9 @@ public class BlurRenderer implements AutoCloseable {
         float realH = height * guiScaleFactor;
 
         float u0 = realX / screenW;
-        float v0 = (realY + realH) / screenH; // Flip V
+        float v0 = (realY + realH) / screenH;
         float u1 = (realX + realW) / screenW;
-        float v1 = realY / screenH; // Flip V
+        float v1 = realY / screenH;
 
         ByteBuffer buf = MemoryUtil.memAlloc(224);
 
@@ -274,60 +263,61 @@ public class BlurRenderer implements AutoCloseable {
         buf.putFloat(r4);
     }
 
-    private void renderPass(RenderTarget source, RenderTarget dest, int level, boolean isDown, float totalRadius) {
+    private void renderPass(RenderTarget source, RenderTarget dest, int level, boolean isDown, float totalRadius, GpuBufferSlice projectionSlice) {
         float w = source.width;
         float h = source.height;
         float offset = 1.0f + (totalRadius * 0.2f); // Adjusted scaling
 
-        try (var pointer = RenderSystem.getDevice().createCommandEncoder().mapBuffer(uniformBuffer, false, true)) {
-            ByteBuffer buf = pointer.data();
-            // uHalfTexelSize (0.5 / width, 0.5 / height)
-            buf.putFloat(0.5f / w).putFloat(0.5f / h);
-            // uOffset
-            buf.putFloat(offset);
-            // padding
-            buf.putFloat(0f);
-            // uUvScale (1, 1)
-            buf.putFloat(1f).putFloat(1f);
-            // uUvOffset (0, 0)
-            buf.putFloat(0f).putFloat(0f);
-        }
+        ByteBuffer uniformBuf = MemoryUtil.memAlloc(32);
+        // uHalfTexelSize (0.5 / width, 0.5 / height)
+        uniformBuf.putFloat(0.5f / w).putFloat(0.5f / h);
+        // uOffset
+        uniformBuf.putFloat(offset);
+        // padding
+        uniformBuf.putFloat(0f);
+        // uUvScale (1, 1)
+        uniformBuf.putFloat(1f).putFloat(1f);
+        // uUvOffset (0, 0)
+        uniformBuf.putFloat(0f).putFloat(0f);
+        uniformBuf.flip();
 
-        GpuBufferSlice dynamicUniforms = RenderSystem.getDynamicUniforms().writeTransform(
-                new Matrix4f(), // Identity ModelView
-                new Vector4f(1, 1, 1, 1),
-                new Vector3f(0, 0, 0),
-                new Matrix4f() // Identity Texture
-        );
+        try (GpuBuffer uniformBuffer = RenderSystem.getDevice().createBuffer(() -> "Blur Info", GpuBuffer.USAGE_UNIFORM, uniformBuf)) {
+            MemoryUtil.memFree(uniformBuf);
 
-        try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-                () -> "Blur Pass " + (isDown ? "Down" : "Up") + " " + level,
-                dest.getColorTextureView(), OptionalInt.of(0),
-                null, OptionalDouble.empty())
-        ) {
-            pass.setPipeline(isDown ? LuminRenderPipelines.BLUR_DOWN : LuminRenderPipelines.BLUR_UP);
+            GpuBufferSlice dynamicUniforms = RenderSystem.getDynamicUniforms().writeTransform(
+                    new Matrix4f(), // Identity ModelView
+                    new Vector4f(1, 1, 1, 1),
+                    new Vector3f(0, 0, 0),
+                    new Matrix4f() // Identity Texture
+            );
 
-            pass.setUniform("DynamicTransforms", dynamicUniforms);
-            pass.setUniform("BlurInfo", uniformBuffer);
-            pass.setUniform("Projection", projectionBuffer);
+            try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
+                    () -> "Blur Pass " + (isDown ? "Down" : "Up") + " " + level,
+                    dest.getColorTextureView(), OptionalInt.of(0),
+                    null, OptionalDouble.empty())
+            ) {
+                pass.setPipeline(isDown ? LuminRenderPipelines.BLUR_DOWN : LuminRenderPipelines.BLUR_UP);
 
-            pass.setVertexBuffer(0, quadBuffer);
+                pass.setUniform("DynamicTransforms", dynamicUniforms);
+                pass.setUniform("BlurInfo", uniformBuffer.slice());
+                pass.setUniform("Projection", projectionSlice);
 
-            RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-            GpuBuffer ibo = autoIndices.getBuffer(6);
-            pass.setIndexBuffer(ibo, autoIndices.type());
+                pass.setVertexBuffer(0, quadBuffer);
 
-            pass.bindTexture("Sampler0", source.getColorTextureView(), linearSampler);
+                RenderSystem.AutoStorageIndexBuffer autoIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+                GpuBuffer ibo = autoIndices.getBuffer(6);
+                pass.setIndexBuffer(ibo, autoIndices.type());
 
-            pass.drawIndexed(0, 0, 6, 1);
+                pass.bindTexture("Sampler0", source.getColorTextureView(), linearSampler);
+
+                pass.drawIndexed(0, 0, 6, 1);
+            }
         }
     }
 
     @Override
     public void close() {
         if (quadBuffer != null) quadBuffer.close();
-        if (uniformBuffer != null) uniformBuffer.close();
-        if (projectionBuffer != null) projectionBuffer.close();
         if (outputTarget != null) outputTarget.destroyBuffers();
         for (RenderTarget target : targets) {
             target.destroyBuffers();
