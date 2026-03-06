@@ -29,7 +29,7 @@ import java.util.OptionalInt;
 
 public class TtfTextRenderer implements ITextRenderer {
 
-    private static final float DEFAULT_SCALE = 0.30f;
+    private static final float DEFAULT_SCALE = 0.27f;
     private static final float SPACING = 1f;
     private static final int STRIDE = 24;
     private final long bufferSize;
@@ -111,7 +111,7 @@ public class TtfTextRenderer implements ITextRenderer {
 
             try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder()
                     .mapBuffer(ttfInfoUniformBuf, false, true)) {
-                Std140Builder.intoBuffer(mappedView.data()).putFloat(0.475f);
+                Std140Builder.intoBuffer(mappedView.data()).putFloat(0.5f);
             }
         }
 

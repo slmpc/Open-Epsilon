@@ -1,5 +1,6 @@
 package com.github.lumin.gui.clickgui.panel;
 
+import com.github.lumin.graphics.renderers.BlurRenderer;
 import com.github.lumin.graphics.renderers.RoundRectRenderer;
 import com.github.lumin.graphics.renderers.TextRenderer;
 import com.github.lumin.graphics.renderers.TextureRenderer;
@@ -9,6 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+
+import java.awt.*;
 
 public class Panel implements IComponent {
 
@@ -35,6 +38,14 @@ public class Panel implements IComponent {
         float guiScale = ClickGui.INSTANCE.scale.getValue().floatValue();
         float screenWidth = mc.getWindow().getGuiScaledWidth();
         float screenHeight = mc.getWindow().getGuiScaledHeight();
+
+        if (ClickGui.INSTANCE.blurMode.is("全屏")) {
+            if (ClickGui.INSTANCE.backgroundBlur.getValue()) {
+                BlurRenderer.INSTANCE.drawBlur(0.0f, 0.0f, screenWidth, screenHeight, 0.0f, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
+            } else {
+                bottomRoundRect.addRoundRect(0.0f, 0.0f, screenWidth, screenHeight, 0.0f, new Color(18, 18, 18, (int) (110 * alpha)));
+            }
+        }
 
         float targetWidth = screenWidth * 0.5f;
         float minWidth = 400f * guiScale;

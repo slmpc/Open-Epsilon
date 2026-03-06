@@ -46,11 +46,11 @@ public class AutoKouZi extends Module {
         messages.clear();
         String fileName = mode.is("Power") ? "CiHui1.txt" : "CiHui2.txt";
         File file = getConfigFile(fileName);
-        
+
         if (!file.exists()) {
             extractResource(fileName, file);
         }
-        
+
         if (file.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
                 String line;

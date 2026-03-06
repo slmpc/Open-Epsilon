@@ -20,7 +20,7 @@ public class TtfFontLoader implements IFontLoader {
     private int atlasId = 0;
 
     public TtfFontLoader(Identifier ttfFile) {
-        this.fontFile = new TtfFontFile(ttfFile, 64, 5);
+        this.fontFile = new TtfFontFile(ttfFile, 64, 6);
     }
 
     @Override

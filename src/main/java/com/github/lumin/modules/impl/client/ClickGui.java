@@ -23,7 +23,7 @@ public class ClickGui extends Module {
 //    public final ColorSetting expandedBackgroundColor = colorSetting("展开背景颜色", new Color(20, 20, 20, 120));
 
     public final BoolSetting backgroundBlur = boolSetting("背景模糊", true);
-    public final DoubleSetting blurStrength = doubleSetting("模糊强度", 100.0, 1.0, 20.0, 0.5, backgroundBlur::getValue, true);
+    public final DoubleSetting blurStrength = doubleSetting("模糊强度", 1, 0.1, 5.0, 0.1, backgroundBlur::getValue, true);
     public final ModeSetting blurMode = modeSetting("模糊方式", "仅侧边栏", new String[]{"全屏", "仅侧边栏"}, backgroundBlur::getValue);
 
     @Override

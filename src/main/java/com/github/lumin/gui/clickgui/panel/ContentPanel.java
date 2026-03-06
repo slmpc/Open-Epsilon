@@ -538,6 +538,7 @@ public class ContentPanel implements IComponent {
         settingsRoundRect.drawAndClear();
         settingsRect.drawAndClear();
         settingsFont.drawAndClear();
+
         clearScissor();
 
         settingsComponent.renderOverlayBlurs(mouseX, mouseY, deltaTicks);
@@ -761,7 +762,12 @@ public class ContentPanel implements IComponent {
     public void render(RendererSet set, int mouseX, int mouseY, float deltaTicks, float alpha) {
         float guiScale = ClickGui.INSTANCE.scale.getValue().floatValue();
         float radius = guiScale * 20f;
-        BlurRenderer.getInstance().drawBlur(x, y, this.width * guiScale, this.height * guiScale, 0, radius, radius, 0, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
+
+        if (ClickGui.INSTANCE.backgroundBlur.getValue() && ClickGui.INSTANCE.blurMode.is("仅侧边栏")) {
+            BlurRenderer.INSTANCE.drawBlur(x, y, this.width * guiScale, this.height * guiScale, 0, radius, radius, 0, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
+        }
+
+        set.bottomRoundRect().addRoundRect(x, y, this.width * guiScale, this.height * guiScale, 0, radius, radius, 0, new Color(0, 0, 0, 25));
 
         targetState = (isSettingsActive() && !this.closeSettingsRequested) ? 1 : 0;
 
@@ -779,10 +785,18 @@ public class ContentPanel implements IComponent {
         if (currentState == 2) {
             viewAnimation.run(1.0f);
             if (viewAnimation.getValue() >= 0.99f) currentState = 1;
+
+            setupScissor(this.x, this.y, this.width * guiScale, this.height * guiScale, (float) mc.getWindow().getGuiScale(), mc.getWindow().getWidth(), mc.getWindow().getHeight(), mc.getWindow().getGuiScaledHeight());
+
             renderListView(set, mouseX, mouseY, deltaTicks, alpha);
             renderSettingsView(set, mouseX, mouseY, deltaTicks, alpha);
+
+            clearScissor();
         } else if (currentState == 3) {
             closeSettingsRequested = true;
+
+            setupScissor(this.x, this.y, this.width * guiScale, this.height * guiScale, (float) mc.getWindow().getGuiScale(), mc.getWindow().getWidth(), mc.getWindow().getHeight(), mc.getWindow().getGuiScaledHeight());
+
             renderListView(set, mouseX, mouseY, deltaTicks, alpha);
             if (settingsComponent != null) {
                 if (!exitAnimationStarted) {
@@ -797,6 +811,8 @@ public class ContentPanel implements IComponent {
                     exitAnimationStarted = false;
                 }
             }
+
+            clearScissor();
         } else if (currentState == 1) {
             renderSettingsView(set, mouseX, mouseY, deltaTicks, alpha);
         } else {

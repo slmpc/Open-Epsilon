@@ -69,7 +69,9 @@ public class Sidebar implements IComponent {
         float width = this.width * guiScale;
         float height = this.height * guiScale;
 
-        BlurRenderer.getInstance().drawBlur(x, y, width, height, radius, 0, 0, radius, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
+        if (ClickGui.INSTANCE.backgroundBlur.getValue() && ClickGui.INSTANCE.blurMode.is("仅侧边栏")) {
+            BlurRenderer.INSTANCE.drawBlur(x, y, width, height, radius, 0, 0, radius, ClickGui.INSTANCE.blurStrength.getValue().floatValue());
+        }
 
         set.bottomRoundRect().addRoundRect(x, y, width, height, radius, 0, 0, radius, applyAlpha(new Color(0x5F000000, true), alpha));
 
