@@ -80,7 +80,7 @@ import org.slf4j.Logger;
 public class Lumin {
     public static final String MODID = "lumin";
     public static final Logger LOGGER = LogUtils.getLogger();
-
+    public static int skipTicks;
     public Lumin(IEventBus modEventBus, ModContainer modContainer) {
     }
 

@@ -7,6 +7,7 @@
     "IMinecraft",
     "IMultiPlayerGameMode",
     "IServerboundContainerClickPacket",
+    "MixinClientLevel",
     "MixinEntity",
     "MixinGlDebug",
     "MixinLivingEntity",
@@ -24,6 +25,7 @@
     "requireAnnotations": true
   },
   "mixins": [
-    "MixinConnection"
+    "MixinConnection",
+    "ServerboundMovePlayerAccessors"
   ]
 }
