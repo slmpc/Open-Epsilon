@@ -61,5 +61,11 @@ public interface IRCHandler {
 
     default void onModListResult(List<String> names, List<String> versions) {
     }
+
+    default void onAssetInfo(boolean exists, String hash, long size) {
+    }
+
+    default void onAssetChunk(byte[] data, long offset, boolean last) {
+    }
 }
 

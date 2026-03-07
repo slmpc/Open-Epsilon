@@ -35,6 +35,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import dev.maru.verify.packet.implemention.c2s.GetAssetInfoC2S;
+import dev.maru.verify.packet.implemention.c2s.StartAssetDownloadC2S;
+import java.io.File;
+import java.io.FileOutputStream;
 
 @ZKMIndy
 public final class LoaderWindow {
@@ -86,8 +90,12 @@ public final class LoaderWindow {
     private JComboBox<String> modNameCombo;
     private JComboBox<String> modVersionCombo;
     private GradientButton launchButton;
+    private JProgressBar progressBar;
     private List<String> availableNames = new ArrayList<>();
     private List<String> availableVersions = new ArrayList<>();
+    private java.io.FileOutputStream assetFos;
+    private long assetTotalSize;
+    private long assetDownloaded;
 
     private Mode mode = Mode.Login;
     private Timer repaintTimer;
@@ -555,9 +563,16 @@ public final class LoaderWindow {
             ModSelection.name = (String) modNameCombo.getSelectedItem();
             ModSelection.version = (String) modVersionCombo.getSelectedItem();
             if (ModSelection.name != null && ModSelection.version != null) {
-                success = true;
+                startAssetCheck();
             }
         });
+
+        progressBar = new JProgressBar(0, 100);
+        progressBar.setVisible(false);
+        progressBar.setStringPainted(true);
+        progressBar.setForeground(new Color(143, 238, 182));
+        progressBar.setOpaque(false);
+        progressBar.setBorder(new EmptyBorder(5, 0, 5, 0));
 
         JPanel content = new JPanel();
         content.setOpaque(false);
@@ -569,7 +584,13 @@ public final class LoaderWindow {
         bottom.setOpaque(false);
         bottom.setBorder(new EmptyBorder(20, 0, 0, 0));
         bottom.add(launchButton, BorderLayout.NORTH);
-        bottom.add(statusLabel, BorderLayout.SOUTH); // Re-add status label
+
+        JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.setOpaque(false);
+        statusPanel.add(progressBar, BorderLayout.NORTH);
+        statusPanel.add(statusLabel, BorderLayout.SOUTH);
+
+        bottom.add(statusPanel, BorderLayout.SOUTH);
 
         content.add(bottom, BorderLayout.SOUTH);
 
@@ -580,6 +601,154 @@ public final class LoaderWindow {
 
         formPanel.revalidate();
         formPanel.repaint();
+    }
+
+    private void startAssetCheck() {
+        launchButton.setEnabled(false);
+        modNameCombo.setEnabled(false);
+        modVersionCombo.setEnabled(false);
+        progressBar.setVisible(true);
+        progressBar.setIndeterminate(true);
+        setStatus("正在检查资源完整性...", Color.WHITE);
+
+        try {
+            VerificationClient.connect(new IRCHandler() {
+                @Override
+                public void onMessage(String sender, String message) {
+                }
+
+                @Override
+                public void onDisconnected(String message) {
+                }
+
+                @Override
+                public void onConnected() {
+                }
+
+                @Override
+                public String getInGameUsername() {
+                    return "";
+                }
+
+                @Override
+                public void onModListResult(List<String> names, List<String> versions) {
+                }
+
+                public void onAssetInfo(boolean exists, String hash, long size) {
+                    SwingUtilities.invokeLater(() -> handleAssetInfo(exists, hash, size));
+                }
+
+                public void onAssetChunk(byte[] data, long offset, boolean last) {
+                    SwingUtilities.invokeLater(() -> handleAssetChunk(data, offset, last));
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        IRCTransport t = VerificationClient.getTransport();
+        if (t != null) {
+            t.sendPacket(new GetAssetInfoC2S(ModSelection.name, ModSelection.version));
+        }
+    }
+
+    private void handleAssetInfo(boolean exists, String hash, long size) {
+        if (!exists) {
+            setStatus("未在服务端找到资源文件，跳过下载...", new Color(255, 200, 100));
+            System.out.println("Lumin: Asset file not found on server for " + ModSelection.name + " " + ModSelection.version);
+            Timer t = new Timer(1500, e -> success = true);
+            t.setRepeats(false);
+            t.start();
+            return;
+        }
+
+        File assetFile = getLocalAssetFile(ModSelection.name, ModSelection.version);
+        if (assetFile.exists() && assetFile.length() == size) {
+            setStatus("正在校验资源文件完整性...", Color.WHITE);
+            new Thread(() -> {
+                String localHash = calculateFileHash(assetFile);
+                if (localHash.equals(hash)) {
+                    SwingUtilities.invokeLater(() -> {
+                        setStatus("资源完整，准备启动...", new Color(143, 238, 182));
+                        Timer t = new Timer(1000, e -> success = true);
+                        t.setRepeats(false);
+                        t.start();
+                    });
+                } else {
+                    SwingUtilities.invokeLater(() -> {
+                        setStatus("资源校验失败，重新下载...", new Color(255, 200, 100));
+                        startAssetDownload(size);
+                    });
+                }
+            }).start();
+            return;
+        }
+
+        startAssetDownload(size);
+    }
+
+    private static String calculateFileHash(File file) {
+        try (InputStream fis = Files.newInputStream(file.toPath())) {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[8192];
+            int n;
+            while ((n = fis.read(buffer)) != -1) {
+                digest.update(buffer, 0, n);
+            }
+            byte[] hash = digest.digest();
+            return java.util.Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private File getLocalAssetFile(String name, String version) {
+        String filename = (name + "_" + version + ".zip").replaceAll("[\\\\/:*?\"<>|]", "");
+        File dir = new File(System.getProperty("user.home"), "Lumin/assets");
+        if (!dir.exists()) dir.mkdirs();
+        return new File(dir, filename);
+    }
+
+    private void startAssetDownload(long size) {
+        assetTotalSize = size;
+        assetDownloaded = 0;
+        progressBar.setIndeterminate(false);
+        progressBar.setValue(0);
+        setStatus("正在下载资源 (0%)", Color.WHITE);
+
+        try {
+            assetFos = new FileOutputStream(getLocalAssetFile(ModSelection.name, ModSelection.version));
+        } catch (Exception e) {
+            setStatus("创建文件失败: " + e.getMessage(), new Color(255, 119, 156));
+            launchButton.setEnabled(true);
+            return;
+        }
+
+        IRCTransport t = VerificationClient.getTransport();
+        if (t != null) {
+            t.sendPacket(new StartAssetDownloadC2S(ModSelection.name, ModSelection.version, 0));
+        }
+    }
+
+    private void handleAssetChunk(byte[] data, long offset, boolean last) {
+        try {
+            if (assetFos != null) {
+                assetFos.write(data);
+                assetDownloaded += data.length;
+                int pct = (int) (assetDownloaded * 100 / assetTotalSize);
+                progressBar.setValue(pct);
+                setStatus("正在下载资源 (" + pct + "%)", Color.WHITE);
+
+                if (last) {
+                    assetFos.close();
+                    assetFos = null;
+                    setStatus("下载完成！", new Color(143, 238, 182));
+                    success = true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void fetchModList() throws IOException {

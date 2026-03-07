@@ -4,10 +4,13 @@ import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -46,7 +49,27 @@ public class MemoryJarUtil {
                 }
             }
         }
-
+        
         return root;
+    }
+
+    public static void mergeZip(Path jimfsRoot, File zipFile) throws IOException {
+        if (zipFile == null || !zipFile.exists()) return;
+        
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                Path entryPath = jimfsRoot.resolve(entry.getName());
+                if (entry.isDirectory()) {
+                    Files.createDirectories(entryPath);
+                } else {
+                    Path parent = entryPath.getParent();
+                    if (parent != null && !Files.exists(parent)) {
+                        Files.createDirectories(parent);
+                    }
+                    Files.copy(zis, entryPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        }
     }
 }

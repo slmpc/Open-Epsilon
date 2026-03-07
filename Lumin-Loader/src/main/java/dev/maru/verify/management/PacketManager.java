@@ -36,6 +36,11 @@ public class PacketManager {
 
         register(ChallengeS2C.class);
         register(ChallengeResponseC2S.class);
+        
+        register(GetAssetInfoC2S.class);
+        register(AssetInfoS2C.class);
+        register(StartAssetDownloadC2S.class);
+        register(AssetChunkS2C.class);
     }
 
     @SafeVarargs

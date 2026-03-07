@@ -155,5 +155,25 @@ public final class MultiplexIRCHandler implements IRCHandler {
             }
         }
     }
+
+    @Override
+    public void onAssetInfo(boolean exists, String hash, long size) {
+        for (IRCHandler h : handlers) {
+            try {
+                h.onAssetInfo(exists, hash, size);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    @Override
+    public void onAssetChunk(byte[] data, long offset, boolean last) {
+        for (IRCHandler h : handlers) {
+            try {
+                h.onAssetChunk(data, offset, last);
+            } catch (Exception ignored) {
+            }
+        }
+    }
 }
 

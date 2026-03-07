@@ -184,6 +184,16 @@ public class IRCTransport {
             sendPacket(new ChallengeResponseC2S(answer));
             return;
         }
+        if (msg instanceof AssetInfoS2C p) {
+            IRCHandler h = handler;
+            if (h != null) h.onAssetInfo(p.isExists(), p.getHash(), p.getSize());
+            return;
+        }
+        if (msg instanceof AssetChunkS2C p) {
+            IRCHandler h = handler;
+            if (h != null) h.onAssetChunk(p.getData(), p.getOffset(), p.isLast());
+            return;
+        }
     }
 
     private void notifyDisconnected(String message) {

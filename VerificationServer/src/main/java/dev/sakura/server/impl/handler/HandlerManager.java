@@ -26,6 +26,8 @@ public class HandlerManager {
         classToHandlerMap.put(RequestModC2S.class, new ModRequestHandler());
         classToHandlerMap.put(GetModListC2S.class, new GetModListHandler());
         classToHandlerMap.put(ChallengeResponseC2S.class, new ChallengeResponseHandler());
+        classToHandlerMap.put(GetAssetInfoC2S.class, new GetAssetInfoHandler());
+        classToHandlerMap.put(StartAssetDownloadC2S.class, new StartAssetDownloadHandler());
     }
 
     public boolean allowNull(IRCPacket packet) {

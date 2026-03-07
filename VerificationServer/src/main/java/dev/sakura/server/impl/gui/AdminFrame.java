@@ -14,7 +14,7 @@ public final class AdminFrame extends JFrame {
     private final Instant startedAt;
 
     public AdminFrame(IRCServer server) {
-        super("Sakura Verification Server");
+        super("Lumin Verification Server");
         this.server = server;
         this.startedAt = Instant.ofEpochMilli(server.getStartedAt());
 

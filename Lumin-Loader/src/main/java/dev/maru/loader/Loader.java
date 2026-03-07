@@ -92,6 +92,17 @@ public class Loader {
             if (modData != null) {
                 try {
                     Path memoryRoot = MemoryJarUtil.loadJarToMemoryFileSystem(modData);
+                    
+                    String name = LoaderWindow.ModSelection.name;
+                    String version = LoaderWindow.ModSelection.version;
+                    if (name != null && version != null) {
+                        String filename = (name + "_" + version + ".zip").replaceAll("[\\\\/:*?\"<>|]", "");
+                        java.io.File assetFile = new java.io.File(System.getProperty("user.home"), "Lumin/assets/" + filename);
+                        if (assetFile.exists()) {
+                            MemoryJarUtil.mergeZip(memoryRoot, assetFile);
+                        }
+                    }
+                    
                     pipeline.addPath(memoryRoot, ModFileDiscoveryAttributes.DEFAULT.withLocator(modLoader), IncompatibleFileReporting.WARN_ALWAYS);
                 } finally {
                     Arrays.fill(modData, (byte) 0);
