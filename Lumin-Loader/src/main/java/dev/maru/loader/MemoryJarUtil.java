@@ -1,8 +1,8 @@
 package dev.maru.loader;
 
 import by.radioegor146.nativeobfuscator.Native;
-import dev.maru.api.jimfs.Configuration;
-import dev.maru.api.jimfs.Jimfs;
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
 import niurendeobf.ZKMIndy;
 
 import java.io.ByteArrayInputStream;

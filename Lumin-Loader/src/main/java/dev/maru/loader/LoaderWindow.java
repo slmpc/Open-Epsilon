@@ -5,7 +5,6 @@ import dev.maru.verify.client.IRCHandler;
 import dev.maru.verify.client.IRCTransport;
 import dev.maru.verify.packet.implemention.c2s.GetAssetInfoC2S;
 import dev.maru.verify.packet.implemention.c2s.GetModListC2S;
-import dev.maru.verify.packet.implemention.c2s.StartAssetDownloadC2S;
 import dev.maru.verify.util.AuthUtil;
 import dev.maru.verify.util.HwidUtil;
 import niurendeobf.ZKMIndy;
@@ -711,20 +710,20 @@ public final class LoaderWindow {
         setStatus("正在连接下载服务器...", Color.WHITE);
 
         new Thread(() -> {
-            String urlStr = "https://gitee.com/hotap/lumin-resouces/releases/download/" + 
-                            ModSelection.name + "_" + ModSelection.version + "/" + 
-                            ModSelection.name + "_" + ModSelection.version + ".zip";
-            
+            String urlStr = "https://gitee.com/hotap/lumin-resouces/releases/download/" +
+                    ModSelection.name + "_" + ModSelection.version + "/" +
+                    ModSelection.name + "_" + ModSelection.version + ".zip";
+
             File tempFile = new File(getLocalAssetFile(ModSelection.name, ModSelection.version).getAbsolutePath() + ".tmp");
             File finalFile = getLocalAssetFile(ModSelection.name, ModSelection.version);
-            
+
             try {
                 java.net.URL url = new java.net.URL(urlStr);
                 java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(10000);
                 conn.setReadTimeout(10000);
                 conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-                
+
                 int code = conn.getResponseCode();
                 if (code == 301 || code == 302) {
                     String newUrl = conn.getHeaderField("Location");
@@ -733,17 +732,17 @@ public final class LoaderWindow {
                     conn.setReadTimeout(10000);
                     code = conn.getResponseCode();
                 }
-                
+
                 if (code != 200) {
                     throw new IOException("HTTP " + code);
                 }
-                
+
                 long length = conn.getContentLengthLong();
                 if (assetTotalSize <= 0) assetTotalSize = length;
-                
+
                 try (InputStream in = conn.getInputStream();
                      FileOutputStream out = new FileOutputStream(tempFile)) {
-                    
+
                     byte[] buffer = new byte[8192];
                     int n;
                     while ((n = in.read(buffer)) != -1) {
@@ -757,16 +756,16 @@ public final class LoaderWindow {
                                 setStatus("正在下载资源 (" + pct + "%)", Color.WHITE);
                             });
                         } else {
-                             SwingUtilities.invokeLater(() -> {
+                            SwingUtilities.invokeLater(() -> {
                                 setStatus("正在下载资源 (" + (assetDownloaded / 1024) + "KB)", Color.WHITE);
                             });
                         }
                     }
                 }
-                
+
                 if (finalFile.exists()) finalFile.delete();
                 tempFile.renameTo(finalFile);
-                
+
                 if (expectedHash != null && !expectedHash.isEmpty()) {
                     SwingUtilities.invokeLater(() -> setStatus("下载完成，正在校验...", Color.WHITE));
                     String dlHash = calculateFileHash(finalFile);
@@ -774,12 +773,12 @@ public final class LoaderWindow {
                         throw new IOException("Hash mismatch after download");
                     }
                 }
-                
+
                 SwingUtilities.invokeLater(() -> {
                     setStatus("下载完成！", new Color(143, 238, 182));
                     success = true;
                 });
-                
+
             } catch (Exception e) {
                 e.printStackTrace();
                 SwingUtilities.invokeLater(() -> {
