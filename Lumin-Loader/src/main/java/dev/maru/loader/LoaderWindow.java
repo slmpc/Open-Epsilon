@@ -131,7 +131,7 @@ public final class LoaderWindow {
     private void initWindow() {
         applyPlatformHints();
         loadFonts();
-        frame = new JFrame("欢迎来到 Sakura | Welcome to Sakura");
+        frame = new JFrame("欢迎来到桜 | Welcome to Sakura");
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         frame.setMinimumSize(new Dimension(760, 460));
         frame.setSize(WIN_W, WIN_H);
@@ -637,10 +637,6 @@ public final class LoaderWindow {
                 public void onAssetInfo(boolean exists, String hash, long size) {
                     SwingUtilities.invokeLater(() -> handleAssetInfo(exists, hash, size));
                 }
-
-                public void onAssetChunk(byte[] data, long offset, boolean last) {
-                    SwingUtilities.invokeLater(() -> handleAssetChunk(data, offset, last));
-                }
             });
         } catch (IOException ignored) {
         }
@@ -653,11 +649,10 @@ public final class LoaderWindow {
 
     private void handleAssetInfo(boolean exists, String hash, long size) {
         if (!exists) {
-            setStatus("无法下载，请联系萌萌刻...", new Color(255, 200, 100));
-            System.out.println("Lumin: Asset file not found on server for " + ModSelection.name + " " + ModSelection.version);
-            Timer t = new Timer(1500, e -> success = true);
-            t.setRepeats(false);
-            t.start();
+            setStatus("未在服务端找到资源信息，尝试从备用源下载...", new Color(255, 200, 100));
+            // 即使服务端没有（可能是新版本未同步），我们也尝试从 Gitee 下载
+            // 只是无法校验 Hash
+            startAssetDownload(0, null); // 0 size, null hash means unknown
             return;
         }
 
@@ -676,14 +671,14 @@ public final class LoaderWindow {
                 } else {
                     SwingUtilities.invokeLater(() -> {
                         setStatus("资源校验失败，重新下载...", new Color(255, 200, 100));
-                        startAssetDownload(size);
+                        startAssetDownload(size, hash);
                     });
                 }
             }).start();
             return;
         }
 
-        startAssetDownload(size);
+        startAssetDownload(size, hash);
     }
 
     private static String calculateFileHash(File file) {
@@ -708,46 +703,91 @@ public final class LoaderWindow {
         return new File(dir, filename);
     }
 
-    private void startAssetDownload(long size) {
-        assetTotalSize = size;
+    private void startAssetDownload(long expectedSize, String expectedHash) {
+        assetTotalSize = expectedSize;
         assetDownloaded = 0;
-        progressBar.setIndeterminate(false);
+        progressBar.setIndeterminate(expectedSize <= 0);
         progressBar.setValue(0);
-        setStatus("正在下载资源 (0%)", Color.WHITE);
+        setStatus("正在连接下载服务器...", Color.WHITE);
 
-        try {
-            assetFos = new FileOutputStream(getLocalAssetFile(ModSelection.name, ModSelection.version));
-        } catch (Exception e) {
-            setStatus("创建文件失败: " + e.getMessage(), new Color(255, 119, 156));
-            launchButton.setEnabled(true);
-            return;
-        }
-
-        IRCTransport t = VerificationClient.getTransport();
-        if (t != null) {
-            t.sendPacket(new StartAssetDownloadC2S(ModSelection.name, ModSelection.version, 0));
-        }
-    }
-
-    private void handleAssetChunk(byte[] data, long offset, boolean last) {
-        try {
-            if (assetFos != null) {
-                assetFos.write(data);
-                assetDownloaded += data.length;
-                int pct = (int) (assetDownloaded * 100 / assetTotalSize);
-                progressBar.setValue(pct);
-                setStatus("正在下载资源 (" + pct + "%)", Color.WHITE);
-
-                if (last) {
-                    assetFos.close();
-                    assetFos = null;
+        new Thread(() -> {
+            String urlStr = "https://gitee.com/hotap/lumin-resouces/releases/download/" + 
+                            ModSelection.name + "_" + ModSelection.version + "/" + 
+                            ModSelection.name + "_" + ModSelection.version + ".zip";
+            
+            File tempFile = new File(getLocalAssetFile(ModSelection.name, ModSelection.version).getAbsolutePath() + ".tmp");
+            File finalFile = getLocalAssetFile(ModSelection.name, ModSelection.version);
+            
+            try {
+                java.net.URL url = new java.net.URL(urlStr);
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(10000);
+                conn.setReadTimeout(10000);
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+                
+                int code = conn.getResponseCode();
+                if (code == 301 || code == 302) {
+                    String newUrl = conn.getHeaderField("Location");
+                    conn = (java.net.HttpURLConnection) new java.net.URL(newUrl).openConnection();
+                    conn.setConnectTimeout(10000);
+                    conn.setReadTimeout(10000);
+                    code = conn.getResponseCode();
+                }
+                
+                if (code != 200) {
+                    throw new IOException("HTTP " + code);
+                }
+                
+                long length = conn.getContentLengthLong();
+                if (assetTotalSize <= 0) assetTotalSize = length;
+                
+                try (InputStream in = conn.getInputStream();
+                     FileOutputStream out = new FileOutputStream(tempFile)) {
+                    
+                    byte[] buffer = new byte[8192];
+                    int n;
+                    while ((n = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, n);
+                        assetDownloaded += n;
+                        if (assetTotalSize > 0) {
+                            int pct = (int) (assetDownloaded * 100 / assetTotalSize);
+                            SwingUtilities.invokeLater(() -> {
+                                progressBar.setIndeterminate(false);
+                                progressBar.setValue(pct);
+                                setStatus("正在下载资源 (" + pct + "%)", Color.WHITE);
+                            });
+                        } else {
+                             SwingUtilities.invokeLater(() -> {
+                                setStatus("正在下载资源 (" + (assetDownloaded / 1024) + "KB)", Color.WHITE);
+                            });
+                        }
+                    }
+                }
+                
+                if (finalFile.exists()) finalFile.delete();
+                tempFile.renameTo(finalFile);
+                
+                if (expectedHash != null && !expectedHash.isEmpty()) {
+                    SwingUtilities.invokeLater(() -> setStatus("下载完成，正在校验...", Color.WHITE));
+                    String dlHash = calculateFileHash(finalFile);
+                    if (!dlHash.equals(expectedHash)) {
+                        throw new IOException("Hash mismatch after download");
+                    }
+                }
+                
+                SwingUtilities.invokeLater(() -> {
                     setStatus("下载完成！", new Color(143, 238, 182));
                     success = true;
-                }
+                });
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                SwingUtilities.invokeLater(() -> {
+                    setStatus("下载失败: " + e.getMessage(), new Color(255, 119, 156));
+                    launchButton.setEnabled(true);
+                });
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        }).start();
     }
 
     private void fetchModList() throws IOException {

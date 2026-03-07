@@ -21,8 +21,7 @@ import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public final class PathURLConnection
-        extends URLConnection {
+public final class PathURLConnection extends URLConnection {
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
     private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
     private InputStream stream;

@@ -16,12 +16,15 @@ exclude     niurendeobf.^* and
             dev.maru.api.jimfs.^* and
             dev.maru.api.jimfs.^*^ * and
             dev.maru.api.jimfs.^*^ *(*) and
-            dev.maru.api.jimfs.protocol.^* and
-            dev.maru.api.jimfs.protocol.^*^ * and
-            dev.maru.api.jimfs.protocol.^*^ *(*) and
+            dev.maru.loader.protocols.jimfs.^* and
+            dev.maru.loader.protocols.jimfs.^*^ * and
+            dev.maru.loader.protocols.jimfs.^*^ *(*) and
             jnic.^* and
             jnic.^*^ * and
             jnic.^*^ *(*) and
+            jimfs.^* and
+            jimfs.^*^ * and
+            jimfs.^*^ *(*) and
             dev.maru.api.LuminAPI and
             dev.maru.api.LuminAPI * and
             dev.maru.api.LuminAPI *(*);
