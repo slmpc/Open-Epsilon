@@ -1,6 +1,7 @@
 package com.github.lumin;
 
 import com.github.lumin.managers.Managers;
+import com.github.lumin.utils.AuthUtils;
 import com.mojang.logging.LogUtils;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -87,7 +88,10 @@ public class Lumin {
     }
 
     @SubscribeEvent
-    static void onClientSetup(FMLClientSetupEvent event) {
+    private static void onClientSetup(FMLClientSetupEvent event) {
+
+        AuthUtils.doSomethingImportant();
+
         LOGGER.info("Welcome to Lumin, Meow~");
 
         Managers.initManagers();
@@ -98,6 +102,7 @@ public class Lumin {
         }));
 
         Lumin.LOGGER.info("Lumin has loaded successfully, Meow~");
+
     }
 
 }

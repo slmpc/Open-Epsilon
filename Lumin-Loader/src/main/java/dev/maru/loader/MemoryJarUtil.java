@@ -23,7 +23,7 @@ public class MemoryJarUtil {
         // 创建一个基于内存的文件系统 (模拟 Unix 路径结构)
         FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
         // Use a subdirectory to ensure getFileName() is not null
-        Path root = fs.getPath("/secure_mod");
+        Path root = fs.getPath("/default");
         Files.createDirectories(root);
 
         // 读取字节流为 Zip

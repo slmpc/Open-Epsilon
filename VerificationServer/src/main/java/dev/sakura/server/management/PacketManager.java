@@ -30,6 +30,11 @@ public class PacketManager {
 
         register(GetModListC2S.class);
         register(ModListS2C.class);
+
+        register(ClientParamsS2C.class);
+
+        register(ChallengeS2C.class);
+        register(ChallengeResponseC2S.class);
     }
 
     @SafeVarargs

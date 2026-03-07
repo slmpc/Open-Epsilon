@@ -32,7 +32,7 @@ public class ModManager {
                 // Fallback for legacy or manually placed files
                 // Treat entire name (minus .jar) as name, version as "unknown"
                 String rawName = f.getName().substring(0, f.getName().length() - 4);
-                if (rawName.equals("secure-mod")) {
+                if (rawName.equals("default")) {
                     list.add(new ModInfo("Default", "Latest", f));
                 } else {
                     list.add(new ModInfo(rawName, "unknown", f));
@@ -67,7 +67,7 @@ public class ModManager {
         }
         // Fallback for legacy requests (null name/version)
         if (name == null || version == null) {
-            return new File(MODS_DIR, "secure-mod.jar");
+            return new File(MODS_DIR, "default.jar");
         }
         return null;
     }

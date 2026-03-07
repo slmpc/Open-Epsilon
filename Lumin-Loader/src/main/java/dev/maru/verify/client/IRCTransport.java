@@ -1,9 +1,11 @@
 package dev.maru.verify.client;
 
+import dev.maru.api.LuminAPI;
 import dev.maru.verify.packet.IRCPacket;
 import dev.maru.verify.packet.implemention.c2s.*;
 import dev.maru.verify.packet.implemention.s2c.*;
 import dev.maru.verify.protocol.IRCProtocol;
+import dev.maru.verify.util.CryptoUtil;
 import niurendeobf.ZKMIndy;
 
 import java.io.*;
@@ -169,6 +171,17 @@ public class IRCTransport {
             if (h != null) {
                 h.onModListResult(p.getNames(), p.getVersions());
             }
+            return;
+        }
+        if (msg instanceof ClientParamsS2C p) {
+            LuminAPI.updateParams(p.getParams());
+            return;
+        }
+        if (msg instanceof ChallengeS2C p) {
+            String salt = p.getSalt();
+            String secret = "SakuraVerifySecret-v1";
+            String answer = CryptoUtil.sha256Base64UrlNoPaddingUtf8(salt, secret);
+            sendPacket(new ChallengeResponseC2S(answer));
             return;
         }
     }

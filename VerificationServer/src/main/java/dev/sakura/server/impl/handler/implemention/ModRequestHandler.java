@@ -6,6 +6,7 @@ import dev.sakura.server.impl.management.ModManager;
 import dev.sakura.server.impl.user.User;
 import dev.sakura.server.impl.user.UserManager;
 import dev.sakura.server.packet.implemention.c2s.RequestModC2S;
+import dev.sakura.server.packet.implemention.s2c.ClientParamsS2C;
 import dev.sakura.server.packet.implemention.s2c.DownloadModS2C;
 import org.tinylog.Logger;
 
@@ -14,23 +15,42 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ModRequestHandler implements PacketHandler<RequestModC2S> {
 
-    // Cache content by file path
     private static final Map<String, CachedMod> cache = new ConcurrentHashMap<>();
 
     @Override
     public void handle(RequestModC2S packet, Connection connection, UserManager userManager, User user) {
         Logger.info("Received mod request from HWID: {} for {}/{}", packet.getHwid(), packet.getName(), packet.getVersion());
 
+        if (!user.isVerifiedIntegrity()) {
+            //Logger.warn("User {} requested mod without passing integrity check!", user.getUsername());
+            // return;
+        }
+
         try {
             File modFile = ModManager.getModFile(packet.getName(), packet.getVersion());
 
             if (modFile != null && modFile.exists()) {
                 CachedMod cached = getCachedMod(modFile);
+
+                // Send critical runtime parameters
+                Map<String, String> params = new HashMap<>();
+                params.put("server_token", UUID.randomUUID().toString());
+                params.put("timestamp", String.valueOf(System.currentTimeMillis()));
+
+                // You can customize params based on the requested mod
+                if (packet.getName() != null) {
+                    params.put("mod_id", packet.getName());
+                }
+
+                connection.sendPacket(new ClientParamsS2C(params));
+
                 connection.sendPacket(new DownloadModS2C(cached.content, cached.hash));
                 Logger.info("Sent mod to HWID: {}", packet.getHwid());
             } else {
@@ -48,7 +68,6 @@ public class ModRequestHandler implements PacketHandler<RequestModC2S> {
         if (cached == null || file.lastModified() > cached.lastModified) {
             Logger.info("Reloading mod file from disk: " + file.getName());
             byte[] bytes = Files.readAllBytes(file.toPath());
-            cachedModContent = Base64.getEncoder().encodeToString(bytes); // unused legacy field
             String content = Base64.getEncoder().encodeToString(bytes);
             String hash = getMD5(bytes);
             cached = new CachedMod(content, hash, file.lastModified());
@@ -76,18 +95,7 @@ public class ModRequestHandler implements PacketHandler<RequestModC2S> {
         return true;
     }
 
-    private static class CachedMod {
-        final String content;
-        final String hash;
-        final long lastModified;
-
-        CachedMod(String content, String hash, long lastModified) {
-            this.content = content;
-            this.hash = hash;
-            this.lastModified = lastModified;
-        }
+    private record CachedMod(String content, String hash, long lastModified) {
     }
 
-    // Legacy fields to avoid compilation errors if referenced elsewhere (unlikely but safe)
-    private static String cachedModContent = null;
 }

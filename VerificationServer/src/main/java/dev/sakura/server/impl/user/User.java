@@ -7,6 +7,8 @@ public class User {
     private String ign;
     private long expireAt;
     private String prefix;
+    private boolean verifiedIntegrity = false;
+    private String expectedChallengeResponse;
 
     public User(String sessionId, String username, String token) {
         this.sessionId = sessionId;
@@ -69,6 +71,22 @@ public class User {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix == null ? "" : prefix;
+    }
+
+    public boolean isVerifiedIntegrity() {
+        return verifiedIntegrity;
+    }
+
+    public void setVerifiedIntegrity(boolean verifiedIntegrity) {
+        this.verifiedIntegrity = verifiedIntegrity;
+    }
+
+    public String getExpectedChallengeResponse() {
+        return expectedChallengeResponse;
+    }
+
+    public void setExpectedChallengeResponse(String expectedChallengeResponse) {
+        this.expectedChallengeResponse = expectedChallengeResponse;
     }
 }
 
