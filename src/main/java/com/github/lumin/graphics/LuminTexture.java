@@ -9,13 +9,24 @@ import javax.annotation.Nonnull;
 public record LuminTexture(
         @Nonnull GpuTexture texture,
         @Nonnull GpuTextureView textureView,
-        @Nonnull GpuSampler sampler
-) {
+        @Nonnull GpuSampler sampler,
+        boolean closeTexture,
+        boolean closeSampler
+) implements AutoCloseable {
 
+    public LuminTexture(@Nonnull GpuTexture texture, @Nonnull GpuTextureView textureView, @Nonnull GpuSampler sampler) {
+        this(texture, textureView, sampler, true, true);
+    }
+
+    @Override
     public void close() {
-        sampler.close();
-        textureView.close();
-        texture.close();
+        if (closeSampler) {
+            sampler.close();
+        }
+        if (closeTexture) {
+            textureView.close();
+            texture.close();
+        }
     }
 
 }

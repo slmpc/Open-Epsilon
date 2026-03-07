@@ -14,7 +14,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.ClientAsset;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 
 import java.awt.*;
@@ -77,10 +77,10 @@ public class Sidebar implements IComponent {
 
         var player = mc.player;
         String playerName = null;
-        ClientAsset.Texture skin = null;
+        Identifier skin = null;
         if (player != null) {
             playerName = player.getName().getString();
-            skin = player.getSkin().body();
+            skin = player.getSkin().body().texturePath();
         }
 
         float padding = 12 * guiScale;
@@ -94,7 +94,7 @@ public class Sidebar implements IComponent {
 
         // Face
         if (skin != null) {
-            set.texture().addRoundedTexture(skin.texturePath(), headX, headY, headSize, headSize, radius - 12, 0.125f, 0.125f, 0.25f, 0.25f, applyAlpha(Color.WHITE, alpha));
+            set.texture().addPlayerHead(skin, headX, headY, headSize, radius - 12f, applyAlpha(Color.WHITE, alpha));
         }
 
         float textX = headX + headSize + 6 * guiScale;

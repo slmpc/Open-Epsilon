@@ -9,29 +9,26 @@ import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.AddressMode;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.TextureFormat;
+import com.mojang.blaze3d.textures.*;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.TextureTransform;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.ARGB;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.awt.*;
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class TextureRenderer implements IRenderer {
     private final Minecraft mc = Minecraft.getInstance();
 
-    private static final int STRIDE = 56; // 44 -> 56 because Radius is now vec4 (4 floats) instead of float (1 float). 3+1+2+4+4 = 14 floats * 4 = 56 bytes
+    private static final int STRIDE = 56;
     private final long bufferSize;
     private final Map<Object, Batch> batches = new LinkedHashMap<>();
     private final Map<Identifier, LuminTexture> textureCache = new HashMap<>();
@@ -61,7 +58,7 @@ public class TextureRenderer implements IRenderer {
     }
 
     public void addRoundedTexture(LuminTexture texture, float x, float y, float width, float height, float radius, float u0, float v0, float u1, float v1, Color color) {
-        addRoundedTexture((Object) texture, x, y, width, height, radius, radius, radius, radius, u0, v0, u1, v1, color, true);
+        addRoundedTexture(texture, x, y, width, height, radius, radius, radius, radius, u0, v0, u1, v1, color, true);
     }
 
     public void addRoundedTexture(Identifier texture, float x, float y, float width, float height, float radiusTL, float radiusTR, float radiusBR, float radiusBL, float u0, float v0, float u1, float v1, Color color, boolean useLinearFilter) {
@@ -69,7 +66,12 @@ public class TextureRenderer implements IRenderer {
     }
 
     public void addRoundedTexture(LuminTexture texture, float x, float y, float width, float height, float radiusTL, float radiusTR, float radiusBR, float radiusBL, float u0, float v0, float u1, float v1, Color color) {
-        addRoundedTexture((Object) texture, x, y, width, height, radiusTL, radiusTR, radiusBR, radiusBL, u0, v0, u1, v1, color, true);
+        addRoundedTexture(texture, x, y, width, height, radiusTL, radiusTR, radiusBR, radiusBL, u0, v0, u1, v1, color, true);
+    }
+
+    public void addPlayerHead(Identifier texture, float x, float y, float size, float radius, Color color) {
+        addRoundedTexture(texture, x, y, size, size, radius, 8f / 64f, 8f / 64f, 16f / 64f, 16f / 64f, color);
+        addRoundedTexture(texture, x, y, size, size, radius, 40f / 64f, 8f / 64f, 48f / 64f, 16f / 64f, color);
     }
 
     private void addRoundedTexture(Object textureKey, float x, float y, float width, float height, float rTL, float rTR, float rBR, float rBL, float u0, float v0, float u1, float v1, Color color, boolean useLinearFilter) {
@@ -90,26 +92,13 @@ public class TextureRenderer implements IRenderer {
         float x2 = x + width;
         float y2 = y + height;
 
-        // Use maximum radius for inner rect calculation to ensure safe zone is correct
-        // But with varying radii, the inner rect concept is tricky.
-        // We will pass the OUTER Rect as InnerRect (as per shader modification plan)
-        // and pass the radii vector.
-
-        // Shader expects: InnerRect = Outer Bounds (x, y, x2, y2)
-        // Shader expects: Radius = (TL, TR, BR, BL)
-
-        float rectX1 = x;
-        float rectY1 = y;
-        float rectX2 = x2;
-        float rectY2 = y2;
-
         long baseAddr = MemoryUtil.memAddress(batch.buffer.getMappedBuffer());
         long p = baseAddr + batch.currentOffset;
 
-        writeVertex(p, x, y, u0, v0, argb, rectX1, rectY1, rectX2, rectY2, rTL, rTR, rBR, rBL);
-        writeVertex(p + STRIDE, x, y2, u0, v1, argb, rectX1, rectY1, rectX2, rectY2, rTL, rTR, rBR, rBL);
-        writeVertex(p + STRIDE * 2L, x2, y2, u1, v1, argb, rectX1, rectY1, rectX2, rectY2, rTL, rTR, rBR, rBL);
-        writeVertex(p + STRIDE * 3L, x2, y, u1, v0, argb, rectX1, rectY1, rectX2, rectY2, rTL, rTR, rBR, rBL);
+        writeVertex(p, x, y, u0, v0, argb, x, y, x2, y2, rTL, rTR, rBR, rBL);
+        writeVertex(p + STRIDE, x, y2, u0, v1, argb, x, y, x2, y2, rTL, rTR, rBR, rBL);
+        writeVertex(p + STRIDE * 2L, x2, y2, u1, v1, argb, x, y, x2, y2, rTL, rTR, rBR, rBL);
+        writeVertex(p + STRIDE * 3L, x2, y, u1, v0, argb, x, y, x2, y2, rTL, rTR, rBR, rBL);
 
         batch.currentOffset += (long) STRIDE * 4L;
         batch.vertexCount += 4;
@@ -192,48 +181,37 @@ public class TextureRenderer implements IRenderer {
     }
 
     private LuminTexture loadTexture(Identifier identifier, boolean useLinearFilter) {
-        NativeImage image = null;
+        AbstractTexture abstractTexture = mc.getTextureManager().getTexture(identifier);
         try {
-            Optional<Resource> resource = mc.getResourceManager().getResource(identifier);
-            if (resource.isPresent()) {
-                try (InputStream is = resource.get().open()) {
-                    image = NativeImage.read(is);
-                }
-            }
+            GpuTexture texture = abstractTexture.getTexture();
+            GpuTextureView view = abstractTexture.getTextureView();
+            GpuSampler sampler = abstractTexture.getSampler();
+            return new LuminTexture(texture, view, sampler, false, false);
         } catch (Exception ignored) {
         }
 
-        if (image == null) {
+        NativeImage image;
+        try {
+            var manager = mc.getResourceManager();
+            var resource = manager.getResourceOrThrow(identifier);
+            try (var stream = resource.open()) {
+                image = NativeImage.read(stream);
+            }
+        } catch (IOException e) {
             image = MissingTextureAtlasSprite.generateMissingImage();
         }
 
-        try (NativeImage finalImage = image) {
-            GpuTexture texture = RenderSystem.getDevice().createTexture(
-                    () -> "Lumin-Texture: " + identifier,
-                    GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST,
-                    TextureFormat.RGBA8,
-                    finalImage.getWidth(),
-                    finalImage.getHeight(),
-                    1,
-                    1
-            );
+        var device = RenderSystem.getDevice();
+        GpuTexture texture = device.createTexture(identifier.toString(), GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING, TextureFormat.RGBA8, image.getWidth(), image.getHeight(), 1, 1);
 
-            var view = RenderSystem.getDevice().createTextureView(texture);
-            FilterMode filterMode = useLinearFilter ? FilterMode.LINEAR : FilterMode.NEAREST;
-            var sampler = RenderSystem.getDevice().createSampler(
-                    AddressMode.CLAMP_TO_EDGE,
-                    AddressMode.CLAMP_TO_EDGE,
-                    filterMode,
-                    filterMode,
-                    1,
-                    OptionalDouble.empty()
-            );
+        device.createCommandEncoder().writeToTexture(texture, image);
 
-            RenderSystem.getDevice().createCommandEncoder().writeToTexture(texture, finalImage);
-            return new LuminTexture(texture, view, sampler);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load texture " + identifier, e);
-        }
+        GpuTextureView view = device.createTextureView(texture);
+        GpuSampler sampler = RenderSystem.getSamplerCache().getClampToEdge(useLinearFilter ? FilterMode.LINEAR : FilterMode.NEAREST);
+
+        image.close();
+
+        return new LuminTexture(texture, view, sampler, true, false);
     }
 
     @Override
