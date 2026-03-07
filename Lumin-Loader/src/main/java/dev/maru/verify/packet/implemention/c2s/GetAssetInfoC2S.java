@@ -6,7 +6,7 @@ import dev.maru.verify.packet.annotations.ProtocolField;
 public class GetAssetInfoC2S implements IRCPacket {
     @ProtocolField("name")
     private String name;
-    
+
     @ProtocolField("version")
     private String version;
 
@@ -21,7 +21,7 @@ public class GetAssetInfoC2S implements IRCPacket {
     public String getName() {
         return name;
     }
-    
+
     public String getVersion() {
         return version;
     }

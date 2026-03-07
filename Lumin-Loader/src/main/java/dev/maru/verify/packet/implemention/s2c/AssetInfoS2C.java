@@ -6,10 +6,10 @@ import dev.maru.verify.packet.annotations.ProtocolField;
 public class AssetInfoS2C implements IRCPacket {
     @ProtocolField("exists")
     private boolean exists;
-    
+
     @ProtocolField("hash")
     private String hash;
-    
+
     @ProtocolField("size")
     private long size;
 

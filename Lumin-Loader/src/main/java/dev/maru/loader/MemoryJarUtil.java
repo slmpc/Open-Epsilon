@@ -49,13 +49,13 @@ public class MemoryJarUtil {
                 }
             }
         }
-        
+
         return root;
     }
 
     public static void mergeZip(Path jimfsRoot, File zipFile) throws IOException {
         if (zipFile == null || !zipFile.exists()) return;
-        
+
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {

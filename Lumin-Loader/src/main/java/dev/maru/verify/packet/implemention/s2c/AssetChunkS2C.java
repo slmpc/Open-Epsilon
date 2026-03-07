@@ -6,10 +6,10 @@ import dev.maru.verify.packet.annotations.ProtocolField;
 public class AssetChunkS2C implements IRCPacket {
     @ProtocolField("data")
     private byte[] data;
-    
+
     @ProtocolField("offset")
     private long offset;
-    
+
     @ProtocolField("last")
     private boolean last;
 

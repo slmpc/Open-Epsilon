@@ -2,7 +2,9 @@ package dev.maru.verify;
 
 import dev.maru.verify.client.IRCHandler;
 import dev.maru.verify.client.IRCTransport;
+import dev.maru.verify.packet.implemention.c2s.GetAssetInfoC2S;
 import dev.maru.verify.packet.implemention.c2s.GetModListC2S;
+import dev.maru.verify.packet.implemention.c2s.StartAssetDownloadC2S;
 import dev.maru.verify.util.AuthUtil;
 import dev.maru.verify.util.HwidUtil;
 import niurendeobf.ZKMIndy;
@@ -12,6 +14,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
@@ -20,6 +23,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -29,16 +34,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import dev.maru.verify.packet.implemention.c2s.GetAssetInfoC2S;
-import dev.maru.verify.packet.implemention.c2s.StartAssetDownloadC2S;
-import java.io.File;
-import java.io.FileOutputStream;
 
 @ZKMIndy
 public final class LoaderWindow {
@@ -642,8 +641,7 @@ public final class LoaderWindow {
                     SwingUtilities.invokeLater(() -> handleAssetChunk(data, offset, last));
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
 
         IRCTransport t = VerificationClient.getTransport();
@@ -696,7 +694,7 @@ public final class LoaderWindow {
                 digest.update(buffer, 0, n);
             }
             byte[] hash = digest.digest();
-            return java.util.Base64.getEncoder().encodeToString(hash);
+            return Base64.getEncoder().encodeToString(hash);
         } catch (Exception e) {
             return "";
         }

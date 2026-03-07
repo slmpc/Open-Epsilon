@@ -6,10 +6,10 @@ import dev.maru.verify.packet.annotations.ProtocolField;
 public class StartAssetDownloadC2S implements IRCPacket {
     @ProtocolField("name")
     private String name;
-    
+
     @ProtocolField("version")
     private String version;
-    
+
     @ProtocolField("offset")
     private long offset;
 
