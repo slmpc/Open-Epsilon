@@ -15,7 +15,7 @@ public class FullBright extends Module {
 
     private final DoubleSetting amount = doubleSetting("Amount", 1, 0.1f, 1, 0.1f);
 
-    public FullBright() {
+    private FullBright() {
         super("全亮", "FullBright", Category.RENDER);
     }
 

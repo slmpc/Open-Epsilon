@@ -45,6 +45,7 @@ public class ModuleManager {
                 Stuck.INSTANCE,
 
                 // Render
+                ESP.INSTANCE,
                 FullBright.INSTANCE,
                 Glow.INSTANCE,
                 HUD.INSTANCE,
