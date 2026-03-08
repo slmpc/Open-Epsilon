@@ -2,7 +2,6 @@ package com.github.lumin.modules;
 
 import com.github.lumin.settings.Setting;
 import com.github.lumin.settings.impl.*;
-import com.github.lumin.utils.player.ChatUtils;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -46,36 +45,33 @@ public class Module {
     protected void onDisable() {
     }
 
-    public void toggle() {
-        enabled = !enabled;
-
-        if (enabled) {
-            try {
-                NeoForge.EVENT_BUS.register(this);
-            } catch (Exception ignored) {
-            }
-
-            onEnable();
-
-            ChatUtils.addChatMessage(chineseName + " 已启用");
-        } else {
-            try {
-                NeoForge.EVENT_BUS.unregister(this);
-            } catch (Exception ignored) {
-            }
-
-            onDisable();
-
-            ChatUtils.addChatMessage(chineseName + " 已禁用");
-        }
-    }
-
     public boolean isEnabled() {
         return enabled;
     }
 
+    public void toggle() {
+        setEnabled(!enabled);
+    }
+
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            if (enabled) {
+                try {
+                    NeoForge.EVENT_BUS.register(this);
+                } catch (Exception ignored) {
+                }
+                
+                onEnable();
+            } else {
+                try {
+                    NeoForge.EVENT_BUS.unregister(this);
+                } catch (Exception ignored) {
+                }
+
+                onDisable();
+            }
+        }
     }
 
     public void reset() {
