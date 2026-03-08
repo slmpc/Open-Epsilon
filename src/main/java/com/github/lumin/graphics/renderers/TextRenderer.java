@@ -36,6 +36,42 @@ public class TextRenderer implements IRenderer {
         textRenderer.addText(text, x, y, 1.0f, color, StaticFontLoader.DEFAULT);
     }
 
+    public void addGlowingText(String text, float x, float y, float scale, Color color, float glowRadius, int intensity, TtfFontLoader fontLoader) {
+        float radius = Math.max(0.5f, glowRadius);
+        int quality = Math.max(1, intensity);
+        int rings = Math.max(10, quality * 8);
+        float sigma = 0.45f;
+        int centerAlpha = Math.max(1, Math.min(255, Math.round(color.getAlpha() * 0.18f)));
+        Color centerGlow = new Color(color.getRed(), color.getGreen(), color.getBlue(), centerAlpha);
+        textRenderer.addText(text, x, y, scale, centerGlow, fontLoader);
+
+        for (int ring = 1; ring <= rings; ring++) {
+            float t = ring / (float) rings;
+            float ringRadius = radius * t * t;
+            int samples = Math.max(14, Math.round((float) (Math.PI * 2.0 * ringRadius * 2.0)));
+            float weight = (float) Math.exp(-(t * t) / (2.0f * sigma * sigma));
+            float alphaScale = 0.70f * weight / (float) Math.sqrt(samples);
+            int sampleAlpha = Math.max(1, Math.min(255, Math.round(color.getAlpha() * alphaScale)));
+            Color sampleColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), sampleAlpha);
+
+            for (int i = 0; i < samples; i++) {
+                double angle = (Math.PI * 2.0 * i) / samples;
+                float offsetX = (float) (Math.cos(angle) * ringRadius);
+                float offsetY = (float) (Math.sin(angle) * ringRadius);
+                textRenderer.addText(text, x + offsetX, y + offsetY, scale, sampleColor, fontLoader);
+            }
+        }
+        textRenderer.addText(text, x, y, scale, color, fontLoader);
+    }
+
+    public void addGlowingText(String text, float x, float y, float scale, Color color, float glowRadius, int intensity) {
+        addGlowingText(text, x, y, scale, color, glowRadius, intensity, StaticFontLoader.DEFAULT);
+    }
+
+    public void addGlowingText(String text, float x, float y, float scale, Color color, float glowRadius) {
+        addGlowingText(text, x, y, scale, color, glowRadius, 1, StaticFontLoader.DEFAULT);
+    }
+
     public float getHeight(float scale) {
         return textRenderer.getHeight(scale, StaticFontLoader.DEFAULT);
     }

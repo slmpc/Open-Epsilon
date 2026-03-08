@@ -53,9 +53,9 @@ public class RenderTest extends Module {
         rectRenderer.addHorizontalGradient(baseX, baseY + 230, 200, 40, new Color(255, 0, 0, 180), new Color(0, 255, 0, 180));
         rectRenderer.addVerticalGradient(baseX + 220, baseY + 230, 200, 40, new Color(0, 0, 255, 180), new Color(255, 255, 0, 180));
 
-        textRenderer.addText("Lumin 渲染测试", baseX, baseY + 290, 1.5f, new Color(255, 255, 255));
+        textRenderer.addGlowingText("Lumin Render Test", baseX, baseY + 290, 1.5f, new Color(255, 255, 255), 3.0f);
         textRenderer.addText("矩形、圆角矩形、线条、圆形、渐变", baseX, baseY + 320, 1.0f, new Color(200, 200, 200));
-        textRenderer.addText("动画: " + String.format("%.2f", anim), baseX, baseY + 345, 1.0f, new Color(150, 255, 150));
+        textRenderer.addGlowingText("动画: " + String.format("%.2f", anim), baseX, baseY + 345, 1.0f, new Color(150, 255, 150), 1.5f);
 
         rectRenderer.drawAndClear();
         roundRectRenderer.drawAndClear();

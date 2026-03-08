@@ -35,6 +35,7 @@ public class ModuleManager {
                 KillAura.INSTANCE,
 
                 // Player
+                AutoAccount.INSTANCE,
                 AutoKouZi.INSTANCE,
                 BreakCooldown.INSTANCE,
                 Disabler.INSTANCE,
