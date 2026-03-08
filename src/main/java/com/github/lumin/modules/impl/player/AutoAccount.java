@@ -54,6 +54,9 @@ public class AutoAccount extends Module {
         state = State.Hub;
         gamesPlayed = 0;
         timer.reset();
+        if (mc.screen == null) {
+            mc.mouseHandler.releaseMouse();
+        }
     }
 
     @SubscribeEvent
