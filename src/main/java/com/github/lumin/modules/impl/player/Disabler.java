@@ -15,7 +15,7 @@ public class Disabler extends Module {
     private final BoolSetting aim360 = boolSetting("AimModulo360", false);
     private final BoolSetting AimDuplicateLook = new BoolSetting("AimDuplicateLook", false);
 
-    public Disabler() {
+    private Disabler() {
         super("残疾人", "Disabler", Category.PLAYER);
     }
 

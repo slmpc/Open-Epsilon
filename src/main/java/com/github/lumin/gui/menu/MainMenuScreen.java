@@ -7,7 +7,8 @@ import com.github.lumin.graphics.renderers.TextRenderer;
 import com.github.lumin.graphics.renderers.TextureRenderer;
 import com.github.lumin.utils.render.animation.Animation;
 import com.github.lumin.utils.render.animation.Easing;
-import com.github.lumin.utils.resources.ResourceLocationUtils;
+import com.github.lumin.assets.resources.ResourceLocationUtils;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.AddressMode;
@@ -109,19 +110,15 @@ public class MainMenuScreen extends Screen {
             textRenderer.addGlowingText(new String[]{"单人游戏", "多人游戏", "设置", "退出游戏"}[i], 30 / (float) mc.getWindow().getGuiScale() + 15 / (float) mc.getWindow().getGuiScale() + (200 / (float) mc.getWindow().getGuiScale() - textRenderer.getWidth(new String[]{"单人游戏", "多人游戏", "设置", "退出游戏"}[i], 1.5f / (float) mc.getWindow().getGuiScale())) / 2f + -350 / (float) mc.getWindow().getGuiScale() * (1 - slideAnimation.getValue()), height / 2f - 40 / (float) mc.getWindow().getGuiScale() + i * (40 / (float) mc.getWindow().getGuiScale() + 10 / (float) mc.getWindow().getGuiScale()) + (40 / (float) mc.getWindow().getGuiScale() - textRenderer.getHeight(1.5f / (float) mc.getWindow().getGuiScale())) / 2f, 1.5f / (float) mc.getWindow().getGuiScale(), Color.WHITE, 1.5f, 1);
         }
 
-        textureRenderer.draw();
-        rectRenderer.draw();
-        roundRectRenderer.draw();
-        textRenderer.draw();
-        textureRenderer.clear();
-        rectRenderer.clear();
-        roundRectRenderer.clear();
-        textRenderer.clear();
+        textureRenderer.drawAndClear();
+        rectRenderer.drawAndClear();
+        roundRectRenderer.drawAndClear();
+        textRenderer.drawAndClear();
     }
 
     @Override
     public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean focused) {
-        if (event.button() == 0) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             for (int i = 0; i < 4; i++) {
                 if (event.x() >= 30 / (float) mc.getWindow().getGuiScale() + 15 / (float) mc.getWindow().getGuiScale() + -350 / (float) mc.getWindow().getGuiScale() * (1 - slideAnimation.getValue()) && event.x() <= 30 / (float) mc.getWindow().getGuiScale() + 15 / (float) mc.getWindow().getGuiScale() + 200 / (float) mc.getWindow().getGuiScale() + -350 / (float) mc.getWindow().getGuiScale() * (1 - slideAnimation.getValue()) && event.y() >= height / 2f - 40 / (float) mc.getWindow().getGuiScale() + i * (40 / (float) mc.getWindow().getGuiScale() + 10 / (float) mc.getWindow().getGuiScale()) && event.y() <= height / 2f - 40 / (float) mc.getWindow().getGuiScale() + i * (40 / (float) mc.getWindow().getGuiScale() + 10 / (float) mc.getWindow().getGuiScale()) + 40 / (float) mc.getWindow().getGuiScale()) {
                     mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.0f));

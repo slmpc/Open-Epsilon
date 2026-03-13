@@ -13,19 +13,16 @@ Lumin Graphics 是一个为现代 Minecraft 模组开发设计的轻量化、高
 
 ---
 
-[!CAUTION]
-
 ## 💡警告
 
 ### 生命周期同步限制
 
-在单帧渲染循环内，严禁在调用一次或多次 Renderer.draw() 之后再调用 Renderer.clear()
-并再次对同一个实例调用 draw()。这会导致 CPU 写入与 GPU 读取之间的严重同步冲突，
-从而引发闪烁或图元的消失。
+在单帧渲染循环内，尽可能不在调用一次或多次 Renderer.draw() 之后再调用 Renderer.clear()
+并再次对同一个实例调用 draw()。这会导致单帧内使用多个 Buffers 导致 In-Fight 优化力度减少
 
 如果业务逻辑确实需要在单帧内进行多轮清理与绘制：
 
-请实例化一个新的 Renderer 来处理后续任务。
+建议实例化一个新的 Renderer 来处理后续任务。
 
 **💡注意**： 请避免创建过多的 Renderer 实例，否则会造成显存空间的过度占用，
 或者你可以在创建 Renderer 实例时设置比默认值更小的 Buffer 大小。
@@ -53,11 +50,7 @@ Lumin Graphics 的所有渲染操作均通过专门的 **Renderer（渲染器）
 private final Supplier<RectRenderer> rectRenderer = Suppliers.memoize(RectRenderer::new);
 
 // 使用 .get() 获取渲染器实例
-rectRenderer.
-
-get().
-
-addRect(10f,10f,100f,100f,Color.WHITE);
+rectRenderer.get().addRect(10f,10f,100f,100f,Color.WHITE);
 
 ```
 
@@ -71,23 +64,14 @@ addRect(10f,10f,100f,100f,Color.WHITE);
 
 ```java
 // 1. 向缓冲区添加形状
-rectRenderer.get().
-
-addRect(10f,10f,200f,200f,Color.WHITE);
+rectRenderer.get().addRect(10f,10f,200f,200f,Color.WHITE);
 
 // 2. 绘制到屏幕并在下一帧前清理数据
-rectRenderer.
+rectRenderer.get().draw();
+rectRenderer.get().clear();
 
-get().
-
-draw();
-rectRenderer.
-
-get().
-
-clear();
-
-// 你也可以直接使用 drawAndClear() 简写
+// 你也可以直接使用 drawAndClear()
+rectRenderer.get().drawAndClear();
 
 ```
 
@@ -97,16 +81,10 @@ clear();
 
 ```java
 // 在初始化阶段或首帧中：
-rectRenderer.get().
-
-addRect(10f,10f,200f,200f,Color.CYAN);
+rectRenderer.get().addRect(10f,10f,200f,200f,Color.CYAN);
 
 // 在渲染循环中：
-rectRenderer.
-
-get().
-
-draw(); // 内容会一直保存在 GPU 缓冲区中，直到调用 .clear()
+rectRenderer.get().draw(); // 内容会一直保存在 GPU 缓冲区中，直到调用 .clear()
 
 ```
 
@@ -125,4 +103,4 @@ draw(); // 内容会一直保存在 GPU 缓冲区中，直到调用 .clear()
 
 ---
 
-Copyright © 2026 KonekokoHouse.
+Copyright © 2026 slmpc.

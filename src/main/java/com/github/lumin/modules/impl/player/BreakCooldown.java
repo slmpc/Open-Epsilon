@@ -8,7 +8,7 @@ public class BreakCooldown extends Module {
 
     public static final BreakCooldown INSTANCE = new BreakCooldown();
 
-    public BreakCooldown() {
+    private BreakCooldown() {
         super("挖掘延迟", "BreakCooldown", Category.PLAYER);
     }
 

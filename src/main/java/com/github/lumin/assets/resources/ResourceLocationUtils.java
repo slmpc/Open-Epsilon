@@ -1,4 +1,4 @@
-package com.github.lumin.utils.resources;
+package com.github.lumin.assets.resources;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;

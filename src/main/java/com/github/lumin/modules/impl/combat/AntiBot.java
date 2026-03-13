@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AntiBot extends Module {
     public static final AntiBot INSTANCE = new AntiBot();
 
-    public AntiBot() {
+    private AntiBot() {
         super("反人机", "AntiBot", Category.COMBAT);
     }
 

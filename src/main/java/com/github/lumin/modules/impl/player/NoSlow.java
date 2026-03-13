@@ -13,7 +13,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 public class NoSlow extends Module {
     public static final NoSlow INSTANCE = new NoSlow();
 
-    public NoSlow() {
+    private NoSlow() {
         super("无减速", "NoSlow", Category.PLAYER);
     }
 

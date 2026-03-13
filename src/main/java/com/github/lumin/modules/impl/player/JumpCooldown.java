@@ -8,7 +8,7 @@ public class JumpCooldown extends Module {
 
     public static final JumpCooldown INSTANCE = new JumpCooldown();
 
-    public JumpCooldown() {
+    private JumpCooldown() {
         super("跳跃冷却", "JumpCooldown", Category.PLAYER);
     }
 

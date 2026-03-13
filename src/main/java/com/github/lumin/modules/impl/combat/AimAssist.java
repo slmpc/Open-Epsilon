@@ -40,7 +40,7 @@ public class AimAssist extends Module {
     private Vector2f playerRotation;
     private LivingEntity currentTarget;
 
-    public AimAssist() {
+    private AimAssist() {
         super("自动瞄准", "AimAssist", Category.COMBAT);
     }
 

@@ -1,6 +1,6 @@
 package com.github.lumin.utils.render;
 
-import com.github.lumin.utils.resources.ResourceLocationUtils;
+import com.github.lumin.assets.resources.ResourceLocationUtils;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.*;

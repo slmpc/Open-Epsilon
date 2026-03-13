@@ -29,7 +29,7 @@ public class Nametags extends Module {
 
     public static final Nametags INSTANCE = new Nametags();
 
-    public Nametags() {
+    private Nametags() {
         super("名牌显示", "Nametags", Category.RENDER);
     }
 

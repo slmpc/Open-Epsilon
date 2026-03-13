@@ -27,7 +27,7 @@ public class AutoClicker extends Module {
     private long nextDelay = 0;
     private long readyTime = 0;
 
-    public AutoClicker() {
+    private AutoClicker() {
         super("连点器", "AutoClicker", Category.COMBAT);
     }
 

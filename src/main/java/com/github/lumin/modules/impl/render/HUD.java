@@ -16,7 +16,7 @@ public class HUD extends Module {
 
     public static final HUD INSTANCE = new HUD();
 
-    public HUD() {
+    private HUD() {
         super("界面", "HUD", Category.RENDER);
     }
 

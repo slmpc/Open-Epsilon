@@ -10,7 +10,7 @@ public class SafeWalk extends Module {
 
     public static final SafeWalk INSTANCE = new SafeWalk();
 
-    public SafeWalk() {
+    private SafeWalk() {
         super("安全行走", "SafeWalk", Category.PLAYER);
     }
 

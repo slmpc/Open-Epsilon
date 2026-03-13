@@ -1,6 +1,6 @@
 package com.github.lumin.graphics.text.ttf;
 
-import com.github.lumin.utils.resources.ResourceLocationUtils;
+import com.github.lumin.assets.resources.ResourceLocationUtils;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.stb.STBTruetype;

@@ -25,7 +25,7 @@ public class ModuleList extends Module {
 
     public static final ModuleList INSTANCE = new ModuleList();
 
-    public ModuleList() {
+    private ModuleList() {
         super("功能列表", "ModuleList", Category.RENDER);
     }
 

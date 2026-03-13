@@ -39,7 +39,7 @@ public class KillAura extends Module {
 
     public static final KillAura INSTANCE = new KillAura();
 
-    public KillAura() {
+    private KillAura() {
         super("杀戮光环", "KillAura", Category.COMBAT);
     }
 

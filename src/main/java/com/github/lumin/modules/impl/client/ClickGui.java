@@ -14,7 +14,7 @@ public class ClickGui extends Module {
 
     public static final ClickGui INSTANCE = new ClickGui();
 
-    public ClickGui() {
+    private ClickGui() {
         super("控制面板", "ClickGui", Category.CLIENT);
     }
 

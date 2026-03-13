@@ -1,7 +1,7 @@
 package com.github.lumin.graphics.text;
 
 import com.github.lumin.graphics.text.ttf.TtfFontLoader;
-import com.github.lumin.utils.resources.ResourceLocationUtils;
+import com.github.lumin.assets.resources.ResourceLocationUtils;
 
 public class StaticFontLoader {
 

@@ -15,7 +15,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 public class Stuck extends Module {
     public static final Stuck INSTANCE = new Stuck();
 
-    public Stuck() {
+    private Stuck() {
         super("卡空", "Stuck", Category.PLAYER);
     }
 

@@ -8,7 +8,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 public class Sprint extends Module {
     public static final Sprint INSTANCE = new Sprint();
 
-    public Sprint() {
+    private Sprint() {
         super("疾跑", "Sprint", Category.PLAYER);
     }
 
