@@ -15,14 +15,14 @@ public class AutoClicker extends Module {
 
     public static final AutoClicker INSTANCE = new AutoClicker();
 
-    private final EnumSetting<Mode> mode = enumSetting("模式", Mode.VERSION_ABOVE_1_9);
-    private final IntSetting minCPS = intSetting("最小CPS", 8, 1, 20, 1, () -> mode.is("1.8"));
-    private final IntSetting maxCPS = intSetting("最大CPS", 12, 1, 20, 1, () -> mode.is("1.8"));
-    private final BoolSetting jitter = boolSetting("抖动", false, () -> mode.is("1.8"));
-    private final BoolSetting autoAttack = boolSetting("自动攻击", false);
+    private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.VERSION_ABOVE_1_9);
+    private final IntSetting minCPS = intSetting("MinCPS", 8, 1, 20, 1, () -> mode.is("1.8"));
+    private final IntSetting maxCPS = intSetting("MaxCPS", 12, 1, 20, 1, () -> mode.is("1.8"));
+    private final BoolSetting jitter = boolSetting("Jitter", false, () -> mode.is("1.8"));
+    private final BoolSetting autoAttack = boolSetting("AutoAttack", false);
 
-    private final IntSetting minDelay = intSetting("最小延迟", 100, 0, 500, 10, () -> mode.is("1.9+"));
-    private final IntSetting maxDelay = intSetting("最大延迟", 200, 0, 500, 10, () -> mode.is("1.9+"));
+    private final IntSetting minDelay = intSetting("MinDelay", 100, 0, 500, 10, () -> mode.is("1.9+"));
+    private final IntSetting maxDelay = intSetting("MaxDelay", 200, 0, 500, 10, () -> mode.is("1.9+"));
 
     private long lastClickTime = 0;
     private long nextDelay = 0;

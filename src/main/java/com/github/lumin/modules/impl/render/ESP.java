@@ -22,7 +22,7 @@ public class ESP extends Module {
         super("ESP", Category.RENDER);
     }
 
-    private final BoolSetting targetChests = boolSetting("箱子", true);
+    private final BoolSetting targetChests = boolSetting("TargetChests", true);
 
     @SubscribeEvent
     public void onRender3D(RenderLevelStageEvent.AfterEntities event) {

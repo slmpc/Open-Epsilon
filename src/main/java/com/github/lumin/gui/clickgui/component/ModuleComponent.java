@@ -91,7 +91,7 @@ public class ModuleComponent implements IComponent {
             } else if (setting instanceof DoubleSetting doubleSetting) {
                 settings.add(new DoubleSettingComponent(doubleSetting));
             } else if (setting instanceof EnumSetting enumSetting) {
-                settings.add(new ModeSettingComponent(enumSetting));
+                settings.add(new EnumSettingComponent(enumSetting));
             } else if (setting instanceof ColorSetting colorSetting) {
                 settings.add(new ColorSettingComponent(colorSetting));
             } else if (setting instanceof StringSetting stringSetting) {
@@ -552,7 +552,7 @@ public class ModuleComponent implements IComponent {
         if (component instanceof BoolSettingComponent c) return c.getSetting().isAvailable();
         if (component instanceof IntSettingComponent c) return c.getSetting().isAvailable();
         if (component instanceof DoubleSettingComponent c) return c.getSetting().isAvailable();
-        if (component instanceof ModeSettingComponent c) return c.getSetting().isAvailable();
+        if (component instanceof EnumSettingComponent c) return c.getSetting().isAvailable();
         if (component instanceof ColorSettingComponent c) return c.getSetting().isAvailable();
         if (component instanceof StringSettingComponent c) return c.getSetting().isAvailable();
         return true;
@@ -562,7 +562,7 @@ public class ModuleComponent implements IComponent {
         if (component instanceof BoolSettingComponent c) return c.getSetting().getDisplayName();
         if (component instanceof IntSettingComponent c) return c.getSetting().getDisplayName();
         if (component instanceof DoubleSettingComponent c) return c.getSetting().getDisplayName();
-        if (component instanceof ModeSettingComponent c) return c.getSetting().getDisplayName();
+        if (component instanceof EnumSettingComponent c) return c.getSetting().getDisplayName();
         if (component instanceof ColorSettingComponent c) return c.getSetting().getDisplayName();
         if (component instanceof StringSettingComponent c) return c.getSetting().getDisplayName();
         return null;

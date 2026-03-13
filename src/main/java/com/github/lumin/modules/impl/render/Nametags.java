@@ -33,11 +33,11 @@ public class Nametags extends Module {
         super("Nametags", Category.RENDER);
     }
 
-    private final BoolSetting showSelf = boolSetting("显示自己", false);
-    private final BoolSetting showItems = boolSetting("显示装备", false);
-    private final BoolSetting showHealthText = boolSetting("显示血量数值", true);
-    private final ColorSetting backgroundColor = colorSetting("背景颜色", new Color(0, 0, 0, 140));
-    private final ColorSetting textColor = colorSetting("文字颜色", Color.WHITE);
+    private final BoolSetting showSelf = boolSetting("ShowSelf", false);
+    private final BoolSetting showItems = boolSetting("ShowItems", false);
+    private final BoolSetting showHealthText = boolSetting("ShowHealthText", true);
+    private final ColorSetting backgroundColor = colorSetting("BackgroundColor", new Color(0, 0, 0, 140));
+    private final ColorSetting textColor = colorSetting("TextColor", Color.WHITE);
 
     private final Supplier<RoundRectRenderer> roundRectRendererSupplier = Suppliers.memoize(RoundRectRenderer::new);
     private final Supplier<TextRenderer> textRendererSupplier = Suppliers.memoize(TextRenderer::new);

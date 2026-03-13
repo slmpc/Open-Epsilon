@@ -18,13 +18,13 @@ public class ClickGui extends Module {
         super("ClickGui", Category.CLIENT);
     }
 
-    public final DoubleSetting scale = doubleSetting("界面缩放", 1.0, 0.5, 2.0, 0.05);
-    public final ColorSetting shadowColor = colorSetting("阴影颜色", new Color(0, 0, 0, 113));
+    public final DoubleSetting scale = doubleSetting("Scale", 1.0, 0.5, 2.0, 0.05);
+    public final ColorSetting shadowColor = colorSetting("ShadowColor", new Color(0, 0, 0, 113));
 
-    public final BoolSetting backgroundBlackColor = boolSetting("黑色背景", true);
-    public final BoolSetting backgroundBlur = boolSetting("背景模糊", true);
-    public final DoubleSetting blurStrength = doubleSetting("模糊强度", 10.5, 1.0, 15, 0.5, backgroundBlur::getValue);
-    public final EnumSetting<BlurMode> blurMode = enumSetting("模糊方式", BlurMode.FullScreen, backgroundBlur::getValue);
+    public final BoolSetting backgroundBlackColor = boolSetting("BackgroundBlackColor", true);
+    public final BoolSetting backgroundBlur = boolSetting("BackgroundBlur", true);
+    public final DoubleSetting blurStrength = doubleSetting("BlurStrength", 10.5, 1.0, 15, 0.5, backgroundBlur::getValue);
+    public final EnumSetting<BlurMode> blurMode = enumSetting("BlurMode", BlurMode.FullScreen, backgroundBlur::getValue);
 
     @Override
     protected void onEnable() {

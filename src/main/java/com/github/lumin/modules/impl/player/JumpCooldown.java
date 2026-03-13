@@ -12,6 +12,6 @@ public class JumpCooldown extends Module {
         super("JumpCooldown", Category.PLAYER);
     }
 
-    public final IntSetting cooldown = intSetting("冷却时间", 0, 0, 9, 1);
+    public final IntSetting cooldown = intSetting("Cooldown", 0, 0, 9, 1);
 
 }

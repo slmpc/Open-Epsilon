@@ -28,12 +28,12 @@ public class ModuleList extends Module {
         super("ModuleList", Category.RENDER);
     }
 
-    private final DoubleSetting scale = doubleSetting("缩放", 1.0, 0.5, 2.0, 0.1);
-    private final ColorSetting shadowColor = colorSetting("阴影颜色", new Color(68, 0, 0, 94));
-    private final DoubleSetting glowRadius = doubleSetting("发光半径", 3.0, 1.0, 10.0, 0.5);
-    private final DoubleSetting glowIntensity = doubleSetting("发光强度", 1.0, 1.0, 5.0, 1.0);
-    private final BoolSetting showCategory = boolSetting("显示分类", false);
-    private final BoolSetting showIcon = boolSetting("显示图标", true);
+    private final DoubleSetting scale = doubleSetting("Scale", 1.0, 0.5, 2.0, 0.1);
+    private final ColorSetting shadowColor = colorSetting("ShadowColor", new Color(68, 0, 0, 94));
+    private final DoubleSetting glowRadius = doubleSetting("GlowRadius", 3.0, 1.0, 10.0, 0.5);
+    private final DoubleSetting glowIntensity = doubleSetting("GlowIntensity", 1.0, 1.0, 5.0, 1.0);
+    private final BoolSetting showCategory = boolSetting("ShowCategory", false);
+    private final BoolSetting showIcon = boolSetting("ShowIcon", true);
     private final Supplier<TextRenderer> textRendererSupplier = Suppliers.memoize(TextRenderer::new);
     private final Supplier<ShadowRenderer> shadowRendererSupplier = Suppliers.memoize(ShadowRenderer::new);
 

@@ -10,7 +10,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 
 import java.awt.*;
 
-public class ModeSettingComponent extends Component {
+public class EnumSettingComponent extends Component {
     private final EnumSetting setting;
     private final Animation selectedXAnimation = new Animation(Easing.EASE_OUT_QUAD, 150L);
     private boolean highlightInitialized;
@@ -19,7 +19,7 @@ public class ModeSettingComponent extends Component {
     private float lastControlW;
     private float lastControlH;
 
-    public ModeSettingComponent(EnumSetting setting) {
+    public EnumSettingComponent(EnumSetting setting) {
         this.setting = setting;
     }
 
@@ -104,7 +104,7 @@ public class ModeSettingComponent extends Component {
             if (i > 0) {
                 set.bottomRoundRect().addRoundRect(segX, controlY + 2.0f * scale, 1.0f * scale, controlH - 4.0f * scale, 0.0f, new Color(255, 255, 255, (int) (14 * alpha)));
             }
-            String mode = setting.getTranslatedValue();
+            String mode = setting.getTranslatedValue(modes[i]);
             float maxTextW = Math.max(0.0f, segW - segInnerPad * 2.0f);
             String display = ellipsize(mode, set.font(), textScale, maxTextW);
             Color textColor = (i == selectedIndex) ? new Color(255, 255, 255, (int) (255 * alpha)) : new Color(200, 200, 200, (int) (255 * alpha));

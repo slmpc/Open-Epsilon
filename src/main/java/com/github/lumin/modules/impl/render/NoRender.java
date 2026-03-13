@@ -8,8 +8,8 @@ public class NoRender extends Module {
 
     public static final NoRender INSTANCE = new NoRender();
 
-    public final BoolSetting potionEffects = boolSetting("药水效果", true);
-    public final BoolSetting playerNameTags = boolSetting("玩家名牌", true);
+    public final BoolSetting potionEffects = boolSetting("PotionEffects", true);
+    public final BoolSetting playerNameTags = boolSetting("PlayerNameTags", true);
 
     private NoRender() {
         super("NoRender", Category.RENDER);

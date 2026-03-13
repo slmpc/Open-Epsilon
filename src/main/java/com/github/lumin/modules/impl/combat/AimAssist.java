@@ -25,16 +25,16 @@ import java.util.List;
 public class AimAssist extends Module {
     public static final AimAssist INSTANCE = new AimAssist();
 
-    public EnumSetting<SmoothMode> mode = enumSetting("平滑模式", SmoothMode.Fast);
-    public DoubleSetting range = doubleSetting("目标距离", 4.2, 1.0, 8.0, 0.1);
-    public DoubleSetting speed = doubleSetting("旋转速度", 10.0, 1.0, 180.0, 1.0);
-    public DoubleSetting strength = doubleSetting("插值强度", 0.1, 0.01, 1.0, 0.01);
-    public BoolSetting ignoreScreen = boolSetting("屏幕打开时忽略", true);
-    public BoolSetting ignoreInventory = boolSetting("物品栏打开时忽略", true);
-    public BoolSetting player = boolSetting("瞄准玩家", true);
-    public BoolSetting mob = boolSetting("瞄准敌对生物", true);
-    public BoolSetting animal = boolSetting("瞄准动物", true);
-    public BoolSetting invisible = boolSetting("瞄准隐身实体", false);
+    public EnumSetting<SmoothMode> mode = enumSetting("Mode", SmoothMode.Fast);
+    public DoubleSetting range = doubleSetting("Range", 4.2, 1.0, 8.0, 0.1);
+    public DoubleSetting speed = doubleSetting("Speed", 10.0, 1.0, 180.0, 1.0);
+    public DoubleSetting strength = doubleSetting("Strength", 0.1, 0.01, 1.0, 0.01);
+    public BoolSetting ignoreScreen = boolSetting("IgnoreScreen", true);
+    public BoolSetting ignoreInventory = boolSetting("IgnoreInventory", true);
+    public BoolSetting player = boolSetting("Player", true);
+    public BoolSetting mob = boolSetting("Mob", true);
+    public BoolSetting animal = boolSetting("Animal", true);
+    public BoolSetting invisible = boolSetting("Invisible", false);
 
     private Vector2f targetRotation;
     private Vector2f playerRotation;

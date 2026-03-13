@@ -33,6 +33,15 @@ public class EnumSetting<E extends Enum<E>> extends Setting<E> {
         return comp != null ? comp.getTranslatedName() : value.toString();
     }
 
+    public String getTranslatedValue(E enumValue) {
+        TranslateComponent comp = modeTranslations.get(enumValue);
+        return comp != null ? comp.getTranslatedName() : enumValue.toString();
+    }
+
+    public boolean is(E enumValue) {
+        return this.value.equals(enumValue);
+    }
+
     public boolean is(String string) {
         return this.getValue().toString().equalsIgnoreCase(string);
     }
