@@ -74,12 +74,7 @@ public class TtfTextRenderer implements ITextRenderer {
 
             TtfGlyphAtlas atlas = glyph.atlas();
 
-            Batch batch = batches.computeIfAbsent(atlas,
-                    k -> new Batch(new LuminRingBuffer(bufferSize, GpuBuffer.USAGE_VERTEX)));
-
-            if (batch.offsetInAtlas + STRIDE * 4 > bufferSize) {
-                flushBatch(atlas, batch);
-            }
+            Batch batch = batches.computeIfAbsent(atlas, k -> new Batch(new LuminRingBuffer(bufferSize, GpuBuffer.USAGE_VERTEX)));
 
             batch.buffer.tryMap();
 
@@ -100,60 +95,6 @@ public class TtfTextRenderer implements ITextRenderer {
             batch.offsetInAtlas += (STRIDE * 4);
             xOffset += glyph.advance() * finalScale + SPACING * scale;
         }
-    }
-
-    private void flushBatch(TtfGlyphAtlas atlas, Batch batch) {
-        if (batch.offsetInAtlas == 0) return;
-
-        if (batch.buffer.isMapped()) {
-            batch.buffer.unmap();
-        }
-
-        LuminRenderSystem.applyOrthoProjection();
-
-        if (ttfInfoUniformBuf == null) {
-            final var size = new Std140SizeCalculator().putFloat().get();
-            ttfInfoUniformBuf = RenderSystem.getDevice().createBuffer(
-                    () -> "Lumin TTF UBO", GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE, size);
-
-            try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder()
-                    .mapBuffer(ttfInfoUniformBuf, false, true)) {
-                Std140Builder.intoBuffer(mappedView.data()).putFloat(0.5f);
-            }
-        }
-
-        int vertexCount = (int) (batch.offsetInAtlas / STRIDE);
-        int indexCount = (vertexCount / 4) * 6;
-
-        RenderSystem.AutoStorageIndexBuffer autoIndices =
-                RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-        GpuBuffer ibo = autoIndices.getBuffer(indexCount);
-
-        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
-        if (target.getColorTextureView() == null) return;
-
-        GpuBufferSlice dynamicUniforms = RenderSystem.getDynamicUniforms().writeTransform(
-                RenderSystem.getModelViewMatrix(), new Vector4f(1, 1, 1, 1),
-                new Vector3f(0, 0, 0), TextureTransform.DEFAULT_TEXTURING.getMatrix()
-        );
-
-        try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-                () -> "Lumin TTF Flush",
-                target.getColorTextureView(), OptionalInt.empty(),
-                target.getDepthTextureView(), OptionalDouble.empty())
-        ) {
-            pass.setPipeline(LuminRenderPipelines.TTF_FONT);
-            RenderSystem.bindDefaultUniforms(pass);
-            pass.setUniform("DynamicTransforms", dynamicUniforms);
-            pass.setUniform("TtfInfo", ttfInfoUniformBuf);
-            pass.setVertexBuffer(0, batch.buffer.getGpuBuffer());
-            pass.setIndexBuffer(ibo, autoIndices.type());
-            pass.bindTexture("Sampler0", atlas.getTexture().textureView(), atlas.getTexture().sampler());
-            pass.drawIndexed(0, 0, indexCount, 1);
-        }
-
-        batch.buffer.rotate();
-        batch.offsetInAtlas = 0;
     }
 
     @Override

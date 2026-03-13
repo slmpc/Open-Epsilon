@@ -42,6 +42,7 @@ public class ModuleManager {
                 Scaffold.INSTANCE,
                 Sprint.INSTANCE,
                 Stuck.INSTANCE,
+                Velocity.INSTANCE,
 
                 // Render
                 ESP.INSTANCE,

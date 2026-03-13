@@ -96,7 +96,8 @@
   "lumin.modules.sprint": "Sprint",
   "lumin.modules.stuck": "Stuck",
   "lumin.modules.esp": "ESP",
-  "lumin.modules.esp.targetchests": "TargetChests",
+  "lumin.modules.esp.chests": "Chests",
+  "lumin.modules.esp.range": "Range",
   "lumin.modules.fullbright": "FullBright",
   "lumin.modules.fullbright.amount": "Amount",
   "lumin.modules.hud": "HUD",
@@ -128,5 +129,14 @@
   "lumin.modules.clickgui.blurmode": "BlurMode",
   "lumin.modules.clickgui.blurmode.fullscreen": "FullScreen",
   "lumin.modules.clickgui.blurmode.onlysidebar": "OnlySidebar",
-  "lumin.gui.gameaccount": "Account"
+  "lumin.gui.gameaccount": "GameAccount",
+  "lumin.modules.velocity": "Velocity",
+  "lumin.modules.velocity.mode": "Mode",
+  "lumin.modules.velocity.mode.vanilla": "Vanilla",
+  "lumin.modules.velocity.mode.legit": "Legit",
+  "lumin.modules.velocity.mode.noxz": "NoXZ",
+  "lumin.modules.velocity.attacks": "Attacks",
+  "lumin.modules.velocity.maxdelaytime": "MaxDelayTime",
+  "lumin.modules.velocity.render": "Render",
+  "lumin.modules.velocity.debug": "Debug"
 }

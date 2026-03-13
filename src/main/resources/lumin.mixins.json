@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "MixinClientLevel",
+    "MixinConnection",
     "MixinEntity",
     "MixinEntityRenderer",
     "MixinGlDebug",
@@ -21,8 +22,5 @@
   },
   "overwrites": {
     "requireAnnotations": true
-  },
-  "mixins": [
-    "MixinConnection"
-  ]
+  }
 }

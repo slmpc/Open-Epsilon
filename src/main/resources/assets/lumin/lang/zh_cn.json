@@ -96,7 +96,8 @@
   "lumin.modules.sprint": "疾跑",
   "lumin.modules.stuck": "卡空",
   "lumin.modules.esp": "透视",
-  "lumin.modules.esp.targetchests": "箱子",
+  "lumin.modules.esp.chests": "箱子",
+  "lumin.modules.esp.range": "范围",
   "lumin.modules.fullbright": "全亮",
   "lumin.modules.fullbright.amount": "亮度",
   "lumin.modules.hud": "界面",
@@ -128,5 +129,14 @@
   "lumin.modules.clickgui.blurmode": "模糊方式",
   "lumin.modules.clickgui.blurmode.fullscreen": "全屏",
   "lumin.modules.clickgui.blurmode.onlysidebar": "仅侧边栏",
-  "lumin.gui.gameaccount": "游戏账号"
+  "lumin.gui.gameaccount": "游戏账号",
+  "lumin.modules.velocity": "缓落",
+  "lumin.modules.velocity.mode": "模式",
+  "lumin.modules.velocity.mode.vanilla": "原版",
+  "lumin.modules.velocity.mode.legit": "合法",
+  "lumin.modules.velocity.mode.noxz": "无水平",
+  "lumin.modules.velocity.attacks": "攻击计数",
+  "lumin.modules.velocity.maxdelaytime": "最大延迟时间",
+  "lumin.modules.velocity.render": "渲染",
+  "lumin.modules.velocity.debug": "调试"
 }
