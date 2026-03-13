@@ -10,14 +10,12 @@ public class Managers {
     public static ConfigManager CONFIG;
     public static ModuleManager MODULE;
     public static RotationManager ROTATION;
-    public static TranslateManager TRANSLATE;
 
     public static void initManagers() {
 
-        MODULE = ModuleManager.INSTANCE;
-        ROTATION = RotationManager.INSTANCE;
-        CONFIG = ConfigManager.INSTANCE;
-        TRANSLATE = TranslateManager.INSTANCE;
+        MODULE = new ModuleManager();
+        ROTATION = new RotationManager();
+        CONFIG = new ConfigManager();
 
     }
 

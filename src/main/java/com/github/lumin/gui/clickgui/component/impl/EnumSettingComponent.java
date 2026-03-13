@@ -104,7 +104,7 @@ public class EnumSettingComponent extends Component {
             if (i > 0) {
                 set.bottomRoundRect().addRoundRect(segX, controlY + 2.0f * scale, 1.0f * scale, controlH - 4.0f * scale, 0.0f, new Color(255, 255, 255, (int) (14 * alpha)));
             }
-            String mode = setting.getTranslatedValue(modes[i]);
+            String mode = setting.getTranslatedValueByIndex(i);
             float maxTextW = Math.max(0.0f, segW - segInnerPad * 2.0f);
             String display = ellipsize(mode, set.font(), textScale, maxTextW);
             Color textColor = (i == selectedIndex) ? new Color(255, 255, 255, (int) (255 * alpha)) : new Color(200, 200, 200, (int) (255 * alpha));

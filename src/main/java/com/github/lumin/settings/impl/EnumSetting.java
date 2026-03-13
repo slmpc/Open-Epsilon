@@ -33,7 +33,10 @@ public class EnumSetting<E extends Enum<E>> extends Setting<E> {
         return comp != null ? comp.getTranslatedName() : value.toString();
     }
 
-    public String getTranslatedValue(E enumValue) {
+    @SuppressWarnings("unchecked")
+    public String getTranslatedValueByIndex(int index) {
+        if (index < 0 || index >= constants.length) return "";
+        E enumValue = constants[index];
         TranslateComponent comp = modeTranslations.get(enumValue);
         return comp != null ? comp.getTranslatedName() : enumValue.toString();
     }

@@ -18,8 +18,6 @@ import java.util.List;
 
 public class ConfigManager {
 
-    public static final ConfigManager INSTANCE = new ConfigManager();
-
     private static final int CONFIG_VERSION = 1;
 
     private final Gson gson = new GsonBuilder()
@@ -33,7 +31,7 @@ public class ConfigManager {
     private boolean dirty;
     private boolean modulesApplied;
 
-    private ConfigManager() {
+    public ConfigManager() {
         try {
             loadFromDisk();
             if (!root.has("version")) {

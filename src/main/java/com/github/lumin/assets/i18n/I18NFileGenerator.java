@@ -1,6 +1,6 @@
 package com.github.lumin.assets.i18n;
 
-import com.github.lumin.managers.impl.ModuleManager;
+import com.github.lumin.managers.Managers;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.Setting;
@@ -24,7 +24,7 @@ public class I18NFileGenerator {
             root.addProperty(catKey, "");
         }
 
-        for (Module module : ModuleManager.INSTANCE.getModules()) {
+        for (Module module : Managers.MODULE.getModules()) {
             String modulePrefix = "modules." + module.getName().toLowerCase();
             root.addProperty("lumin." + modulePrefix, "");
 

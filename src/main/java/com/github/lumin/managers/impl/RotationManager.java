@@ -25,8 +25,6 @@ public class RotationManager {
 
     Minecraft mc = Minecraft.getInstance();
 
-    public static final RotationManager INSTANCE = new RotationManager();
-
     private final Vector2f offset = new Vector2f(0, 0);
     public Vector2f rotations;
     public Vector2f lastRotations = new Vector2f(0, 0);
@@ -43,7 +41,7 @@ public class RotationManager {
 
     private int priority;
 
-    private RotationManager() {
+    public RotationManager() {
         NeoForge.EVENT_BUS.register(this);
     }
 

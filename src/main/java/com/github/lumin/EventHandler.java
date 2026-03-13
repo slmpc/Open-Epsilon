@@ -26,10 +26,7 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void onResourcesReload(AddClientReloadListenersEvent event) {
-        event.addListener(
-                ResourceLocationUtils.getIdentifier("objects/reload_listener"),
-                new LanguageReloadListener()
-        );
+        event.addListener(ResourceLocationUtils.getIdentifier("objects/reload_listener"), new LanguageReloadListener());
     }
 
 }
