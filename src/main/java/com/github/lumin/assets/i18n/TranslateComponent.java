@@ -23,7 +23,7 @@ public class TranslateComponent {
 
     public static TranslateComponent create(String prefix, String suffix) {
         TranslateComponent component = new TranslateComponent(prefix, suffix);
-        TranslateManager.getInstance().registerTranslateComponent(component);
+        TranslateManager.INSTANCE.registerTranslateComponent(component);
         return component;
     }
     

@@ -9,7 +9,6 @@ import java.util.concurrent.Executor;
 
 public class LanguageReloadListener implements PreparableReloadListener {
 
-
     @Override
     public @NonNull CompletableFuture<Void> reload(
             @NonNull SharedState sharedState,
@@ -21,8 +20,9 @@ public class LanguageReloadListener implements PreparableReloadListener {
                 .thenCompose(barrier::wait)
                 .thenRunAsync(() -> {
 
-                    TranslateManager.getInstance().refresh();
+                    TranslateManager.INSTANCE.refresh();
 
                 }, applyExectutor);
     }
+
 }
