@@ -13,15 +13,14 @@ import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 public class Stuck extends Module {
-
     public static final Stuck INSTANCE = new Stuck();
 
     private Stuck() {
-        super("Stuck", Category.PLAYER);
+        super("卡空", "Stuck", Category.PLAYER);
     }
 
-    private float lastYaw;
-    private float lastPitch;
+    float lastYaw;
+    float lastPitch;
 
     @Override
     public void onDisable() {
@@ -31,8 +30,8 @@ public class Stuck extends Module {
     }
 
     @SubscribeEvent
-    public void onMovementInputUpdate(MovementInputUpdateEvent event) {
-        event.getInput().moveVector = new Vec2(0, 0);
+    public void onMovementInputUpdate(MovementInputUpdateEvent e) {
+        e.getInput().moveVector = new Vec2(0, 0);
     }
 
     @SubscribeEvent
@@ -45,6 +44,14 @@ public class Stuck extends Module {
         }
     }
 
+    /*  @EventTarget
+      public void onUseItem(EventUseItem e){
+          if (mc.player.getYRot() != lastYaw || mc.player.getXRot() != lastPitch) {
+              PacketUtil.sendPacketNoEvent(new ServerboundMovePlayerPacket.Rot(mc.player.getYRot(), mc.player.getXRot(), mc.player.onGround(), mc.player.horizontalCollision));
+          }
+          lastPitch = mc.player.getXRot();
+          lastYaw = mc.player.getYRot();
+      }*/
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent.RightClickItem event) {
         if (mc.player.getYRot() != lastYaw || mc.player.getXRot() != lastPitch) {
@@ -53,5 +60,4 @@ public class Stuck extends Module {
         lastPitch = mc.player.getXRot();
         lastYaw = mc.player.getYRot();
     }
-
 }

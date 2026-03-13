@@ -12,6 +12,6 @@ public class NoRender extends Module {
     public final BoolSetting playerNameTags = boolSetting("玩家名牌", true);
 
     private NoRender() {
-        super("NoRender", Category.RENDER);
+        super("移除原版渲染", "NoRender", Category.RENDER);
     }
 }

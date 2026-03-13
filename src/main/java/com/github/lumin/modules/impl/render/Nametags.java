@@ -30,7 +30,7 @@ public class Nametags extends Module {
     public static final Nametags INSTANCE = new Nametags();
 
     private Nametags() {
-        super("Nametags", Category.RENDER);
+        super("名牌显示", "Nametags", Category.RENDER);
     }
 
     private final BoolSetting showSelf = boolSetting("显示自己", false);

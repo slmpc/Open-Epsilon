@@ -78,7 +78,6 @@ import org.slf4j.Logger;
 @Mod(value = Lumin.MODID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = Lumin.MODID, value = Dist.CLIENT)
 public class Lumin {
-
     public static final String MODID = "lumin";
     public static final Logger LOGGER = LogUtils.getLogger();
 

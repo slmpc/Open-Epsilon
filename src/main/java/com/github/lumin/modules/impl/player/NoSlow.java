@@ -14,7 +14,7 @@ public class NoSlow extends Module {
     public static final NoSlow INSTANCE = new NoSlow();
 
     private NoSlow() {
-        super("NoSlow", Category.PLAYER);
+        super("无减速", "NoSlow", Category.PLAYER);
     }
 
     private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Jump);

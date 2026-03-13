@@ -14,7 +14,7 @@ public class Disabler extends Module {
     public static final Disabler INSTANCE = new Disabler();
 
     private Disabler() {
-        super("Disabler", Category.PLAYER);
+        super("残疾人", "Disabler", Category.PLAYER);
     }
 
     private final BoolSetting DuplicateRotPlace = boolSetting("DuplicateRotPlace", true);
