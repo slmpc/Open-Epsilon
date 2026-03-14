@@ -36,11 +36,13 @@ public class ModuleManager {
                 AutoAccount.INSTANCE,
                 BreakCooldown.INSTANCE,
                 Disabler.INSTANCE,
+                InvManager.INSTANCE,
                 JumpCooldown.INSTANCE,
                 NoSlow.INSTANCE,
                 SafeWalk.INSTANCE,
                 Scaffold.INSTANCE,
                 Sprint.INSTANCE,
+                Stealer.INSTANCE,
                 Stuck.INSTANCE,
                 Velocity.INSTANCE,
 

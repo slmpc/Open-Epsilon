@@ -81,21 +81,21 @@ public class Stealer extends Module {
             return !(score <= bestScore);
         } else if (stack.getItem() == Items.COMPASS) {
             return !InvHelper.hasItem(stack.getItem());
-        } else if (stack.getItem() == Items.WATER_BUCKET && InvHelper.getItemCount(Items.WATER_BUCKET) >= InvManager.INSTANCE.waterBucketCount.getValue()) {
+        } else if (stack.getItem() == Items.WATER_BUCKET && InvHelper.getItemCount(Items.WATER_BUCKET) >= InvManager.INSTANCE.getWaterBucketCount()) {
             return false;
-        } else if (stack.getItem() == Items.LAVA_BUCKET && InvHelper.getItemCount(Items.LAVA_BUCKET) >= InvManager.INSTANCE.lavaBucketCount.getValue()) {
+        } else if (stack.getItem() == Items.LAVA_BUCKET && InvHelper.getItemCount(Items.LAVA_BUCKET) >= InvManager.INSTANCE.getLavaBucketCount()) {
             return false;
         } else if (stack.getItem() instanceof BlockItem
                 && InvHelper.isValidStack(stack)
-                && InvHelper.getBlockCountInInventory() + stack.getCount() >= InvManager.INSTANCE.maxBlockSize.getValue()) {
+                && InvHelper.getBlockCountInInventory() + stack.getCount() >= InvManager.INSTANCE.getMaxBlockSize()) {
             return false;
-        } else if (stack.getItem() == Items.ARROW && InvHelper.getItemCount(Items.ARROW) + stack.getCount() >= InvManager.INSTANCE.maxArrowSize.getValue()) {
+        } else if (stack.getItem() == Items.ARROW && InvHelper.getItemCount(Items.ARROW) + stack.getCount() >= InvManager.INSTANCE.getMaxArrowSize()) {
             return false;
         } else if (stack.getItem() instanceof FishingRodItem && InvHelper.getItemCount(Items.FISHING_ROD) >= 1) {
             return false;
         } else if (stack.getItem() != Items.SNOWBALL && stack.getItem() != Items.EGG
-                || InvHelper.getItemCount(Items.SNOWBALL) + InvHelper.getItemCount(Items.EGG) + stack.getCount() < InvManager.INSTANCE.maxProjectileSize.getValue()
-                && InvManager.INSTANCE.keepProjectile.getValue()) {
+                || InvHelper.getItemCount(Items.SNOWBALL) + InvHelper.getItemCount(Items.EGG) + stack.getCount() < InvManager.INSTANCE.getMaxProjectileSize()
+                && InvManager.INSTANCE.shouldKeepProjectile()) {
             return !stack.has(DataComponents.CUSTOM_NAME) && InvHelper.isCommonItemUseful(stack);
         } else {
             return false;

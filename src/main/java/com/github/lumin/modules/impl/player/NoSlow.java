@@ -83,21 +83,10 @@ public class NoSlow extends Module {
     }
 
     private enum Mode {
-        Vanilla("Vanilla"),
-        Jump("Jump"),
-        Grim1_2("Grim 1/2"),
-        Grim1_3("Grim 1/3");
-
-        final String name;
-
-        Mode(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
+        Vanilla,
+        Jump,
+        Grim1_2,
+        Grim1_3
     }
 
 }

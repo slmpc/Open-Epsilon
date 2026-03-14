@@ -43,7 +43,7 @@ public class ModuleComponent implements IComponent {
 
     private final TranslateComponent keyBindNoneComponent = TranslateComponent.create("keybind", "none");
     private final TranslateComponent keyBindToggleComponent = TranslateComponent.create("keybind", "toggle");
-    private final TranslateComponent keyBindHoldComponent  = TranslateComponent.create("keybind", "hold");
+    private final TranslateComponent keyBindHoldComponent = TranslateComponent.create("keybind", "hold");
 
     public void initAnimation(float sourceX, float sourceY, float sourceW, float sourceH, float targetX, float targetY, float targetW, float targetH) {
         this.sourceX = sourceX;
