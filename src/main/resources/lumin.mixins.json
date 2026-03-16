@@ -14,8 +14,7 @@
     "MixinLocalPlayer",
     "MixinMinecraft",
     "MixinMultiPlayerGameMode",
-    "MixinTitleScreen",
-    "MixinWindow"
+    "MixinTitleScreen"
   ],
   "injectors": {
     "defaultRequire": 1

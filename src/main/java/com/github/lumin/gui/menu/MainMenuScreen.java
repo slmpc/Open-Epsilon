@@ -1,6 +1,7 @@
 package com.github.lumin.gui.menu;
 
 import com.github.lumin.assets.resources.ResourceLocationUtils;
+import com.github.lumin.graphics.LuminRenderable;
 import com.github.lumin.graphics.LuminTexture;
 import com.github.lumin.graphics.renderers.RectRenderer;
 import com.github.lumin.graphics.renderers.RoundRectRenderer;
@@ -13,6 +14,7 @@ import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,7 +34,9 @@ import java.awt.*;
 import java.io.InputStream;
 import java.util.Optional;
 
-public class MainMenuScreen extends Screen {
+public class MainMenuScreen extends Screen implements LuminRenderable {
+
+    public static final MainMenuScreen INSTANCE = new MainMenuScreen();
 
     private static final Identifier bg = ResourceLocationUtils.getIdentifier("textures/gui/mainmenu/1.png");
 
@@ -44,8 +48,8 @@ public class MainMenuScreen extends Screen {
     private LuminTexture backgroundTexture;
     private boolean textureLoaded = false;
 
-    public MainMenuScreen() {
-        super(Component.literal("主菜单"));
+    private MainMenuScreen() {
+        super(Component.literal("Lumin-MainMenu"));
     }
 
     @Override
@@ -121,6 +125,11 @@ public class MainMenuScreen extends Screen {
             float textY = by + (bh - textRenderer.getHeight(1.5f / guiScale)) / 2f;
             textRenderer.addText(buttons[i], textX, textY, 1.5f / guiScale, Color.WHITE);
         }
+    }
+
+    @Override
+    public void luminRender(DeltaTracker partialTick) {
+        if (mc.screen != this) return;
 
         textureRenderer.drawAndClear();
         rectRenderer.drawAndClear();
@@ -143,7 +152,7 @@ public class MainMenuScreen extends Screen {
                     switch (i) {
                         case 0 -> mc.setScreen(new SelectWorldScreen(this));
                         case 1 -> mc.setScreen(new JoinMultiplayerScreen(this));
-                        case 2 -> mc.setScreen(new OptionsScreen(this, mc.options));
+                        case 2 -> mc.setScreen(new OptionsScreen(this, mc.options, false));
                         case 3 -> mc.stop();
                     }
                     return true;
@@ -161,4 +170,5 @@ public class MainMenuScreen extends Screen {
     @Override
     public void renderBackground(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
     }
+
 }

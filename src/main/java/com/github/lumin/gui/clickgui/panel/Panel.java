@@ -1,9 +1,11 @@
 package com.github.lumin.gui.clickgui.panel;
 
+import com.github.lumin.graphics.LuminRenderable;
 import com.github.lumin.graphics.renderers.*;
 import com.github.lumin.graphics.shaders.BlurShader;
 import com.github.lumin.gui.IComponent;
 import com.github.lumin.modules.impl.client.ClickGui;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -11,7 +13,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 
 import java.awt.*;
 
-public class Panel implements IComponent {
+public class Panel implements IComponent, LuminRenderable {
 
     private final Minecraft mc = Minecraft.getInstance();
 
@@ -42,11 +44,6 @@ public class Panel implements IComponent {
 
         if (ClickGui.INSTANCE.backgroundBlackColor.getValue()) {
             rectRenderer.addRect(0, 0, screenWidth, screenHeight, new Color(18, 18, 18, (int) (110 * alpha)));
-            rectRenderer.drawAndClear();
-        }
-
-        if (ClickGui.INSTANCE.isFullScreenBlur()) {
-            BlurShader.INSTANCE.drawBlur(0.0f, 0.0f, screenWidth, screenHeight, 0.0f, ClickGui.INSTANCE.getBlurStrength());
         }
 
         float targetWidth = screenWidth * 0.5f;
@@ -65,7 +62,6 @@ public class Panel implements IComponent {
         float y = (screenHeight - scaledHeight) / 2.0f;
 
         shadowRenderer.addShadow(x, y, scaledWidth, scaledHeight, 20f * guiScale, 12f * guiScale, ClickGui.INSTANCE.shadowColor.getValue());
-        shadowRenderer.drawAndClear();
 
         float sidebarWidth = Math.max(120f * guiScale, width / 4);
         float contentWidth = width - sidebarWidth;
@@ -74,11 +70,6 @@ public class Panel implements IComponent {
         contentPanel.setBounds(x + sidebarWidth, y, contentWidth, height);
         sidebar.render(this.set, mouseX, mouseY, deltaTicks, alpha);
         contentPanel.render(this.set, mouseX, mouseY, deltaTicks, alpha);
-
-        bottomRoundRect.drawAndClear();
-        topRoundRect.drawAndClear();
-        textureRenderer.drawAndClear();
-        fontRenderer.drawAndClear();
 
     }
 
@@ -107,4 +98,23 @@ public class Panel implements IComponent {
         return sidebar.mouseScrolled(mouseX, mouseY, scrollX, scrollY) || contentPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
+    @Override
+    public void luminRender(DeltaTracker partialTick) {
+        rectRenderer.drawAndClear();
+
+        if (ClickGui.INSTANCE.isFullScreenBlur()) {
+            float screenWidth = mc.getWindow().getGuiScaledWidth();
+            float screenHeight = mc.getWindow().getGuiScaledHeight();
+            BlurShader.INSTANCE.drawBlur(0.0f, 0.0f, screenWidth, screenHeight, 0.0f, ClickGui.INSTANCE.getBlurStrength());
+        }
+
+        shadowRenderer.drawAndClear();
+
+        bottomRoundRect.drawAndClear();
+        topRoundRect.drawAndClear();
+        textureRenderer.drawAndClear();
+        fontRenderer.drawAndClear();
+
+        contentPanel.luminRender(partialTick);
+    }
 }

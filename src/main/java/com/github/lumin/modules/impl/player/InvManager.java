@@ -19,7 +19,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.equipment.Equippable;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -266,7 +267,7 @@ public class InvManager extends Module {
                     Equippable equipment = stack.get(DataComponents.EQUIPPABLE);
                     if (equipment == null) return;
                     if (!stack.isEmpty() && timer.passedMillise(MathUtils.getRandom(minDelay.getValue(), maxDelay.getValue())) && InvHelper.getBestArmorScore(equipment.slot()) > InvHelper.getProtection(stack)) {
-                        mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, 4 + (4 - i), 1, ClickType.THROW, mc.player);
+                        mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, 4 + (4 - i), 1, ContainerInput.THROW, mc.player);
                         this.inventoryOpen = true;
                         timer.reset();
                     }
@@ -284,9 +285,9 @@ public class InvManager extends Module {
                     boolean isBetterItem = InvHelper.getCurrentArmorScore(equipment.slot()) < currentItemScore;
                     if (isBestItem && isBetterItem && timer.passedMillise(MathUtils.getRandom(minDelay.getValue(), maxDelay.getValue()))) {
                         if (ix < 9) {
-                            mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, ix + 36, 0, ClickType.QUICK_MOVE, mc.player);
+                            mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, ix + 36, 0, ContainerInput.QUICK_MOVE, mc.player);
                         } else {
-                            mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, ix, 0, ClickType.QUICK_MOVE, mc.player);
+                            mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, ix, 0, ContainerInput.QUICK_MOVE, mc.player);
                         }
 
                         this.inventoryOpen = true;
@@ -297,7 +298,7 @@ public class InvManager extends Module {
         }
 
         if (this.clickOffHand && timer.passedMillise(MathUtils.getRandom(minDelay.getValue(), maxDelay.getValue()))) {
-            mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, 45, 0, ClickType.PICKUP, mc.player);
+            mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, 45, 0, ContainerInput.PICKUP, mc.player);
             this.inventoryOpen = true;
             this.clickOffHand = false;
             timer.reset();
@@ -311,9 +312,9 @@ public class InvManager extends Module {
                     ItemStack goldenAppleStack = mc.player.getInventory().getItem(slot);
                     if (offHand.getCount() + goldenAppleStack.getCount() <= 64) {
                         if (slot < 9) {
-                            mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, slot + 36, 0, ClickType.PICKUP, mc.player);
+                            mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, slot + 36, 0, ContainerInput.PICKUP, mc.player);
                         } else {
-                            mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, slot, 0, ClickType.PICKUP, mc.player);
+                            mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, slot, 0, ContainerInput.PICKUP, mc.player);
                         }
 
                         this.inventoryOpen = true;
@@ -526,9 +527,9 @@ public class InvManager extends Module {
 
     private void swapOffHand(int slot) {
         if (slot < 9) {
-            mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, slot + 36, 40, ClickType.SWAP, mc.player);
+            mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, slot + 36, 40, ContainerInput.SWAP, mc.player);
         } else {
-            mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, slot, 40, ClickType.SWAP, mc.player);
+            mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, slot, 40, ContainerInput.SWAP, mc.player);
         }
 
         this.inventoryOpen = true;
@@ -540,9 +541,9 @@ public class InvManager extends Module {
             int itemSlot = InvHelper.getItemStackSlot(item);
             if (itemSlot != -1) {
                 if (itemSlot < 9) {
-                    mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, itemSlot + 36, 1, ClickType.THROW, mc.player);
+                    mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, itemSlot + 36, 1, ContainerInput.THROW, mc.player);
                 } else {
-                    mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, itemSlot, 1, ClickType.THROW, mc.player);
+                    mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, itemSlot, 1, ContainerInput.THROW, mc.player);
                 }
 
                 this.inventoryOpen = true;
@@ -557,9 +558,9 @@ public class InvManager extends Module {
             int bestItemSlot = InvHelper.getItemStackSlot(bestItem);
             if (bestItemSlot != -1) {
                 if (bestItemSlot < 9) {
-                    mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, bestItemSlot + 36, targetSlot, ClickType.SWAP, mc.player);
+                    mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, bestItemSlot + 36, targetSlot, ContainerInput.SWAP, mc.player);
                 } else {
-                    mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, bestItemSlot, targetSlot, ClickType.SWAP, mc.player);
+                    mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, bestItemSlot, targetSlot, ContainerInput.SWAP, mc.player);
                 }
 
                 this.inventoryOpen = true;
@@ -576,9 +577,9 @@ public class InvManager extends Module {
                 ItemStack bestItemStack = mc.player.getInventory().getItem(bestItemSlot);
                 if (currentSlot.getItem() != item || currentSlot.getCount() < bestItemStack.getCount()) {
                     if (bestItemSlot < 9) {
-                        mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, bestItemSlot + 36, targetSlot, ClickType.SWAP, mc.player);
+                        mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, bestItemSlot + 36, targetSlot, ContainerInput.SWAP, mc.player);
                     } else {
-                        mc.gameMode.handleInventoryMouseClick(mc.player.inventoryMenu.containerId, bestItemSlot, targetSlot, ClickType.SWAP, mc.player);
+                        mc.gameMode.handleContainerInput(mc.player.inventoryMenu.containerId, bestItemSlot, targetSlot, ContainerInput.SWAP, mc.player);
                     }
 
                     this.inventoryOpen = true;

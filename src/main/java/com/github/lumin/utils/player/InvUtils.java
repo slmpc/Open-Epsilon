@@ -2,7 +2,7 @@ package com.github.lumin.utils.player;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -150,7 +150,7 @@ public class InvUtils {
             AbstractContainerMenu handler = mc.player.containerMenu;
             int selectedSlot = mc.player.getInventory().getSelectedSlot();
 
-            mc.gameMode.handleInventoryMouseClick(handler.containerId, containerSlot, selectedSlot, ClickType.SWAP, mc.player);
+            mc.gameMode.handleContainerInput(handler.containerId, containerSlot, selectedSlot, ContainerInput.SWAP, mc.player);
 
             invSlots = new int[]{containerSlot, selectedSlot};
             return true;
@@ -162,7 +162,7 @@ public class InvUtils {
         if (invSlots == null || invSlots.length < 2) return;
         AbstractContainerMenu handler = mc.player.containerMenu;
 
-        mc.gameMode.handleInventoryMouseClick(handler.containerId, invSlots[0], invSlots[1], ClickType.SWAP, mc.player);
+        mc.gameMode.handleContainerInput(handler.containerId, invSlots[0], invSlots[1], ContainerInput.SWAP, mc.player);
     }
 
 }

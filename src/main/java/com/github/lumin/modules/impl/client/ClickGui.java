@@ -29,7 +29,7 @@ public class ClickGui extends Module {
     @Override
     protected void onEnable() {
         if (nullCheck()) return;
-        mc.setScreen(new ClickGuiScreen());
+        mc.setScreen(ClickGuiScreen.INSTANCE);
     }
 
     @Override

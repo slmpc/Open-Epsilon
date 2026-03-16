@@ -1,6 +1,7 @@
 package com.github.lumin.utils.player;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.chat.GuiMessageSource;
 import net.minecraft.network.chat.Component;
 
 public class ChatUtils {
@@ -16,15 +17,12 @@ public class ChatUtils {
     }
 
     public static void addChatMessage(boolean prefix, String message) {
-        mc.execute(() -> mc.gui.getChat().addMessage(Component.literal((prefix ? CLIENT_PREFIX : "") + message)));
-    }
-
-    public static void addPlayerMessage(String message) {
-        mc.execute(() -> {
-            if (mc.player != null) {
-                mc.player.displayClientMessage(Component.literal(message.replace('&', '§')), false);
-            }
-        });
+        mc.execute(() -> mc.gui.getChat().addMessage(
+                Component.literal((prefix ? CLIENT_PREFIX : "") + message),
+                null,
+                GuiMessageSource.SYSTEM_CLIENT,
+                null
+        ));
     }
 
 }

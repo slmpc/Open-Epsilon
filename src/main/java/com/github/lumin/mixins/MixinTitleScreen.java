@@ -22,7 +22,7 @@ public class MixinTitleScreen {
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof TitleScreen) {
-            mc.setScreen(new MainMenuScreen());
+            mc.setScreen(MainMenuScreen.INSTANCE);
         }
     }
 

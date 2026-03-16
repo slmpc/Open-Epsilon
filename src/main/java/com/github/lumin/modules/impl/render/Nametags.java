@@ -92,7 +92,7 @@ public class Nametags extends Module {
 
 
     @SubscribeEvent
-    private void onRenderAfterEntities(RenderLevelStageEvent.AfterEntities event) {
+    private void onRenderAfterEntities(RenderLevelStageEvent.AfterLevel event) {
         if (nullCheck()) return;
 
         tags.clear();

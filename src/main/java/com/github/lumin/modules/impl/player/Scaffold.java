@@ -48,7 +48,7 @@ public class Scaffold extends Module {
     private Scaffold() {
         super("Scaffold", Category.PLAYER);
 
-        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterEntities event) -> {
+        NeoForge.EVENT_BUS.addListener((RenderLevelStageEvent.AfterLevel event) -> {
             if (nullCheck()) return;
 
             if (!render.getValue() || renderBoxes.isEmpty()) return;
@@ -366,7 +366,8 @@ public class Scaffold extends Module {
     private boolean onAir() {
         Vec3 baseVec = mc.player.getEyePosition();
         BlockPos base = BlockPos.containing(baseVec.x, getYLevel(), baseVec.z);
-        return mc.level.getBlockState(base).getBlock() instanceof AirBlock || mc.level.getBlockState(base).getBlock() instanceof WaterlilyBlock;
+        return mc.level.getBlockState(base).getBlock() instanceof AirBlock
+                || mc.level.getBlockState(base).getBlock() instanceof WaterloggedTransparentBlock;
     }
 
     private record BlockInfo(BlockPos blockPos, BlockPos position, Direction dir) {

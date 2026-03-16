@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -102,7 +102,7 @@ public class AutoAccount extends Module {
                         for (int i = 0; i < chestMenu.slots.size(); i++) {
                             ItemStack stack = chestMenu.getSlot(i).getItem();
                             if (stack.getHoverName().getString().contains("决斗竞技场")) {
-                                mc.gameMode.handleInventoryMouseClick(chestMenu.containerId, i, 0, ClickType.PICKUP, mc.player);
+                                mc.gameMode.handleContainerInput(chestMenu.containerId, i, 0, ContainerInput.PICKUP, mc.player);
                                 state = State.WaitingForPVPHub;
                                 timer.reset();
                                 return;
@@ -153,7 +153,7 @@ public class AutoAccount extends Module {
                             }
 
                             if (isWhitelisted && stack.getCount() == 2) {
-                                mc.gameMode.handleInventoryMouseClick(chestMenu.containerId, i, 0, ClickType.PICKUP, mc.player);
+                                mc.gameMode.handleContainerInput(chestMenu.containerId, i, 0, ContainerInput.PICKUP, mc.player);
                                 timer.reset();
                                 return;
                             }
@@ -174,7 +174,7 @@ public class AutoAccount extends Module {
                         }
 
                         if (isWhitelisted) {
-                            mc.gameMode.handleInventoryMouseClick(chestMenu.containerId, i, 0, ClickType.PICKUP, mc.player);
+                            mc.gameMode.handleContainerInput(chestMenu.containerId, i, 0, ContainerInput.PICKUP, mc.player);
                             timer.reset();
                         }
                     }
@@ -237,7 +237,7 @@ public class AutoAccount extends Module {
                         for (int i = 0; i < chestMenu.slots.size(); i++) {
                             ItemStack stack = chestMenu.getSlot(i).getItem();
                             if (stack.getHoverName().getString().contains("第一天")) {
-                                mc.gameMode.handleInventoryMouseClick(chestMenu.containerId, i, 0, ClickType.PICKUP, mc.player);
+                                mc.gameMode.handleContainerInput(chestMenu.containerId, i, 0, ContainerInput.PICKUP, mc.player);
                                 ChatUtils.addChatMessage("已自动签到，模块关闭。");
                                 toggle();
                                 return;

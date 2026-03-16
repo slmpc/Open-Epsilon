@@ -1,6 +1,7 @@
 package com.github.lumin.gui.clickgui.panel;
 
 import com.github.lumin.assets.i18n.TranslateComponent;
+import com.github.lumin.graphics.LuminRenderable;
 import com.github.lumin.graphics.renderers.RectRenderer;
 import com.github.lumin.graphics.renderers.RoundRectRenderer;
 import com.github.lumin.graphics.renderers.TextRenderer;
@@ -16,6 +17,7 @@ import com.github.lumin.modules.impl.client.ClickGui;
 import com.github.lumin.utils.render.MouseUtils;
 import com.github.lumin.utils.render.animation.Animation;
 import com.github.lumin.utils.render.animation.Easing;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -27,7 +29,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContentPanel implements IComponent {
+public class ContentPanel implements IComponent, LuminRenderable {
 
     private final Minecraft mc = Minecraft.getInstance();
 
@@ -330,14 +332,28 @@ public class ContentPanel implements IComponent {
             visibleIndex++;
         }
 
+        if (listMaxScroll > 0.0f) {
+            renderScrollbar(set, lastScrollbarX, lastListY, lastScrollbarW, lastListH, lastThumbY, lastThumbH, listDraggingScrollbar, MouseUtils.isHovering(lastScrollbarX, lastListY, lastScrollbarW, lastListH, mouseX, mouseY), MouseUtils.isHovering(lastScrollbarX, lastThumbY, lastScrollbarW, lastThumbH, mouseX, mouseY), alpha);
+        }
+    }
+
+    @Override
+    public void luminRender(DeltaTracker partialTick) {
+
         listRoundRect.drawAndClear();
         listFont.drawAndClear();
         listRoundRect.clearScissor();
         listFont.clearScissor();
 
-        if (listMaxScroll > 0.0f) {
-            renderScrollbar(set, lastScrollbarX, lastListY, lastScrollbarW, lastListH, lastThumbY, lastThumbH, listDraggingScrollbar, MouseUtils.isHovering(lastScrollbarX, lastListY, lastScrollbarW, lastListH, mouseX, mouseY), MouseUtils.isHovering(lastScrollbarX, lastThumbY, lastScrollbarW, lastThumbH, mouseX, mouseY), alpha);
-        }
+        settingsRoundRect.drawAndClear();
+        settingsRect.drawAndClear();
+        settingsFont.drawAndClear();
+
+        pickingRound.drawAndClear();
+        pickingRect.drawAndClear();
+        pickerRound.drawAndClear();
+        pickingText.drawAndClear();
+
     }
 
     private boolean listViewMouseClicked(MouseButtonEvent event, boolean focused) {
@@ -541,19 +557,11 @@ public class ContentPanel implements IComponent {
         }
         settingsComponent.render(settingsSet, mouseX, mouseY, deltaTicks);
 
-        settingsRoundRect.drawAndClear();
-        settingsRect.drawAndClear();
-        settingsFont.drawAndClear();
-
         clearScissor();
 
         settingsComponent.renderOverlayBlurs(mouseX, mouseY, deltaTicks);
         settingsComponent.renderOverlays(settingsSet, mouseX, mouseY, deltaTicks);
 
-        pickingRound.drawAndClear();
-        pickingRect.drawAndClear();
-        pickerRound.drawAndClear();
-        pickingText.drawAndClear();
 
         if (settingsMaxScroll > 0.0f && !settingsComponent.isExiting()) {
             renderScrollbar(set, lastSettingsScrollbarX, lastSettingsY, lastSettingsScrollbarW, lastSettingsH, lastSettingsThumbY, lastSettingsThumbH, settingsDraggingScrollbar, MouseUtils.isHovering(lastSettingsScrollbarX, lastSettingsY, lastSettingsScrollbarW, lastSettingsH, mouseX, mouseY), MouseUtils.isHovering(lastSettingsScrollbarX, lastSettingsThumbY, lastSettingsScrollbarW, lastSettingsThumbH, mouseX, mouseY), alpha);

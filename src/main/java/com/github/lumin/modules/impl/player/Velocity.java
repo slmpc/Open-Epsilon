@@ -103,18 +103,18 @@ public class Velocity extends Module {
                     lag = true;
                     return;
                 }
-                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.getId() == mc.player.getId()) {
+                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket(int id, Vec3 movement) && id == mc.player.getId()) {
                     if (stage == VelocityStage.NONE) {
                         if (!lag) {
                             stage = VelocityStage.DELAY;
                             velocityTime = System.currentTimeMillis();
                             event.setCanceled(true);
-                            velocity = new Vec3(packet.getMovement().x, packet.getMovement().y, packet.getMovement().z);
+                            velocity = new Vec3(movement.x, movement.y, movement.z);
                         } else {
                             lag = false;
                         }
                     } else {
-                        velocity = new Vec3(packet.getMovement().x, packet.getMovement().y, packet.getMovement().z);
+                        velocity = new Vec3(movement.x, movement.y, movement.z);
                         stage = VelocityStage.LAG;
                         event.setCanceled(true);
                     }
@@ -168,7 +168,7 @@ public class Velocity extends Module {
             }
 
             case Legit -> {
-                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.getId() == mc.player.getId()) {
+                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
                     jump = true;
                 }
             }
@@ -238,7 +238,7 @@ public class Velocity extends Module {
     }
 
     @Subscribe
-    public void onRender(RenderLevelStageEvent.AfterEntities event) {
+    public void onRender(RenderLevelStageEvent.AfterLevel event) {
         if (stage == VelocityStage.NONE) return;
         for (Entity entity : targets.keySet()) {
             if (!(entity instanceof Player)) continue;
