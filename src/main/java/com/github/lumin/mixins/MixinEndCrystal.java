@@ -1,6 +1,6 @@
 package com.github.lumin.mixins;
 
-import com.github.lumin.mixins.ducks.EndCrystalAccess;
+import com.github.lumin.ducks.EndCrystalAccess;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

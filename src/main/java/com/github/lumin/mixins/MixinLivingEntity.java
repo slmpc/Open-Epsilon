@@ -2,7 +2,7 @@ package com.github.lumin.mixins;
 
 import com.github.lumin.events.JumpEvent;
 import com.github.lumin.managers.RotationManager;
-import com.github.lumin.mixins.ducks.PlayerHurtAccess;
+import com.github.lumin.ducks.PlayerHurtAccess;
 import com.github.lumin.modules.impl.player.JumpCooldown;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;

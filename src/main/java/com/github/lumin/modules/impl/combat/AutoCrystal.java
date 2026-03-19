@@ -353,9 +353,9 @@ public class AutoCrystal extends Module {
         }
 
         if (packet instanceof ClientboundEntityEventPacket eventPacket) {
-            if (currentTarget != null && eventPacket instanceof com.github.lumin.mixins.ducks.EntityEventPacketAccess access) {
+            if (currentTarget != null && eventPacket instanceof com.github.lumin.ducks.EntityEventPacketAccess access) {
                 if (access.lumin$getEntityId() == currentTarget.getId() && access.lumin$getEventId() == 3) {
-                    if (currentTarget instanceof com.github.lumin.mixins.ducks.PlayerHurtAccess hurtAccess) {
+                    if (currentTarget instanceof com.github.lumin.ducks.PlayerHurtAccess hurtAccess) {
                         hurtAccess.lumin$setHurt(true);
                     }
                     timeoutTimer.reset();
@@ -407,7 +407,7 @@ public class AutoCrystal extends Module {
             currentTarget = findTarget();
         }
 
-        if (currentTarget instanceof com.github.lumin.mixins.ducks.PlayerHurtAccess hurtAccess) {
+        if (currentTarget instanceof com.github.lumin.ducks.PlayerHurtAccess hurtAccess) {
             if (timeoutTimer.passedSecond(timeout.getValue())) {
                 hurtAccess.lumin$setHurt(false);
             }
@@ -703,7 +703,7 @@ public class AutoCrystal extends Module {
         if (crystal.tickCount < ticksExisted.getValue()) return false;
         if (recentAttacks.contains(crystal.getId())) return false;
         if (inhibit.getValue()) {
-            if (crystal instanceof com.github.lumin.mixins.ducks.EndCrystalAccess access && access.lumin$getSpawnTime() == 0L) {
+            if (crystal instanceof com.github.lumin.ducks.EndCrystalAccess access && access.lumin$getSpawnTime() == 0L) {
                 Long stored = spawnTimes.get(crystal.getId());
                 if (stored != null) {
                     access.lumin$setSpawnTime(stored);
@@ -741,7 +741,7 @@ public class AutoCrystal extends Module {
                 return false;
             }
         }
-        if (damageSync.getValue() && currentTarget instanceof com.github.lumin.mixins.ducks.PlayerHurtAccess hurtAccess) {
+        if (damageSync.getValue() && currentTarget instanceof com.github.lumin.ducks.PlayerHurtAccess hurtAccess) {
             if (hurtAccess.lumin$isHurt() && !timeoutTimer.passedSecond(timeout.getValue())) {
                 return false;
             }
@@ -902,7 +902,7 @@ public class AutoCrystal extends Module {
         CLIENT.gameMode.attack(CLIENT.player, crystal);
         CLIENT.player.swing(InteractionHand.MAIN_HAND);
         markAttacked(crystal.getId());
-        if (crystal instanceof com.github.lumin.mixins.ducks.EndCrystalAccess access) {
+            if (crystal instanceof com.github.lumin.ducks.EndCrystalAccess access) {
             access.lumin$setMioAttacked(true);
         }
     }
@@ -1017,7 +1017,7 @@ public class AutoCrystal extends Module {
         attackTimes.put(id, System.currentTimeMillis());
         if (CLIENT.level != null) {
             Entity entity = CLIENT.level.getEntity(id);
-            if (entity instanceof EndCrystal crystal && crystal instanceof com.github.lumin.mixins.ducks.EndCrystalAccess access) {
+            if (entity instanceof EndCrystal crystal && crystal instanceof com.github.lumin.ducks.EndCrystalAccess access) {
                 access.lumin$setMioAttacked(true);
             }
         }
@@ -1029,7 +1029,7 @@ public class AutoCrystal extends Module {
     private void markSpawn(int id) {
         if (CLIENT.level == null) return;
         Entity entity = CLIENT.level.getEntity(id);
-        if (entity instanceof EndCrystal crystal && crystal instanceof com.github.lumin.mixins.ducks.EndCrystalAccess access) {
+        if (entity instanceof EndCrystal crystal && crystal instanceof com.github.lumin.ducks.EndCrystalAccess access) {
             if (access.lumin$getSpawnTime() == 0L) {
                 access.lumin$setSpawnTime(System.currentTimeMillis());
             }
@@ -1038,7 +1038,7 @@ public class AutoCrystal extends Module {
 
     public boolean shouldInhibitRender(EndCrystal crystal) {
         if (!isEnabled() || !inhibit.getValue()) return false;
-        if (!(crystal instanceof com.github.lumin.mixins.ducks.EndCrystalAccess access)) return false;
+        if (!(crystal instanceof com.github.lumin.ducks.EndCrystalAccess access)) return false;
         if (!access.lumin$isMioAttacked()) return false;
         if (crystal.tickCount >= inhibitMaxTicks.getValue()) return false;
         long spawn = access.lumin$getSpawnTime();

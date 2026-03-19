@@ -1,4 +1,4 @@
-package com.github.lumin.mixins.ducks;
+package com.github.lumin.ducks;
 
 public interface EndCrystalAccess {
     long lumin$getSpawnTime();
