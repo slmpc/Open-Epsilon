@@ -519,10 +519,12 @@ public class AutoCrystal extends Module {
             PlaceMode mode = visible ? PlaceMode.Visible : PlaceMode.Wall;
             if (!isBaseBlock(pos)) {
                 if (basePlace.getValue()) {
-                    mode = PlaceMode.Base;
-                } else {
                     continue;
                 }
+                continue;
+            }
+            if (basePlace.getValue()) {
+                mode = PlaceMode.Base;
             }
 
             PlacementResult candidate = new PlacementResult(pos.immutable(), currentTarget, targetDamage, mode, placeVec);
@@ -787,7 +789,7 @@ public class AutoCrystal extends Module {
 
         BlockState base = CLIENT.level.getBlockState(pos);
         if (base.isAir() && !airPlace.getValue()) return false;
-        if (!isBaseBlock(pos) && !basePlace.getValue()) return false;
+        if (!isBaseBlock(pos)) return false;
 
         BlockPos up = pos.above();
         if (!CLIENT.level.getBlockState(up).canBeReplaced()) return false;
@@ -857,7 +859,8 @@ public class AutoCrystal extends Module {
         InteractionHand hand = useOffhand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         Direction side = hitResult != null ? hitResult.getDirection() : (strictDirection.getValue() ? getPlaceFacing(pos) : Direction.UP);
         if (side == null) side = Direction.UP;
-        Vec3 hitVec = hitResult != null ? hitResult.getLocation() : placeVec.add(new Vec3(side.getStepX(), side.getStepY(), side.getStepZ()).scale(0.5));
+        Vec3 base = Vec3.atLowerCornerOf(pos).add(0.0, 1.0, 0.0);
+        Vec3 hitVec = hitResult != null ? hitResult.getLocation() : new Vec3(placeVec.x, base.y, placeVec.z);
         BlockHitResult hit = hitResult != null ? hitResult : new BlockHitResult(hitVec, side, pos, false);
         CLIENT.gameMode.useItemOn(CLIENT.player, hand, hit);
         CLIENT.player.swing(hand);
