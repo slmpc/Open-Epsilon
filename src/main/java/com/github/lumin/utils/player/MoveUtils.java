@@ -4,6 +4,7 @@ import com.github.lumin.utils.math.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 
 public class MoveUtils {
@@ -57,6 +58,19 @@ public class MoveUtils {
         }
 
         event.getInput().moveVector = new Vec2(closestStrafe, closestForward);
+    }
+
+    public static Vec3 fixMovement(Vec3 input, float targetYaw, float currentYaw) {
+        if (input == null) return null;
+        if (input.lengthSqr() == 0) return input;
+
+        double yaw = Math.toRadians(Mth.wrapDegrees(targetYaw - currentYaw));
+        double cos = Math.cos(yaw);
+        double sin = Math.sin(yaw);
+
+        double x = input.x * cos - input.z * sin;
+        double z = input.x * sin + input.z * cos;
+        return new Vec3(x, input.y, z);
     }
 
 }

@@ -65,6 +65,15 @@ public class MioRotationManager {
         return active;
     }
 
+    public boolean isMovementFixEnabled() {
+        return active && correctMovement == MovementFix.ON && rotations != null;
+    }
+
+    public float getYaw() {
+        if (rotations == null) return mc.player.getYRot();
+        return rotations.x;
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     private void onClientTick(ClientTickEvent.Pre event) {
         if (mc.player == null || mc.level == null) return;
