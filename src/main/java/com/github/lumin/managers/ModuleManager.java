@@ -5,6 +5,8 @@ import com.github.lumin.modules.impl.client.ClickGui;
 import com.github.lumin.modules.impl.combat.AimAssist;
 import com.github.lumin.modules.impl.combat.AntiBot;
 import com.github.lumin.modules.impl.combat.AutoClicker;
+import com.github.lumin.modules.impl.combat.AutoCrystal;
+import com.github.lumin.modules.impl.combat.FakePlayer;
 import com.github.lumin.modules.impl.combat.KillAura;
 import com.github.lumin.modules.impl.player.*;
 import com.github.lumin.modules.impl.render.*;
@@ -31,6 +33,8 @@ public class ModuleManager {
                 AimAssist.INSTANCE,
                 AntiBot.INSTANCE,
                 AutoClicker.INSTANCE,
+                AutoCrystal.INSTANCE,
+                FakePlayer.INSTANCE,
                 KillAura.INSTANCE,
 
                 // Player
@@ -42,6 +46,7 @@ public class ModuleManager {
                 NoSlow.INSTANCE,
                 SafeWalk.INSTANCE,
                 Scaffold.INSTANCE,
+                Speedmine.INSTANCE,
                 Sprint.INSTANCE,
                 Stealer.INSTANCE,
                 Stuck.INSTANCE,
