@@ -82,9 +82,6 @@ public class KillAura extends Module {
     private int switchIndex = 0;
     private float attacks = 0;
 
-    private static final Firefly firefly = new Firefly();
-    private static final CaptureMark captureMark = new CaptureMark();
-
     @Override
     protected void onDisable() {
         target = null;
@@ -104,12 +101,12 @@ public class KillAura extends Module {
             return;
         }
 
-        if (targetMode.is("Single")) {
+        if (targetMode.is(TargetMode.Single)) {
             target = targets.getFirst();
-        } else if (targetMode.is("Switch")) {
+        } else if (targetMode.is(TargetMode.Switch)) {
             if (switchIndex >= targets.size()) switchIndex = 0;
             target = targets.get(switchIndex);
-        } else if (targetMode.is("Multi")) {
+        } else if (targetMode.is(TargetMode.Multiple)) {
             target = targets.getFirst();
         }
 
@@ -128,7 +125,7 @@ public class KillAura extends Module {
         if (mc.player.getAttackStrengthScale(0.5f) < 1.0f && mode.is(Mode.OnePointNinePlus)) return;
 
         while (attacks >= 1) {
-            if (targetMode.is("Multi")) {
+            if (targetMode.is(TargetMode.Multiple)) {
                 for (LivingEntity t : targets) {
                     if (RotationUtils.getEyeDistanceToEntity(t) <= range.getValue() && mc.hitResult.getType() == HitResult.Type.ENTITY) {
                         doAttack();
@@ -138,8 +135,8 @@ public class KillAura extends Module {
             } else {
                 if (RotationUtils.getEyeDistanceToEntity(target) <= range.getValue() && mc.hitResult.getType() == HitResult.Type.ENTITY && mc.crosshairPickEntity.is(target)) {
                     doAttack();
-                    if (targetMode.is("Switch")) switchIndex++;
-                } else if (targetMode.is("Switch")) {
+                    if (targetMode.is(TargetMode.Switch)) switchIndex++;
+                } else if (targetMode.is(TargetMode.Switch)) {
                     switchIndex++;
                 }
             }
@@ -153,9 +150,9 @@ public class KillAura extends Module {
 
         switch (espMode.getValue()) {
             case CaptureMark ->
-                    captureMark.render(event.getPoseStack(), target, espSize.getValue(), espRotSpeed.getValue(), waveSpeed.getValue(), espColor1.getValue(), espColor2.getValue());
+                    CaptureMark.render(event.getPoseStack(), target, espSize.getValue(), espRotSpeed.getValue(), waveSpeed.getValue(), espColor1.getValue(), espColor2.getValue());
             case Firefly ->
-                    firefly.render(event.getPoseStack(), target, fireflyLength.getValue(), fireflyFactor.getValue(), fireflyShaking.getValue(), fireflyAmplitude.getValue(), fireflyColor.getValue());
+                    Firefly.render(event.getPoseStack(), target, fireflyLength.getValue(), fireflyFactor.getValue(), fireflyShaking.getValue(), fireflyAmplitude.getValue(), fireflyColor.getValue());
         }
 
     }

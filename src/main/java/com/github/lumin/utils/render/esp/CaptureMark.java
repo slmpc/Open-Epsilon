@@ -24,7 +24,7 @@ import java.awt.*;
 
 public class CaptureMark {
 
-    private final Minecraft mc = Minecraft.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
 
     private static final Identifier CAPTUREMARK = ResourceLocationUtils.getIdentifier("textures/particles/target.png");
 
@@ -46,11 +46,8 @@ public class CaptureMark {
                     .createRenderSetup()
     );
 
-    private float rotation = 0f;
-
-    public void render(PoseStack poseStack, LivingEntity target, double espSize, double rotSpeed, double waveSpeed, Color color1, Color color2) {
-        rotation -= (float) rotSpeed;
-        if (rotation <= -360f) rotation += 360f;
+    public static void render(PoseStack poseStack, LivingEntity target, double espSize, double rotSpeed, double waveSpeed, Color color1, Color color2) {
+        float rotation = (float) (System.currentTimeMillis() / 1000.0 * rotSpeed) % 360f;
 
         Vec3 cam = mc.getEntityRenderDispatcher().camera.position();
         float partialTick = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);

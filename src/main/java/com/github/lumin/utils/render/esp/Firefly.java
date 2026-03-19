@@ -22,11 +22,11 @@ import java.awt.*;
 
 public class Firefly {
 
-    private final Minecraft mc = Minecraft.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
 
     private static final Identifier FIREFLY_TEX = ResourceLocationUtils.getIdentifier("textures/particles/firefly.png");
 
-    private final RenderPipeline fireflyPipeline = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+    private static final RenderPipeline fireflyPipeline = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
             .withLocation("pipeline/firefly")
             .withBlend(BlendFunction.LIGHTNING)
             .withCull(false)
@@ -34,14 +34,14 @@ public class Firefly {
             .withDepthWrite(false)
             .build();
 
-    private final RenderType fireflyLayer = RenderType.create("firefly_layer", RenderSetup.builder(fireflyPipeline)
+    private static final RenderType fireflyLayer = RenderType.create("firefly_layer", RenderSetup.builder(fireflyPipeline)
             .withTexture("Sampler0", FIREFLY_TEX)
             .sortOnUpload()
             .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
             .setOutputTarget(OutputTarget.MAIN_TARGET).createRenderSetup()
     );
 
-    public void render(PoseStack matrices, LivingEntity target, int espLength, int factor, double shaking, double amplitude, Color color) {
+    public static void render(PoseStack matrices, LivingEntity target, int espLength, int factor, double shaking, double amplitude, Color color) {
         Camera camera = mc.gameRenderer.getMainCamera();
         float tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 

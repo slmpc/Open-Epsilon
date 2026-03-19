@@ -37,6 +37,7 @@ public class ModuleManager {
                 AutoAccount.INSTANCE,
                 BreakCooldown.INSTANCE,
                 Disabler.INSTANCE,
+                ElytraFly.INSTANCE,
                 InvManager.INSTANCE,
                 JumpCooldown.INSTANCE,
                 NoRotate.INSTANCE,
