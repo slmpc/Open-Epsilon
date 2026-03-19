@@ -2,6 +2,7 @@ package com.github.lumin.modules.impl.combat;
 
 import com.github.lumin.events.PacketEvent;
 import com.github.lumin.managers.RotationManager;
+import com.github.lumin.managers.MioRotationManager;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.modules.impl.player.Speedmine;
@@ -104,6 +105,11 @@ public class AutoCrystal extends Module {
         Swap
     }
 
+    private enum RotationEngine {
+        Lumin,
+        Mio
+    }
+
     private enum PlaceMode {
         Visible,
         Wall,
@@ -140,6 +146,7 @@ public class AutoCrystal extends Module {
     private final BoolSetting movementSync = boolSetting("MovementSync", true, rotate::getValue);
     private final DoubleSetting rotateSpeed = doubleSetting("RotateSpeed", 10.0, 1.0, 20.0, 0.5, rotate::getValue);
     private final DoubleSetting yawStep = doubleSetting("YawStep", 0.0, 0.0, 180.0, 1.0, rotate::getValue);
+    private final EnumSetting<RotationEngine> rotationEngine = enumSetting("RotationEngine", RotationEngine.Lumin, rotate::getValue);
     private final BoolSetting facePlace = boolSetting("FacePlace", true);
     private final DoubleSetting facePlaceHealth = doubleSetting("Health", 8.0, 0.0, 36.0, 0.5);
     private final DoubleSetting armorThreshold = doubleSetting("Armor", 10.0, 0.0, 20.0, 0.5);
@@ -922,7 +929,11 @@ public class AutoCrystal extends Module {
         Vector2f rotations = RotationUtils.calculate(pos);
         rotations = applyYawStep(rotations);
         MovementFix fix = movementSync.getValue() ? MovementFix.ON : MovementFix.OFF;
-        RotationManager.INSTANCE.setRotations(rotations, rotateSpeed.getValue(), fix, Priority.High);
+        if (rotationEngine.getValue() == RotationEngine.Mio) {
+            MioRotationManager.INSTANCE.setRotations(rotations, rotateSpeed.getValue(), fix, Priority.High);
+        } else {
+            RotationManager.INSTANCE.setRotations(rotations, rotateSpeed.getValue(), fix, Priority.High);
+        }
     }
 
     private Vector2f applyYawStep(Vector2f target) {
