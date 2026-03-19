@@ -2,6 +2,7 @@ package com.github.lumin.mixins;
 
 import com.github.lumin.events.JumpEvent;
 import com.github.lumin.managers.RotationManager;
+import com.github.lumin.modules.impl.render.NoRender;
 import com.github.lumin.ducks.PlayerHurtAccess;
 import com.github.lumin.modules.impl.player.JumpCooldown;
 import net.minecraft.client.Minecraft;
@@ -14,6 +15,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
 public abstract class MixinLivingEntity implements PlayerHurtAccess {
@@ -51,6 +54,13 @@ public abstract class MixinLivingEntity implements PlayerHurtAccess {
             this.noJumpDelay = module.cooldown.getValue();
         } else {
             this.noJumpDelay = value;
+        }
+    }
+
+    @Inject(method = "handleEntityEvent", at = @At("HEAD"), cancellable = true)
+    private void lumin$noTotemEffect(byte status, CallbackInfo ci) {
+        if (NoRender.INSTANCE.isEnabled() && NoRender.INSTANCE.totems.getValue() && status == 35) {
+            ci.cancel();
         }
     }
 

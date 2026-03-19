@@ -1,11 +1,8 @@
 package com.github.lumin.modules.impl.render;
 
-import com.github.lumin.events.PacketEvent;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
-import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
-import net.neoforged.bus.api.SubscribeEvent;
 
 public class NoRender extends Module {
 
@@ -18,15 +15,5 @@ public class NoRender extends Module {
 
     private NoRender() {
         super("NoRender", Category.RENDER);
-    }
-
-    @SubscribeEvent
-    public void onPacketReceive(PacketEvent.Receive event) {
-        if (!isEnabled()) return;
-        if (totems.getValue() && event.getPacket() instanceof ClientboundEntityEventPacket packet) {
-            if (packet instanceof com.github.lumin.ducks.EntityEventPacketAccess access && access.lumin$getEventId() == 35) {
-                event.setCanceled(true);
-            }
-        }
     }
 }
