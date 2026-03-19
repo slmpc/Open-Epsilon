@@ -6,6 +6,7 @@ import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.*;
 import com.github.lumin.utils.math.MathUtils;
 import com.github.lumin.utils.render.esp.CaptureMark;
+import com.github.lumin.utils.render.esp.Firefly;
 import com.github.lumin.utils.rotation.MovementFix;
 import com.github.lumin.utils.rotation.Priority;
 import com.github.lumin.utils.rotation.RotationUtils;
@@ -35,6 +36,11 @@ public class KillAura extends Module {
         super("KillAura", Category.COMBAT);
     }
 
+    private enum Mode {
+        OnePointEight,
+        OnePointNinePlus
+    }
+
     public enum TargetMode {
         Single,
         Switch,
@@ -46,12 +52,12 @@ public class KillAura extends Module {
         Firefly
     }
 
+    private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.OnePointEight);
     private final EnumSetting<TargetMode> targetMode = enumSetting("TargetMode", TargetMode.Single);
     private final DoubleSetting range = doubleSetting("Range", 3.0, 1.0, 6.0, 0.01);
     private final DoubleSetting aimRange = doubleSetting("AimRange", 4.0, 1.0, 6.0, 0.1);
     private final IntSetting rotationSpeed = intSetting("roationspeed", 10, 1, 10, 1);
     private final DoubleSetting fov = doubleSetting("FOV", 360.0, 10.0, 360.0, 1.0);
-    private final BoolSetting cooldownATK = boolSetting("CooldownATK", false);
     private final DoubleSetting cps = doubleSetting("CPS", 10.0, 1.0, 20.0, 1.0);
     private final DoubleSetting maxCps = doubleSetting("MaxCPS", 12, 1, 20, 1);
     private final BoolSetting player = boolSetting("Player", true);
@@ -60,11 +66,16 @@ public class KillAura extends Module {
     private final BoolSetting Invisible = boolSetting("Invisible", true);
     private final BoolSetting esp = boolSetting("ESP", false);
     private final EnumSetting<ESPMode> espMode = enumSetting("ESPMode", ESPMode.Firefly, esp::getValue);
-    private final ColorSetting espColor1 = colorSetting("ESPMain", new Color(255, 183, 197), esp::getValue);
-    private final ColorSetting espColor2 = colorSetting("ESPSecond", new Color(255, 133, 161), esp::getValue);
-    private final DoubleSetting espSize = doubleSetting("ESPSize", 1.2, 0.5, 3.0, 0.1, esp::getValue);
-    private final DoubleSetting espRotSpeed = doubleSetting("RotSpeed", 2.0, 0.5, 10.0, 0.1, esp::getValue);
-    private final DoubleSetting waveSpeed = doubleSetting("WaveSpeed", 3.0, 0.5, 10.0, 0.1, esp::getValue);
+    private final ColorSetting espColor1 = colorSetting("ESPMain", new Color(255, 183, 197), () -> esp.getValue() && espMode.is(ESPMode.CaptureMark));
+    private final ColorSetting espColor2 = colorSetting("ESPSecond", new Color(255, 133, 161), () -> esp.getValue() && espMode.is(ESPMode.CaptureMark));
+    private final DoubleSetting espSize = doubleSetting("ESPSize", 1.2, 0.5, 3.0, 0.1, () -> esp.getValue() && espMode.is(ESPMode.CaptureMark));
+    private final DoubleSetting espRotSpeed = doubleSetting("RotSpeed", 2.0, 0.5, 10.0, 0.1, () -> esp.getValue() && espMode.is(ESPMode.CaptureMark));
+    private final DoubleSetting waveSpeed = doubleSetting("WaveSpeed", 3.0, 0.5, 10.0, 0.1, () -> esp.getValue() && espMode.is(ESPMode.CaptureMark));
+    private final ColorSetting fireflyColor = colorSetting("FireflyColor", new Color(149, 149, 149, 80), () -> esp.getValue() && espMode.is(ESPMode.Firefly));
+    private final IntSetting fireflyLength = intSetting("FireflyLength", 14, 8, 128, 1, () -> esp.getValue() && espMode.is(ESPMode.Firefly));
+    private final IntSetting fireflyFactor = intSetting("FireflyFactor", 8, 1, 10, 1, () -> esp.getValue() && espMode.is(ESPMode.Firefly));
+    private final DoubleSetting fireflyShaking = doubleSetting("FireflyShaking", 1.8, 0.25, 10.0, 0.25, () -> esp.getValue() && espMode.is(ESPMode.Firefly));
+    private final DoubleSetting fireflyAmplitude = doubleSetting("FireflyAmplitude", 3.0, 0.0, 10.0, 0.25, () -> esp.getValue() && espMode.is(ESPMode.Firefly));
 
     private LivingEntity target;
     private final List<LivingEntity> targets = new ArrayList<>();
@@ -72,7 +83,8 @@ public class KillAura extends Module {
     private int switchIndex = 0;
     private float attacks = 0;
 
-    private final CaptureMark captureMark = new CaptureMark();
+    private static final Firefly firefly = new Firefly();
+    private static final CaptureMark captureMark = new CaptureMark();
 
     @Override
     protected void onDisable() {
@@ -105,8 +117,7 @@ public class KillAura extends Module {
         attacks += MathUtils.getRandom(cps.getValue().floatValue(), maxCps.getValue().floatValue()) / 20f;
 
         if (target != null) {
-            float[] rotations = RotationUtils.getRotationsToEntity(target);
-            RotationManager.INSTANCE.setRotations(new Vector2f(rotations[0], rotations[1]), rotationSpeed.getValue().floatValue(), MovementFix.ON, Priority.Medium);
+            RotationManager.INSTANCE.setRotations(RotationUtils.getRotationsToEntity(target), rotationSpeed.getValue().floatValue(), MovementFix.ON, Priority.Medium);
         }
     }
 
@@ -115,7 +126,7 @@ public class KillAura extends Module {
         if (nullCheck()) return;
         if (target == null) return;
         if (mc.player.isUsingItem() || mc.player.isBlocking()) return;
-        if (mc.player.getAttackStrengthScale(0.5f) < 1.0f && cooldownATK.getValue()) return;
+        if (mc.player.getAttackStrengthScale(0.5f) < 1.0f && mode.is(Mode.OnePointNinePlus)) return;
 
         while (attacks >= 1) {
             if (targetMode.is("Multi")) {
@@ -142,10 +153,8 @@ public class KillAura extends Module {
         if (nullCheck() || !esp.getValue() || target == null) return;
 
         switch (espMode.getValue()) {
-            case CaptureMark -> {
-                captureMark.update(espRotSpeed.getValue());
-                captureMark.render(event.getPoseStack(), target, espSize.getValue(), waveSpeed.getValue(), espColor1.getValue(), espColor2.getValue());
-            }
+            case CaptureMark -> captureMark.render(event.getPoseStack(), target, espSize.getValue(), espRotSpeed.getValue(), waveSpeed.getValue(), espColor1.getValue(), espColor2.getValue());
+            case Firefly -> firefly.render(event.getPoseStack(), target, fireflyLength.getValue(), fireflyFactor.getValue(), fireflyShaking.getValue(), fireflyAmplitude.getValue(), fireflyColor.getValue());
         }
 
     }

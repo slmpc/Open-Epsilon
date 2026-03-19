@@ -48,13 +48,10 @@ public class CaptureMark {
 
     private float rotation = 0f;
 
-    public void update(double rotSpeed) {
+    public void render(PoseStack poseStack, LivingEntity target, double espSize, double rotSpeed, double waveSpeed, Color color1, Color color2) {
         rotation -= (float) rotSpeed;
-        if (rotation <= -360f) rotation += 360f;
-    }
+        if (rotation <= -360f) rotation += 360f;Vec3 cam = mc.getEntityRenderDispatcher().camera.position();
 
-    public void render(PoseStack poseStack, LivingEntity target, double espSize, double waveSpeed, Color color1, Color color2) {
-        Vec3 cam = mc.getEntityRenderDispatcher().camera.position();
         float partialTick = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
         double ex = Mth.lerp(partialTick, target.xOld, target.getX()) - cam.x;

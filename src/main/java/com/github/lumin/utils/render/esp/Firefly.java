@@ -41,7 +41,7 @@ public class Firefly {
             .setOutputTarget(OutputTarget.MAIN_TARGET).createRenderSetup()
     );
 
-    private void render(LivingEntity target, PoseStack matrices, int espLength, int factor, float shaking, float amplitude, Color color) {
+    public void render(PoseStack matrices, LivingEntity target, int espLength, int factor, double shaking, double amplitude, Color color) {
         Camera camera = mc.gameRenderer.getMainCamera();
         float tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
