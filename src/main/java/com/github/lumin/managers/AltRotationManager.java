@@ -17,9 +17,9 @@ import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector2f;
 
-public class MioRotationManager {
+public class AltRotationManager {
 
-    public static final MioRotationManager INSTANCE = new MioRotationManager();
+    public static final AltRotationManager INSTANCE = new AltRotationManager();
 
     private final Minecraft mc = Minecraft.getInstance();
 
@@ -31,7 +31,7 @@ public class MioRotationManager {
     private MovementFix correctMovement = MovementFix.OFF;
     private int priority;
 
-    private MioRotationManager() {
+    private AltRotationManager() {
         NeoForge.EVENT_BUS.register(this);
     }
 

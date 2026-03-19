@@ -2,7 +2,7 @@ package com.github.lumin.modules.impl.combat;
 
 import com.github.lumin.events.PacketEvent;
 import com.github.lumin.managers.RotationManager;
-import com.github.lumin.managers.MioRotationManager;
+import com.github.lumin.managers.AltRotationManager;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.modules.impl.player.Speedmine;
@@ -107,7 +107,7 @@ public class AutoCrystal extends Module {
 
     private enum RotationEngine {
         Lumin,
-        Mio
+        Alt
     }
 
     private enum PlaceMode {
@@ -929,8 +929,8 @@ public class AutoCrystal extends Module {
         Vector2f rotations = RotationUtils.calculate(pos);
         rotations = applyYawStep(rotations);
         MovementFix fix = movementSync.getValue() ? MovementFix.ON : MovementFix.OFF;
-        if (rotationEngine.getValue() == RotationEngine.Mio) {
-            MioRotationManager.INSTANCE.setRotations(rotations, rotateSpeed.getValue(), fix, Priority.High);
+        if (rotationEngine.getValue() == RotationEngine.Alt) {
+            AltRotationManager.INSTANCE.setRotations(rotations, rotateSpeed.getValue(), fix, Priority.High);
         } else {
             RotationManager.INSTANCE.setRotations(rotations, rotateSpeed.getValue(), fix, Priority.High);
         }
