@@ -192,7 +192,7 @@ public class AutoCrystal extends Module {
     private final DoubleSetting wallRangeBoost = doubleSetting("WallRangeBoost", 0.0, 0.0, 6.0, 0.1);
     private final BoolSetting renderDamageText = boolSetting("RenderDamageText", true, render::getValue);
     private final EnumSetting<MultipointMode> multipoint = enumSetting("Multipoint", MultipointMode.Corners);
-    private final BoolSetting hbFix = boolSetting("HBFix", false);
+    private final BoolSetting hbFix = boolSetting("HBFix", true);
     private final DoubleSetting multipointOffset = doubleSetting("MultipointOffset", 0.45, 0.0, 1.0, 0.05);
     private final DoubleSetting multipointLowY = doubleSetting("MultipointLowY", 0.05, 0.0, 1.0, 0.05);
     private final DoubleSetting multipointHighY = doubleSetting("MultipointHighY", 0.95, 0.0, 1.5, 0.05);
@@ -802,7 +802,8 @@ public class AutoCrystal extends Module {
                 boolean blocked = false;
                 for (Entity entity : entities) {
                     if (entity instanceof ItemEntity) continue;
-                    if (entity == CLIENT.player && lowerHitBox.getValue()) continue;
+                    if (entity == CLIENT.player) continue;
+                    if (currentTarget != null && entity == currentTarget) continue;
                     blocked = true;
                     break;
                 }
