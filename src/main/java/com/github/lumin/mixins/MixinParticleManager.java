@@ -39,6 +39,11 @@ public class MixinParticleManager {
         if (particleOptions == null) {
             return false;
         }
-        return particleOptions.getType() == ParticleTypes.EXPLOSION || particleOptions.getType() == ParticleTypes.EXPLOSION_EMITTER;
+        return particleOptions.getType() == ParticleTypes.EXPLOSION
+                || particleOptions.getType() == ParticleTypes.EXPLOSION_EMITTER
+                || particleOptions.getType() == ParticleTypes.POOF
+                || particleOptions.getType() == ParticleTypes.SMOKE
+                || particleOptions.getType() == ParticleTypes.LARGE_SMOKE
+                || particleOptions.getType() == ParticleTypes.CLOUD;
     }
 }
