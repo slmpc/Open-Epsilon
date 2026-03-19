@@ -5,7 +5,6 @@ import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
-import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.neoforged.bus.api.SubscribeEvent;
 
 public class NoRender extends Module {
@@ -24,10 +23,6 @@ public class NoRender extends Module {
     @SubscribeEvent
     public void onPacketReceive(PacketEvent.Receive event) {
         if (!isEnabled()) return;
-        if (explosions.getValue() && event.getPacket() instanceof ClientboundExplodePacket) {
-            event.setCanceled(true);
-            return;
-        }
         if (totems.getValue() && event.getPacket() instanceof ClientboundEntityEventPacket packet) {
             if (packet instanceof com.github.lumin.ducks.EntityEventPacketAccess access && access.lumin$getEventId() == 35) {
                 event.setCanceled(true);

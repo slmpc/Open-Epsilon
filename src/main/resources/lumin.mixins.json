@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "MixinClientboundEntityEventPacket",
+    "MixinClientPacketListener",
     "MixinClientLevel",
     "MixinConnection",
     "MixinEndCrystal",
