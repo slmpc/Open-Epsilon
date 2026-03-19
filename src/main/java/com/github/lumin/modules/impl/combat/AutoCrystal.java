@@ -362,21 +362,26 @@ public class AutoCrystal extends Module {
         if (!upState.isAir() && !upState.canBeReplaced() && !upState.is(Blocks.FIRE)) return false;
         if (!oneDotTwelve.getValue() && !CLIENT.level.getBlockState(up.above()).canBeReplaced()) return false;
         AABB box = new AABB(up.getX(), up.getY(), up.getZ(), up.getX() + 1.0, up.getY() + (oneDotTwelve.getValue() ? 2.0 : 1.0), up.getZ() + 1.0);
-        List<Entity> entities = CLIENT.level.getEntities((Entity) null, box, e -> !(e instanceof EndCrystal));
-        if (!entities.isEmpty()) {
-            if (hbFix.getValue()) {
-                for (Entity entity : entities) {
-                    if (entity instanceof ItemEntity) continue;
-                    if (entity == CLIENT.player) continue;
-                    if (currentTarget != null && entity == currentTarget) continue;
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
+        if (hasBlockingEntity(box)) return false;
         if (strictDirection.getValue() && getPlaceDirection(pos) == null) return false;
         return true;
+    }
+
+    private boolean hasBlockingEntity(AABB box) {
+        List<Entity> entities = CLIENT.level.getEntities((Entity) null, box, entity -> !(entity instanceof EndCrystal));
+        if (entities.isEmpty()) {
+            return false;
+        }
+        if (!hbFix.getValue()) {
+            return true;
+        }
+        for (Entity entity : entities) {
+            if (entity instanceof ItemEntity) continue;
+            if (entity == CLIENT.player) continue;
+            if (entity == currentTarget) continue;
+            return true;
+        }
+        return false;
     }
 
     private boolean isBaseBlock(BlockPos pos) {

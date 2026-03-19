@@ -9,7 +9,6 @@ import com.github.lumin.modules.impl.player.MoveFix;
 import com.github.lumin.utils.player.MoveUtils;
 import com.github.lumin.utils.rotation.MovementFix;
 import com.github.lumin.utils.rotation.Priority;
-import com.github.lumin.utils.rotation.RotationUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.util.Mth;
@@ -35,10 +34,6 @@ public class TwoBTwoTRotationManager {
     private int rotateTicks;
     private float serverYaw;
     private float serverPitch;
-    private float lastServerYaw;
-    private float lastServerPitch;
-
-    private int preserveTicks;
 
     private TwoBTwoTRotationManager() {
         NeoForge.EVENT_BUS.register(this);
@@ -51,7 +46,7 @@ public class TwoBTwoTRotationManager {
         if (Float.isNaN(rotations.x) || Float.isNaN(rotations.y) || Float.isInfinite(rotations.x) || Float.isInfinite(rotations.y)) {
             return;
         }
-        if (MoveFix.INSTANCE.mouseSensFix.getValue()) {
+        if (MoveFix.INSTANCE.useMouseSensFix()) {
             double gcd = Math.pow(mc.options.sensitivity().get() * 0.6 + 0.2, 3.0) * 1.2;
             rotations.x = (float) (rotations.x - (rotations.x - serverYaw) % gcd);
             rotations.y = (float) (rotations.y - (rotations.y - serverPitch) % gcd);
@@ -103,8 +98,6 @@ public class TwoBTwoTRotationManager {
     @SubscribeEvent
     private void onPacketSend(PacketEvent.Send event) {
         if (event.getPacket() instanceof ServerboundMovePlayerPacket packet && packet.hasRotation()) {
-            lastServerYaw = serverYaw;
-            lastServerPitch = serverPitch;
             serverYaw = packet.getYRot(0.0f);
             serverPitch = packet.getXRot(0.0f);
         }
@@ -117,19 +110,18 @@ public class TwoBTwoTRotationManager {
         }
         RotationRequest request = getRotationRequest();
         if (request == null) {
-            if (rotation != null) {
-                rotateTicks++;
-                if (rotateTicks > MoveFix.INSTANCE.preserveTicks.getValue()) {
-                    rotation = null;
-                    preserveTicks = 0;
-                }
+            if (rotation == null) {
+                return;
+            }
+            rotateTicks++;
+            if (rotateTicks > MoveFix.INSTANCE.getPreserveTicks()) {
+                rotation = null;
             }
             return;
         }
         rotation = request;
         rotate = true;
         rotateTicks = 0;
-        preserveTicks = MoveFix.INSTANCE.preserveTicks.getValue();
     }
 
     @SubscribeEvent
@@ -172,10 +164,8 @@ public class TwoBTwoTRotationManager {
             event.setPitch(rotation.pitch);
             rotate = false;
         }
-        if (rotation.snap) {
-            if (preserveTicks <= 0) {
-                rotation = null;
-            }
+        if (rotation.snap && MoveFix.INSTANCE.getPreserveTicks() <= 0) {
+            rotation = null;
         }
     }
 

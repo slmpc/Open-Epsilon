@@ -41,4 +41,12 @@ public class MoveFix extends Module {
         }
         return RotationManager.INSTANCE.isActive();
     }
+
+    public boolean useMouseSensFix() {
+        return isEnabled() && mouseSensFix.getValue();
+    }
+
+    public int getPreserveTicks() {
+        return preserveTicks.getValue();
+    }
 }
