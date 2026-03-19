@@ -1,8 +1,8 @@
-# Lumin Graphics
+# Hikari Graphics
 
 [English](README.md) | **简体中文**
 
-Lumin Graphics 是一个为现代 Minecraft 模组开发设计的轻量化、高性能渲染框架。
+Hikari Graphics 是一个为现代 Minecraft 模组开发设计的轻量化、高性能渲染框架。
 
 ---
 
@@ -31,7 +31,7 @@ Lumin Graphics 是一个为现代 Minecraft 模组开发设计的轻量化、高
 
 ## 快速上手
 
-Lumin Graphics 的所有渲染操作均通过专门的 **Renderer（渲染器）** 完成。
+Hikari Graphics 的所有渲染操作均通过专门的 **Renderer（渲染器）** 完成。
 
 ### 可用渲染器
 
@@ -92,14 +92,14 @@ rectRenderer.get().draw(); // 内容会一直保存在 GPU 缓冲区中，直到
 
 ### 💡 优化建议
 
-在使用 **Lumin Graphics** 时请记住：多次调用 `.draw()` 而不调用 `.clear()` 是极其高效的。它仅会重新触发现有 GPU
+在使用 **Hikari Graphics** 时请记住：多次调用 `.draw()` 而不调用 `.clear()` 是极其高效的。它仅会重新触发现有 GPU
 数据的绘制指令，而无需重新上传顶点数据。
 
 ---
 
 ## 开源协议
 
-* **Lumin Graphics**：核心渲染组件（位于 `src/main/java/com/github/lumin/graphics/`）采用 [MIT License](LICENSE) 协议。
+* **Hikari Graphics**：核心渲染组件（位于 `src/main/java/com/github/lumin/graphics/`）采用 [MIT License](LICENSE) 协议。
 
 ---
 

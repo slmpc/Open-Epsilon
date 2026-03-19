@@ -1,8 +1,8 @@
-# Lumin Graphics
+# Hikari Graphics
 
 **English** | [简体中文](README_zh.md)
 
-Lumin Graphics is a lightweight, high-performance rendering framework designed for modern Minecraft modding.
+Hikari Graphics is a lightweight, high-performance rendering framework designed for modern Minecraft modding.
 
 ### IMPORTANT: The English version may occasionally be out of sync.
 
@@ -39,7 +39,7 @@ Alternatively, you can specify a smaller buffer size than the default value when
 
 ## Quick Start
 
-All rendering operations in Lumin Graphics are performed through specialized **Renderers**.
+All rendering operations in Hikari Graphics are performed through specialized **Renderers**.
 
 ### Available Renderers
 
@@ -58,7 +58,11 @@ Minecraft libraries) to ensure safe and lazy initialization.
 private final Supplier<RectRenderer> rectRenderer = Suppliers.memoize(RectRenderer::new);
 
 // Use .get() to access the renderer instance
-rectRenderer.get().addRect(10f, 10f, 100f, 100f, Color.WHITE);
+rectRenderer.
+
+get().
+
+addRect(10f,10f,100f,100f,Color.WHITE);
 
 ```
 
@@ -72,14 +76,28 @@ For most immediate-mode UI tasks, you need to add shapes and clear the buffer wi
 
 ```java
 // 1. Add shapes to the buffer
-rectRenderer.get().addRect(10f, 10f, 200f, 200f, Color.WHITE);
+rectRenderer.get().
+
+addRect(10f,10f,200f,200f,Color.WHITE);
 
 // 2. Draw to the screen and clear data before the next frame
-rectRenderer.get().draw();
-rectRenderer.get().clear();
+rectRenderer.
+
+get().
+
+draw();
+rectRenderer.
+
+get().
+
+clear();
 
 // Alternatively, you can use the shortcut:
-rectRenderer.get().drawAndClear();
+rectRenderer.
+
+get().
+
+drawAndClear();
 
 ```
 
@@ -90,10 +108,16 @@ frames, thereby saving CPU overhead.
 
 ```java
 // During the initialization phase or the first frame:
-rectRenderer.get().addRect(10f, 10f, 200f, 200f, Color.CYAN);
+rectRenderer.get().
+
+addRect(10f,10f,200f,200f,Color.CYAN);
 
 // In the rendering loop:
-rectRenderer.get().draw(); // Content remains in the GPU buffer until .clear() is called.
+rectRenderer.
+
+get().
+
+draw(); // Content remains in the GPU buffer until .clear() is called.
 
 ```
 
@@ -101,14 +125,14 @@ rectRenderer.get().draw(); // Content remains in the GPU buffer until .clear() i
 
 ### 💡 Optimization Tips
 
-When using **Lumin Graphics**, keep in mind: calling `.draw()` multiple times without calling `.clear()` is extremely
+When using **Hikari Graphics**, keep in mind: calling `.draw()` multiple times without calling `.clear()` is extremely
 efficient. It simply re-triggers the draw command for existing GPU data without the need to re-upload vertex data.
 
 ---
 
 ## License
 
-* **Lumin Graphics**: The core rendering components (located in `src/main/java/com/github/lumin/graphics/`) are licensed
+* **Hikari Graphics**: The core rendering components (located in `src/main/java/com/github/lumin/graphics/`) are licensed
   under the [MIT License](https://www.google.com/search?q=LICENSE).
 
 ---

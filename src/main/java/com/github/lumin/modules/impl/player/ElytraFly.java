@@ -47,7 +47,7 @@ public class ElytraFly extends Module {
     private final DoubleSetting verticalSpeed = doubleSetting("VerticalSpeed", 0.8, 0.1, 2.0, 0.05, () -> mode.is(Mode.Firework));
     private final DoubleSetting glideDown = doubleSetting("GlideDown", -0.02, -0.2, 0.1, 0.01, () -> mode.is(Mode.Firework));
     private final DoubleSetting accel = doubleSetting("Acceleration", 0.35, 0.05, 1.0, 0.05, () -> mode.is(Mode.Firework));
-    private final IntSetting boostDelay = intSetting("BoostDelay", 9, 2, 40, 1, () -> mode.is(Mode.Firework));
+    private final IntSetting boostDelay = intSetting("BoostDelay", 9, 2, 50, 1, () -> mode.is(Mode.Firework));
     private final IntSetting rotationSpeed = intSetting("RotationSpeed", 10, 1, 10, 1, () -> mode.is(Mode.Firework));
 
     private int rocketCooldown;
