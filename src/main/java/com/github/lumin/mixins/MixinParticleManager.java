@@ -41,6 +41,11 @@ public class MixinParticleManager {
                 || particleOptions.getType() == ParticleTypes.SMOKE
                 || particleOptions.getType() == ParticleTypes.LARGE_SMOKE
                 || particleOptions.getType() == ParticleTypes.CLOUD
+                || NoRender.INSTANCE.potionParticles.getValue() && (
+                particleOptions.getType() == ParticleTypes.EFFECT
+                        || particleOptions.getType() == ParticleTypes.ENTITY_EFFECT
+                        || particleOptions.getType() == ParticleTypes.INSTANT_EFFECT
+                        || particleOptions.getType() == ParticleTypes.SPLASH)
                 || NoRender.INSTANCE.fireworks.getValue() && (particleOptions.getType() == ParticleTypes.FIREWORK || particleOptions.getType() == ParticleTypes.FLASH)
                 || NoRender.INSTANCE.portal.getValue() && (particleOptions.getType() == ParticleTypes.PORTAL || particleOptions.getType() == ParticleTypes.REVERSE_PORTAL)
                 || NoRender.INSTANCE.totems.getValue() && particleOptions.getType() == ParticleTypes.TOTEM_OF_UNDYING;

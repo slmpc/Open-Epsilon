@@ -22,6 +22,7 @@ public class NoRender extends Module {
     public final BoolSetting fireworks = boolSetting("Fireworks", true);
     public final BoolSetting fireOverlay = boolSetting("FireOverlay", true);
     public final BoolSetting negativeEffects = boolSetting("NegativeEffects", true);
+    public final BoolSetting potionParticles = boolSetting("PotionParticles", true);
 
     public boolean noVignette() {
         return isEnabled() && vignette.getValue();
