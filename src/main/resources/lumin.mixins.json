@@ -17,6 +17,8 @@
     "MixinLocalPlayer",
     "MixinMultiPlayerGameMode",
     "MixinRegistryDataLoader",
+    "MixinMobEffectFogEnvironment",
+    "MixinParticleManager",
     "MixinScreenEffectRenderer",
     "MixinTitleScreen",
     "MixinAvatarRenderer",

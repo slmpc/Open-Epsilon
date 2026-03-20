@@ -20,4 +20,11 @@ public class MixinScreenEffectRenderer {
         }
     }
 
+    @Inject(method = "renderFire", at = @At("HEAD"), cancellable = true)
+    private static void onRenderFire(PoseStack poseStack, MultiBufferSource bufferSource, TextureAtlasSprite texture, CallbackInfo ci) {
+        if (NoRender.INSTANCE.isEnabled() && NoRender.INSTANCE.fireOverlay.getValue()) {
+            ci.cancel();
+        }
+    }
+
 }

@@ -16,6 +16,12 @@ public class NoRender extends Module {
     public final BoolSetting potionEffects = boolSetting("PotionEffects", true);
     public final BoolSetting playerNameTags = boolSetting("PlayerNameTags", true);
     public final BoolSetting blockOverlay = boolSetting("BlockOverlay", true);
+    public final BoolSetting explosions = boolSetting("Explosions", true);
+    public final BoolSetting totems = boolSetting("Totems", true);
+    public final BoolSetting portal = boolSetting("Portal", true);
+    public final BoolSetting fireworks = boolSetting("Fireworks", true);
+    public final BoolSetting fireOverlay = boolSetting("FireOverlay", true);
+    public final BoolSetting negativeEffects = boolSetting("NegativeEffects", true);
 
     public boolean noVignette() {
         return isEnabled() && vignette.getValue();
