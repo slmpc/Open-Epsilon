@@ -25,6 +25,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.joml.Vector2f;
 
 import java.util.HashSet;
@@ -53,29 +54,28 @@ public class ElytraFly extends Module {
     private final EnumSetting<SwapMode> swapMode = enumSetting("SwapMode", SwapMode.InvSwitch);
     private final BoolSetting armored = boolSetting("Armored", false);
     private final BoolSetting autoStart = boolSetting("AutoStart", true, () -> mode.is(Mode.Firework));
-    private final BoolSetting onlyMoving = boolSetting("OnlyMoving", false, () -> mode.is(Mode.Firework));
     private final DoubleSetting horizontalSpeed = doubleSetting("HorizontalSpeed", 1.35, 0.1, 5.0, 0.05, () -> mode.is(Mode.Firework));
     private final DoubleSetting verticalSpeed = doubleSetting("VerticalSpeed", 0.8, 0.1, 2.0, 0.05, () -> mode.is(Mode.Firework));
     private final DoubleSetting accel = doubleSetting("Acceleration", 0.35, 0.05, 1.0, 0.05, () -> mode.is(Mode.Firework));
     private final IntSetting boostDelay = intSetting("BoostDelay", 9, 2, 50, 1, () -> mode.is(Mode.Firework));
     private final IntSetting rotationSpeed = intSetting("RotationSpeed", 10, 1, 10, 1, () -> mode.is(Mode.Firework));
 
+    private int offGroundTicks;
+
     private final TimerUtils timer = new TimerUtils();
     private final Set<Integer> fireworkIds = new HashSet<>();
-    private boolean armoredFirstBoostUsed = false;
 
     @Override
     protected void onEnable() {
+        offGroundTicks = 0;
         timer.reset();
         fireworkIds.clear();
-        armoredFirstBoostUsed = false;
     }
 
     @Override
     protected void onDisable() {
         timer.reset();
         fireworkIds.clear();
-        armoredFirstBoostUsed = false;
     }
 
     public boolean isFirework(FireworkRocketEntity firework) {
@@ -87,9 +87,6 @@ public class ElytraFly extends Module {
         if (nullCheck()) return;
 
         if (mode.is(Mode.Firework)) {
-            if (mc.player.onGround() || mc.player.isInWater()) {
-                armoredFirstBoostUsed = false;
-            }
             fireworkIds.removeIf(id -> mc.level.getEntity(id) == null);
 
             if (!canGlide()) {
@@ -98,71 +95,38 @@ public class ElytraFly extends Module {
             }
 
             if (!mc.player.isFallFlying()) {
-                boolean keepDelayTimer = false;
-                if (autoStart.getValue() && !mc.player.onGround() && !mc.player.isInWater()) {
-                    if (armored.getValue()) {
-                        if (hasInput()) {
-                            keepDelayTimer = tryArmoredTick();
-                        }
-                    } else {
-                        boolean started = startFallFlying();
-                        keepDelayTimer = started;
-                        if (started && useFirework()) {
-                            timer.reset();
+                if (!mc.player.onGround()) {
+                    offGroundTicks++;
+                    if (autoStart.getValue() && !mc.player.isInWater()) {
+                        if (armored.getValue()) {
+                            if (hasInput()) {
+                                这个是甲飞();
+                            }
+                        } else {
+                            if (startFallFlying() && hasInput()) {
+                                useFirework(true);
+                            }
                         }
                     }
+                    return;
+                } else {
+                    offGroundTicks = 0;
                 }
-                if (!keepDelayTimer) {
-                    timer.reset();
-                }
-                return;
             }
 
-            if (shouldUseFirework() && useFirework()) {
-                timer.reset();
+            if (!armored.getValue()) {
+                useFirework(false);
             }
+
+            applyMotion();
         }
-    }
-
-    private boolean shouldUseFirework() {
-        return ((!onlyMoving.getValue() || MoveUtils.isMoving()) && hasInput()) && timer.delay(boostDelay.getValue());
-    }
-
-    private boolean tryArmoredTick() {
-        if (!mc.player.containerMenu.getCarried().isEmpty()) return false;
-
-        int elytraSlot = findElytra();
-        if (elytraSlot == -1) return false;
-
-        int elytraContainerSlot = toContainerSlot(elytraSlot);
-
-        clickSlot(elytraContainerSlot);
-
-        boolean started = startFallFlying();
-        boolean canBoost = started || mc.player.isFallFlying();
-        if (started && !armoredFirstBoostUsed) {
-            if (useFirework()) {
-                timer.reset();
-                armoredFirstBoostUsed = true;
-            }
-        } else if (canBoost && shouldUseFirework()) {
-            if (useFirework()) {
-                timer.reset();
-            }
-        }
-
-        clickSlot(elytraContainerSlot);
-
-        return true;
     }
 
     @SubscribeEvent
-    private void onTickPost(ClientTickEvent.Post event) {
-        if (nullCheck()) return;
-
-        if (mode.is(Mode.Firework)) {
-            if (!mc.player.isFallFlying()) return;
-            applyMotion();
+    private void onPlayerTick(PlayerTickEvent.Pre event) {
+        // 我操了家人我想不到更好的办法在第一个tick放烟花的办法了。。。
+        if (armored.getValue() && mc.player.isFallFlying() && offGroundTicks == 1) {
+            useFirework(true);
         }
     }
 
@@ -175,7 +139,7 @@ public class ElytraFly extends Module {
     }
 
     private boolean canGlide() {
-        if (armored.getValue() && mode.is(Mode.Firework) && findElytra() != -1) {
+        if (armored.getValue() && mode.is(Mode.Firework) && hasElytra()) {
             return true;
         }
         for (EquipmentSlot slot : EquipmentSlot.VALUES) {
@@ -244,29 +208,34 @@ public class ElytraFly extends Module {
         return new Vec3(x / length, 0.0, z / length);
     }
 
-    private boolean useFirework() {
-        FindItemResult rocket = swapMode.is(SwapMode.Silent) ? InvUtils.findInHotbar(Items.FIREWORK_ROCKET) : InvUtils.find(Items.FIREWORK_ROCKET);
-        if (!rocket.found()) return false;
+    private void useFirework(boolean ignoreDelay) {
+        if (hasInput() && (ignoreDelay || timer.delay(boostDelay.getValue()))) {
+            FindItemResult rocket = swapMode.is(SwapMode.Silent) ? InvUtils.findInHotbar(Items.FIREWORK_ROCKET) : InvUtils.find(Items.FIREWORK_ROCKET);
+            if (!rocket.found()) return;
 
-        InteractionHand hand = rocket.getHand();
-        boolean swapped = swapMode.is(SwapMode.Silent) ? InvUtils.swap(rocket.slot(), true) : InvUtils.invSwap(rocket.slot());
+            InteractionHand hand = rocket.getHand();
+            boolean swapped = swapMode.is(SwapMode.Silent) ? InvUtils.swap(rocket.slot(), true) : InvUtils.invSwap(rocket.slot());
 
-        InteractionResult result = mc.gameMode.useItem(mc.player, hand);
+            InteractionResult result = mc.gameMode.useItem(mc.player, hand);
 
-        if (result.consumesAction()) {
-            mc.player.swing(hand);
-            updateFireworks();
-        }
+            if (result.consumesAction()) {
+                timer.reset();
+                mc.player.swing(hand);
+                updateFireworks();
+            }
 
-        if (swapped) {
-            if (swapMode.is(SwapMode.Silent)) {
-                InvUtils.swapBack();
-            } else {
-                InvUtils.invSwapBack();
+            if (swapped) {
+                if (swapMode.is(SwapMode.Silent)) {
+                    InvUtils.swapBack();
+                } else {
+                    InvUtils.invSwapBack();
+                }
             }
         }
+    }
 
-        return result.consumesAction();
+    private boolean hasElytra() {
+        return findElytra() != -1;
     }
 
     private int findElytra() {
@@ -280,11 +249,27 @@ public class ElytraFly extends Module {
         return slot;
     }
 
-    private void clickSlot(int slot) {
-        int id = mc.player.containerMenu.containerId;
-        mc.gameMode.handleInventoryMouseClick(id, slot, 0, ClickType.PICKUP, mc.player);
-        mc.gameMode.handleInventoryMouseClick(id, CHEST_ARMOR_MENU_SLOT, 0, ClickType.PICKUP, mc.player);
-        mc.gameMode.handleInventoryMouseClick(id, slot, 0, ClickType.PICKUP, mc.player);
+    private void 这个是甲飞() {
+        if (!mc.player.containerMenu.getCarried().isEmpty()) return;
+
+        int elytraSlot = findElytra();
+        if (elytraSlot < 0) return;
+
+        int elytraContainerSlot = toContainerSlot(elytraSlot);
+
+        swapChestSlotWith(elytraContainerSlot);
+
+        startFallFlying();
+        useFirework(false);
+
+        swapChestSlotWith(elytraContainerSlot);
+    }
+
+    private void swapChestSlotWith(int containerSlot) {
+        int containerId = mc.player.containerMenu.containerId;
+        mc.gameMode.handleInventoryMouseClick(containerId, containerSlot, 0, ClickType.PICKUP, mc.player);
+        mc.gameMode.handleInventoryMouseClick(containerId, CHEST_ARMOR_MENU_SLOT, 0, ClickType.PICKUP, mc.player);
+        mc.gameMode.handleInventoryMouseClick(containerId, containerSlot, 0, ClickType.PICKUP, mc.player);
     }
 
     private void updateFireworks() {
@@ -294,4 +279,5 @@ public class ElytraFly extends Module {
             }
         }
     }
+
 }

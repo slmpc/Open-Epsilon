@@ -15,6 +15,7 @@
     "MixinLivingEntityRenderer",
     "MixinLocalPlayer",
     "MixinMultiPlayerGameMode",
+    "MixinRegistryDataLoader",
     "MixinScreenEffectRenderer",
     "MixinTitleScreen",
     "MixinWindow"

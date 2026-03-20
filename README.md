@@ -1,4 +1,4 @@
-# Epsilon+
+# Epsilon
 
 [Graphics](src/main/java/com/github/lumin/graphics/README.md)
 
