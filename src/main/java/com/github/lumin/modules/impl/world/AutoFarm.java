@@ -58,7 +58,6 @@ public class AutoFarm extends Module {
 
     private final TimerUtils actionTimer = new TimerUtils();
     private final TimerUtils harvestTimer = new TimerUtils();
-    private int actionsThisTick;
     private BlockPos treePos;
 
     private AutoFarm() {
@@ -67,14 +66,12 @@ public class AutoFarm extends Module {
 
     @Override
     protected void onEnable() {
-        actionsThisTick = 0;
         actionTimer.reset();
         harvestTimer.reset();
     }
 
     @Override
     protected void onDisable() {
-        actionsThisTick = 0;
     }
 
     @SubscribeEvent
@@ -85,11 +82,10 @@ public class AutoFarm extends Module {
 
         updateTreePos();
 
-        if (!autoPlant.getValue() && !autoHarvest.getValue()) {
+        if (!autoPlant.getValue() && !autoHarvest.getValue() && !useBonemeal.getValue()) {
             return;
         }
 
-        actionsThisTick = 0;
         List<BlockPos> targets = collectTargetsInRadius();
         if (tryPlant(targets)) {
             return;
@@ -271,8 +267,9 @@ public class AutoFarm extends Module {
                 return true;
             }
 
-            plantAt(pos, plantingItem);
-            return true;
+            if (plantAt(pos, plantingItem)) {
+                return true;
+            }
         }
 
         return false;
@@ -334,8 +331,7 @@ public class AutoFarm extends Module {
             return true;
         }
 
-        plantAt(treePos, plantingItem);
-        return true;
+        return plantAt(treePos, plantingItem);
     }
 
     private boolean tryTreeBonemeal(FindItemResult bonemealItem) {
@@ -375,7 +371,6 @@ public class AutoFarm extends Module {
                 mc.player.swing(InteractionHand.MAIN_HAND);
                 actionTimer.reset();
                 harvestTimer.reset();
-                actionsThisTick++;
             }
             return true;
         }
@@ -384,7 +379,7 @@ public class AutoFarm extends Module {
     }
 
     private Vec3 getPlantTarget(BlockPos pos) {
-        // 放弃了，来个高人帮我优化。
+        // 放弃了，来个高人帮我优化，为什么就是不能直接往低一格种呢
         return new Vec3(pos.getX() + 0.5, pos.getY() + 0.95, pos.getZ() + 0.5);
     }
 
@@ -415,7 +410,7 @@ public class AutoFarm extends Module {
         }
     }
 
-    private void plantAt(BlockPos pos, FindItemResult result) {
+    private boolean plantAt(BlockPos pos, FindItemResult result) {
         boolean swapped = false;
         boolean invSwapped = false;
 
@@ -427,16 +422,16 @@ public class AutoFarm extends Module {
             }
 
             if (!swapped && !invSwapped) {
-                return;
+                return false;
             }
         }
 
         InteractionHand hand = result.getHand();
         InteractionResult interaction = mc.gameMode.useItemOn(mc.player, hand, new BlockHitResult(getPlantTarget(pos), Direction.UP, pos, false));
+        boolean success = interaction.consumesAction();
         if (interaction.consumesAction()) {
             mc.player.swing(hand);
             actionTimer.reset();
-            actionsThisTick++;
         }
 
         if (swapped) {
@@ -444,6 +439,8 @@ public class AutoFarm extends Module {
         } else if (invSwapped) {
             InvUtils.invSwapBack();
         }
+
+        return success;
     }
 
     private void applyBonemeal(BlockPos pos, FindItemResult result) {
@@ -467,7 +464,6 @@ public class AutoFarm extends Module {
         if (interaction.consumesAction()) {
             mc.player.swing(hand);
             actionTimer.reset();
-            actionsThisTick++;
         }
 
         if (swapped) {
