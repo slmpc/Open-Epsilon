@@ -82,51 +82,14 @@ public class AutoFarm extends Module {
         }
 
         actionsThisTick = 0;
-        for (BlockPos pos : collectTargetsInRadius()) {
-            if (actionsThisTick >= 1) {
-                break;
-            }
-
-            BlockState state = mc.level.getBlockState(pos);
-            if (autoHarvest.getValue() && isSupportedCrop(state.getBlock())) {
-                boolean grown = isHarvestReady(state, pos);
-                if (grown && harvestTimer.passedMillise(harvestDelay.getValue() * 1000.0)) {
-                    if (shouldWaitForRotation(pos)) {
-                        break;
-                    }
-
-                    if (mc.gameMode.startDestroyBlock(pos, Direction.UP)) {
-                        mc.player.swing(InteractionHand.MAIN_HAND);
-                        actionTimer.reset();
-                        harvestTimer.reset();
-                        actionsThisTick++;
-                    }
-                    break;
-                }
-            }
-
-            if (autoPlant.getValue()) {
-                FindItemResult plantingItem = findPlantingItem(pos, state);
-                if (plantingItem.found() && actionTimer.passedMillise(50.0)) {
-                    if (shouldWaitForRotation(getPlantTarget(pos))) {
-                        break;
-                    }
-                    plantAt(pos, plantingItem);
-                    break;
-                }
-            }
-
-            if (useBonemeal.getValue() && state.getBlock() instanceof CropBlock crop && crop.getAge(state) < crop.getMaxAge()) {
-                FindItemResult bonemealItem = findPreferredHotbarItem(stack -> stack.is(Items.BONE_MEAL));
-                if (bonemealItem.found() && actionTimer.passedMillise(50.0)) {
-                    if (shouldWaitForRotation(getBonemealTarget(pos))) {
-                        break;
-                    }
-                    applyBonemeal(pos, bonemealItem);
-                    break;
-                }
-            }
+        List<BlockPos> targets = collectTargetsInRadius();
+        if (tryPlant(targets)) {
+            return;
         }
+        if (tryBonemeal(targets)) {
+            return;
+        }
+        tryHarvest(targets);
     }
 
     private List<BlockPos> collectTargetsInRadius() {
@@ -257,6 +220,83 @@ public class AutoFarm extends Module {
             if (fluidState.is(FluidTags.WATER) || sideState.is(Blocks.FROSTED_ICE)) {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    private boolean tryPlant(List<BlockPos> targets) {
+        if (!autoPlant.getValue() || !actionTimer.passedMillise(50.0)) {
+            return false;
+        }
+
+        for (BlockPos pos : targets) {
+            BlockState state = mc.level.getBlockState(pos);
+            FindItemResult plantingItem = findPlantingItem(pos, state);
+            if (!plantingItem.found()) {
+                continue;
+            }
+
+            if (shouldWaitForRotation(getPlantTarget(pos))) {
+                return true;
+            }
+
+            plantAt(pos, plantingItem);
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean tryBonemeal(List<BlockPos> targets) {
+        if (!useBonemeal.getValue() || !actionTimer.passedMillise(50.0)) {
+            return false;
+        }
+
+        FindItemResult bonemealItem = findPreferredHotbarItem(stack -> stack.is(Items.BONE_MEAL));
+        if (!bonemealItem.found()) {
+            return false;
+        }
+
+        for (BlockPos pos : targets) {
+            BlockState state = mc.level.getBlockState(pos);
+            if (!(state.getBlock() instanceof CropBlock crop) || crop.getAge(state) >= crop.getMaxAge()) {
+                continue;
+            }
+
+            if (shouldWaitForRotation(getBonemealTarget(pos))) {
+                return true;
+            }
+
+            applyBonemeal(pos, bonemealItem);
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean tryHarvest(List<BlockPos> targets) {
+        if (!autoHarvest.getValue() || !harvestTimer.passedMillise(harvestDelay.getValue() * 1000.0)) {
+            return false;
+        }
+
+        for (BlockPos pos : targets) {
+            BlockState state = mc.level.getBlockState(pos);
+            if (!isSupportedCrop(state.getBlock()) || !isHarvestReady(state, pos)) {
+                continue;
+            }
+
+            if (shouldWaitForRotation(pos)) {
+                return true;
+            }
+
+            if (mc.gameMode.startDestroyBlock(pos, Direction.UP)) {
+                mc.player.swing(InteractionHand.MAIN_HAND);
+                actionTimer.reset();
+                harvestTimer.reset();
+                actionsThisTick++;
+            }
+            return true;
         }
 
         return false;
