@@ -218,17 +218,8 @@ public class AutoFarm extends Module {
         return new FindItemResult(-1, 0, 0);
     }
 
-    private boolean isPlantingItem(net.minecraft.world.item.ItemStack stack) {
-        return isPlantingItem(stack.getItem());
-    }
-
     private boolean isCropPlantingItem(net.minecraft.world.item.ItemStack stack) {
         return isCropPlantingItem(stack.getItem());
-    }
-
-    private boolean isPlantingItem(Item item) {
-        return isCropPlantingItem(item)
-                || item == Items.SUGAR_CANE && sugarCane.getValue();
     }
 
     private boolean isCropPlantingItem(Item item) {
@@ -236,16 +227,6 @@ public class AutoFarm extends Module {
                 || item == Items.CARROT && carrots.getValue()
                 || item == Items.POTATO && potatoes.getValue()
                 || item == Items.BEETROOT_SEEDS && beetroot.getValue();
-    }
-
-    private Item getPlantingItem(FindItemResult result) {
-        if (result.isOffhand()) {
-            return mc.player.getOffhandItem().getItem();
-        }
-        if (result.slot() == mc.player.getInventory().getSelectedSlot()) {
-            return mc.player.getMainHandItem().getItem();
-        }
-        return mc.player.getInventory().getItem(result.slot()).getItem();
     }
 
     private boolean canPlantCropAt(BlockPos pos, BlockState state) {
@@ -270,6 +251,7 @@ public class AutoFarm extends Module {
     }
 
     private Vec3 getPlantTarget(BlockPos pos) {
+        // 放弃了，来个高人帮我优化。
         return new Vec3(pos.getX() + 0.5, pos.getY() + 0.95, pos.getZ() + 0.5);
     }
 
