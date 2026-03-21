@@ -42,8 +42,8 @@ public class ModuleListPanel {
         this.guiHeight = guiGraphics.guiHeight();
         rows.clear();
 
-        textRenderer.addText(state.getSelectedCategory().getName(), bounds.x() + 12.0f, bounds.y() + 12.0f, 0.88f, DropdownTheme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);
-        textRenderer.addText("Modules", bounds.x() + 12.0f, bounds.y() + 25.0f, 0.62f, DropdownTheme.TEXT_SECONDARY);
+        textRenderer.addText(state.getSelectedCategory().getName(), bounds.x() + DropdownTheme.PANEL_TITLE_INSET, bounds.y() + 10.0f, 0.78f, DropdownTheme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);
+        textRenderer.addText("Modules", bounds.x() + DropdownTheme.PANEL_TITLE_INSET, bounds.y() + 21.0f, 0.56f, DropdownTheme.TEXT_SECONDARY);
 
         DropdownLayout.Rect viewport = getViewport();
         List<Module> modules = state.getVisibleModules();
@@ -89,6 +89,6 @@ public class ModuleListPanel {
     }
 
     private DropdownLayout.Rect getViewport() {
-        return new DropdownLayout.Rect(bounds.x() + 8.0f, bounds.y() + 40.0f, bounds.width() - 16.0f, bounds.height() - 48.0f);
+        return new DropdownLayout.Rect(bounds.x() + DropdownTheme.PANEL_VIEWPORT_INSET, bounds.y() + 34.0f, bounds.width() - DropdownTheme.PANEL_VIEWPORT_INSET * 2.0f, bounds.height() - 40.0f);
     }
 }

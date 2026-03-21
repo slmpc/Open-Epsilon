@@ -18,12 +18,12 @@ public class StringSettingRow extends SettingRow<StringSetting> {
     @Override
     public void render(GuiGraphics guiGraphics, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, TextRenderer textRenderer, DropdownLayout.Rect bounds, boolean hovered, int mouseX, int mouseY, float partialTick) {
         roundRectRenderer.addRoundRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), DropdownTheme.CARD_RADIUS, hovered ? DropdownTheme.SURFACE_CONTAINER_HIGH : DropdownTheme.SURFACE_CONTAINER);
-        textRenderer.addText(setting.getDisplayName(), bounds.x() + 10.0f, bounds.y() + 8.0f, 0.74f, DropdownTheme.TEXT_PRIMARY);
+        textRenderer.addText(setting.getDisplayName(), bounds.x() + DropdownTheme.ROW_CONTENT_INSET, bounds.y() + 7.0f, 0.68f, DropdownTheme.TEXT_PRIMARY);
         String value = setting.getValue();
         String shown = value == null ? "" : value;
         if (shown.length() > 22) {
             shown = shown.substring(0, 19) + "...";
         }
-        textRenderer.addText(shown, bounds.right() - 116.0f, bounds.y() + 8.0f, 0.66f, DropdownTheme.TEXT_SECONDARY);
+        textRenderer.addText(shown, bounds.right() - DropdownTheme.ROW_TRAILING_INSET - 92.0f, bounds.y() + 7.0f, 0.60f, DropdownTheme.TEXT_SECONDARY);
     }
 }

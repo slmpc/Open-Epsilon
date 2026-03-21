@@ -6,40 +6,55 @@ import java.awt.*;
 
 public final class DropdownTheme {
 
-    public static final Color SCRIM = new Color(7, 10, 13, 138);
-    public static final Color SHADOW = new Color(0, 0, 0, 72);
+    public static final Color SCRIM = new Color(0, 0, 0, 152);
+    public static final Color SHADOW = new Color(0, 0, 0, 82);
 
-    public static final Color SURFACE = new Color(22, 26, 29, 238);
-    public static final Color SURFACE_DIM = new Color(18, 22, 25, 232);
-    public static final Color SURFACE_CONTAINER = new Color(29, 34, 39, 244);
-    public static final Color SURFACE_CONTAINER_HIGH = new Color(35, 41, 47, 248);
-    public static final Color SURFACE_CONTAINER_HIGHEST = new Color(41, 48, 55, 252);
+    public static final Color SURFACE = new Color(20, 18, 24, 238);
+    public static final Color SURFACE_DIM = new Color(15, 13, 19, 232);
+    public static final Color SURFACE_CONTAINER_LOW = new Color(29, 27, 32, 240);
+    public static final Color SURFACE_CONTAINER = new Color(33, 31, 38, 244);
+    public static final Color SURFACE_CONTAINER_HIGH = new Color(43, 41, 48, 248);
+    public static final Color SURFACE_CONTAINER_HIGHEST = new Color(54, 52, 59, 252);
 
-    public static final Color OUTLINE = new Color(63, 75, 85, 180);
-    public static final Color OUTLINE_SOFT = new Color(63, 75, 85, 96);
+    public static final Color OUTLINE = new Color(147, 143, 153, 180);
+    public static final Color OUTLINE_SOFT = new Color(147, 143, 153, 96);
 
-    public static final Color PRIMARY = new Color(124, 198, 255);
-    public static final Color PRIMARY_CONTAINER = new Color(18, 50, 71, 230);
-    public static final Color ON_PRIMARY_CONTAINER = new Color(214, 238, 255);
+    public static final Color PRIMARY = new Color(208, 188, 255);
+    public static final Color ON_PRIMARY = new Color(56, 30, 114);
+    public static final Color PRIMARY_CONTAINER = new Color(79, 55, 139, 236);
+    public static final Color ON_PRIMARY_CONTAINER = new Color(234, 221, 255);
 
-    public static final Color SECONDARY_CONTAINER = new Color(36, 49, 58, 236);
-    public static final Color ON_SECONDARY_CONTAINER = new Color(222, 233, 241);
+    public static final Color SECONDARY = new Color(204, 194, 220);
+    public static final Color ON_SECONDARY = new Color(51, 45, 65);
+    public static final Color SECONDARY_CONTAINER = new Color(74, 68, 88, 236);
+    public static final Color ON_SECONDARY_CONTAINER = new Color(232, 222, 248);
 
-    public static final Color TEXT_PRIMARY = new Color(230, 237, 243);
-    public static final Color TEXT_SECONDARY = new Color(154, 167, 178);
-    public static final Color TEXT_MUTED = new Color(122, 134, 144);
-    public static final Color SUCCESS = new Color(129, 199, 132);
-    public static final Color ERROR = new Color(255, 138, 128);
+    public static final Color TERTIARY = new Color(239, 184, 200);
+    public static final Color ON_TERTIARY = new Color(73, 37, 50);
+    public static final Color TERTIARY_CONTAINER = new Color(99, 59, 72, 236);
+    public static final Color ON_TERTIARY_CONTAINER = new Color(255, 216, 228);
 
-    public static final int PANEL_RADIUS = 18;
-    public static final int SECTION_RADIUS = 14;
-    public static final int CARD_RADIUS = 10;
+    public static final Color TEXT_PRIMARY = new Color(230, 224, 233);
+    public static final Color TEXT_SECONDARY = new Color(202, 196, 208);
+    public static final Color TEXT_MUTED = new Color(147, 143, 153);
+    public static final Color SUCCESS = new Color(204, 194, 220);
+    public static final Color ERROR = new Color(242, 184, 181);
+
+    public static final int PANEL_RADIUS = 16;
+    public static final int SECTION_RADIUS = 12;
+    public static final int CARD_RADIUS = 9;
     public static final int CHIP_RADIUS = 999;
 
-    public static final float OUTER_PADDING = 11.0f;
-    public static final float SECTION_GAP = 8.0f;
-    public static final float INNER_PADDING = 10.0f;
-    public static final float ROW_GAP = 5.0f;
+    public static final float OUTER_PADDING = 9.0f;
+    public static final float SECTION_GAP = 7.0f;
+    public static final float INNER_PADDING = 8.0f;
+    public static final float ROW_GAP = 4.0f;
+    public static final float PANEL_TITLE_INSET = 10.0f;
+    public static final float PANEL_VIEWPORT_INSET = 7.0f;
+    public static final float ROW_CONTENT_INSET = 8.0f;
+    public static final float ROW_TRAILING_INSET = 8.0f;
+    public static final float RAIL_COLLAPSED_WIDTH = 58.0f;
+    public static final float RAIL_EXPANDED_WIDTH = 182.0f;
 
     private DropdownTheme() {
     }

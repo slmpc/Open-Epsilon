@@ -21,7 +21,7 @@ public abstract class SettingRow<T extends Setting<?>> {
     }
 
     public float getHeight() {
-        return 32.0f;
+        return 28.0f;
     }
 
     public void render(GuiGraphics guiGraphics, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, TextRenderer textRenderer, DropdownLayout.Rect bounds, boolean hovered, int mouseX, int mouseY, float partialTick) {
@@ -38,4 +38,5 @@ public abstract class SettingRow<T extends Setting<?>> {
     public boolean mouseScrolled(DropdownLayout.Rect bounds, double mouseX, double mouseY, double scrollX, double scrollY) {
         return false;
     }
+
 }

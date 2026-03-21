@@ -6,21 +6,29 @@ public final class DropdownLayout {
     }
 
     public static Layout compute(int screenWidth, int screenHeight) {
-        float panelWidth = Math.min(760.0f, screenWidth - 68.0f);
-        float panelHeight = Math.min(438.0f, screenHeight - 72.0f);
+        return compute(screenWidth, screenHeight, 58.0f);
+    }
+
+    public static Layout compute(int screenWidth, int screenHeight, float railWidth) {
+        float panelWidth = Math.min(704.0f, screenWidth - 80.0f);
+        float panelHeight = Math.min(404.0f, screenHeight - 84.0f);
 
         float x = (screenWidth - panelWidth) / 2.0f;
         float y = (screenHeight - panelHeight) / 2.0f;
 
-        float railWidth = 64.0f;
         float gap = DropdownTheme.SECTION_GAP;
-        float moduleWidth = Math.min(224.0f, panelWidth * 0.32f);
-        float detailWidth = panelWidth - railWidth - moduleWidth - gap * 2.0f;
+        float columnHeight = panelHeight - DropdownTheme.OUTER_PADDING * 2.0f;
+        float railX = x + DropdownTheme.OUTER_PADDING;
+        float modulesX = railX + railWidth + gap;
+        float maxContentRight = x + panelWidth - DropdownTheme.OUTER_PADDING;
+        float moduleWidth = Math.min(204.0f, panelWidth * 0.31f);
+        float detailX = modulesX + moduleWidth + gap;
+        float detailWidth = maxContentRight - detailX;
 
         Rect panel = new Rect(x, y, panelWidth, panelHeight);
-        Rect rail = new Rect(x + DropdownTheme.OUTER_PADDING, y + DropdownTheme.OUTER_PADDING, railWidth, panelHeight - DropdownTheme.OUTER_PADDING * 2.0f);
-        Rect modules = new Rect(rail.right() + gap, y + DropdownTheme.OUTER_PADDING, moduleWidth, panelHeight - DropdownTheme.OUTER_PADDING * 2.0f);
-        Rect detail = new Rect(modules.right() + gap, y + DropdownTheme.OUTER_PADDING, detailWidth - DropdownTheme.OUTER_PADDING * 2.0f, panelHeight - DropdownTheme.OUTER_PADDING * 2.0f);
+        Rect rail = new Rect(railX, y + DropdownTheme.OUTER_PADDING, railWidth, columnHeight);
+        Rect modules = new Rect(modulesX, y + DropdownTheme.OUTER_PADDING, moduleWidth, columnHeight);
+        Rect detail = new Rect(detailX, y + DropdownTheme.OUTER_PADDING, detailWidth, columnHeight);
 
         return new Layout(panel, rail, modules, detail);
     }
@@ -53,4 +61,5 @@ public final class DropdownLayout {
             return new Rect(x + amount, y + amount, width - amount * 2.0f, height - amount * 2.0f);
         }
     }
+
 }

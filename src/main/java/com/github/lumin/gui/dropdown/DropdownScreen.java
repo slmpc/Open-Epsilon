@@ -31,7 +31,7 @@ public class DropdownScreen extends Screen {
     private final Supplier<ShadowRenderer> shadowRendererSupplier = Suppliers.memoize(ShadowRenderer::new);
     private final DropdownPopupHost popupHost = new DropdownPopupHost();
     private final DropdownInputRouter inputRouter = new DropdownInputRouter();
-    private final CategoryRailPanel categoryRailPanel = new CategoryRailPanel(state, roundRectRendererSupplier.get(), textRendererSupplier.get());
+    private final CategoryRailPanel categoryRailPanel = new CategoryRailPanel(state, rectRendererSupplier.get(), roundRectRendererSupplier.get(), textRendererSupplier.get());
     private final ModuleListPanel moduleListPanel = new ModuleListPanel(state, roundRectRendererSupplier.get(), rectRendererSupplier.get(), shadowRendererSupplier.get(), textRendererSupplier.get());
     private final ModuleDetailPanel moduleDetailPanel = new ModuleDetailPanel(state, roundRectRendererSupplier.get(), rectRendererSupplier.get(), shadowRendererSupplier.get(), textRendererSupplier.get());
 
@@ -50,7 +50,8 @@ public class DropdownScreen extends Screen {
 
     @Override
     public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        DropdownLayout.Layout layout = DropdownLayout.compute(width, height);
+        float railWidth = categoryRailPanel.getAnimatedWidth();
+        DropdownLayout.Layout layout = DropdownLayout.compute(width, height, railWidth);
 
         drawBackgroundScrim();
         drawChrome(layout);
@@ -96,7 +97,7 @@ public class DropdownScreen extends Screen {
             return super.mouseClicked(event, isDoubleClick);
         }
 
-        DropdownLayout.Layout layout = DropdownLayout.compute(width, height);
+        DropdownLayout.Layout layout = DropdownLayout.compute(width, height, categoryRailPanel.getAnimatedWidth());
         if (!layout.panel().contains(mouseX, mouseY)) {
             onClose();
             return true;

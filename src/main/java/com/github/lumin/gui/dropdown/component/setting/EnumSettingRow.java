@@ -19,11 +19,12 @@ public class EnumSettingRow extends SettingRow<EnumSetting<?>> {
     @Override
     public void render(GuiGraphics guiGraphics, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, TextRenderer textRenderer, DropdownLayout.Rect bounds, boolean hovered, int mouseX, int mouseY, float partialTick) {
         roundRectRenderer.addRoundRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), DropdownTheme.CARD_RADIUS, hovered ? DropdownTheme.SURFACE_CONTAINER_HIGH : DropdownTheme.SURFACE_CONTAINER);
-        textRenderer.addText(setting.getDisplayName(), bounds.x() + 10.0f, bounds.y() + 8.0f, 0.74f, DropdownTheme.TEXT_PRIMARY);
+        textRenderer.addText(setting.getDisplayName(), bounds.x() + DropdownTheme.ROW_CONTENT_INSET, bounds.y() + 7.0f, 0.68f, DropdownTheme.TEXT_PRIMARY);
         String value = setting.getTranslatedValue();
-        float chipWidth = Math.min(100.0f, textRenderer.getWidth(value, 0.66f) + 18.0f);
-        roundRectRenderer.addRoundRect(bounds.right() - chipWidth - 10.0f, bounds.y() + 6.0f, chipWidth, 18.0f, DropdownTheme.CARD_RADIUS, DropdownTheme.SECONDARY_CONTAINER);
-        textRenderer.addText(value, bounds.right() - chipWidth + 2.0f, bounds.y() + 10.0f, 0.66f, DropdownTheme.ON_SECONDARY_CONTAINER);
+        float chipWidth = Math.min(88.0f, textRenderer.getWidth(value, 0.60f) + 16.0f);
+        float chipX = bounds.right() - DropdownTheme.ROW_TRAILING_INSET - chipWidth;
+        roundRectRenderer.addRoundRect(chipX, bounds.y() + 5.0f, chipWidth, 16.0f, DropdownTheme.CARD_RADIUS, DropdownTheme.SECONDARY_CONTAINER);
+        textRenderer.addText(value, chipX + 10.0f, bounds.y() + 9.0f, 0.60f, DropdownTheme.ON_SECONDARY_CONTAINER);
     }
 
     @Override

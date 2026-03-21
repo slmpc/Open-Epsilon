@@ -21,9 +21,9 @@ public class BoolSettingRow extends SettingRow<BoolSetting> {
     @Override
     public void render(GuiGraphics guiGraphics, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, TextRenderer textRenderer, DropdownLayout.Rect bounds, boolean hovered, int mouseX, int mouseY, float partialTick) {
         roundRectRenderer.addRoundRect(bounds.x(), bounds.y(), bounds.width(), bounds.height(), DropdownTheme.CARD_RADIUS, hovered ? DropdownTheme.SURFACE_CONTAINER_HIGH : DropdownTheme.SURFACE_CONTAINER);
-        textRenderer.addText(setting.getDisplayName(), bounds.x() + 10.0f, bounds.y() + 8.0f, 0.74f, DropdownTheme.TEXT_PRIMARY);
+        textRenderer.addText(setting.getDisplayName(), bounds.x() + DropdownTheme.ROW_CONTENT_INSET, bounds.y() + 7.0f, 0.68f, DropdownTheme.TEXT_PRIMARY);
 
-        DropdownLayout.Rect rect = new DropdownLayout.Rect(bounds.right() - 42.0f, bounds.y() + 8.0f, 28.0f, 16.0f);
+        DropdownLayout.Rect rect = new DropdownLayout.Rect(bounds.right() - DropdownTheme.ROW_TRAILING_INSET - 24.0f, bounds.y() + 7.0f, 24.0f, 14.0f);
         Color track = setting.getValue() ? DropdownTheme.PRIMARY : DropdownTheme.SURFACE_CONTAINER_HIGHEST;
         Color knob = setting.getValue() ? DropdownTheme.ON_PRIMARY_CONTAINER : DropdownTheme.TEXT_SECONDARY;
         roundRectRenderer.addRoundRect(rect.x(), rect.y(), rect.width(), rect.height(), DropdownTheme.CHIP_RADIUS, track);

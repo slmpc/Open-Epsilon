@@ -48,24 +48,24 @@ public class ModuleDetailPanel {
 
         Module module = state.getSelectedModule();
         String detailTitle = module == null ? "No Module" : module.getTranslatedName();
-        textRenderer.addText(detailTitle, bounds.x() + 12.0f, bounds.y() + 12.0f, 0.88f, DropdownTheme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);
-        textRenderer.addText("Settings", bounds.x() + 12.0f, bounds.y() + 25.0f, 0.62f, DropdownTheme.TEXT_SECONDARY);
+        textRenderer.addText(detailTitle, bounds.x() + DropdownTheme.PANEL_TITLE_INSET, bounds.y() + 10.0f, 0.78f, DropdownTheme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);
+        textRenderer.addText("Settings", bounds.x() + DropdownTheme.PANEL_TITLE_INSET, bounds.y() + 21.0f, 0.56f, DropdownTheme.TEXT_SECONDARY);
 
         if (module == null) {
             return;
         }
 
-        headerBounds = new DropdownLayout.Rect(bounds.x() + 8.0f, bounds.y() + 40.0f, bounds.width() - 16.0f, 60.0f);
+        headerBounds = new DropdownLayout.Rect(bounds.x() + DropdownTheme.PANEL_VIEWPORT_INSET, bounds.y() + 34.0f, bounds.width() - DropdownTheme.PANEL_VIEWPORT_INSET * 2.0f, 52.0f);
         roundRectRenderer.addRoundRect(headerBounds.x(), headerBounds.y(), headerBounds.width(), headerBounds.height(), DropdownTheme.CARD_RADIUS, DropdownTheme.SURFACE_CONTAINER);
-        textRenderer.addText(module.getTranslatedName(), headerBounds.x() + 12.0f, headerBounds.y() + 10.0f, 0.8f, DropdownTheme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);
-        textRenderer.addText(module.category.getName(), headerBounds.x() + 12.0f, headerBounds.y() + 22.0f, 0.62f, DropdownTheme.TEXT_SECONDARY);
-        textRenderer.addText(module.getDescription(), headerBounds.x() + 12.0f, headerBounds.y() + 34.0f, 0.62f, DropdownTheme.TEXT_MUTED);
-        drawSwitch(new DropdownLayout.Rect(headerBounds.right() - 42.0f, headerBounds.y() + 10.0f, 28.0f, 16.0f), module.isEnabled());
-        textRenderer.addText(module.getBindMode().name(), headerBounds.right() - 54.0f, headerBounds.y() + 34.0f, 0.62f, DropdownTheme.TEXT_SECONDARY);
+        textRenderer.addText(module.getTranslatedName(), headerBounds.x() + DropdownTheme.PANEL_TITLE_INSET, headerBounds.y() + 8.0f, 0.72f, DropdownTheme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);
+        textRenderer.addText(module.category.getName(), headerBounds.x() + DropdownTheme.PANEL_TITLE_INSET, headerBounds.y() + 18.0f, 0.56f, DropdownTheme.TEXT_SECONDARY);
+        textRenderer.addText(module.getDescription(), headerBounds.x() + DropdownTheme.PANEL_TITLE_INSET, headerBounds.y() + 28.0f, 0.56f, DropdownTheme.TEXT_MUTED);
+        drawSwitch(new DropdownLayout.Rect(headerBounds.right() - DropdownTheme.ROW_TRAILING_INSET - 24.0f, headerBounds.y() + 8.0f, 24.0f, 14.0f), module.isEnabled());
+        textRenderer.addText(module.getBindMode().name(), headerBounds.right() - DropdownTheme.ROW_TRAILING_INSET - 34.0f, headerBounds.y() + 28.0f, 0.56f, DropdownTheme.TEXT_SECONDARY);
 
         DropdownLayout.Rect viewport = getViewport();
         List<Setting<?>> settings = module.getSettings().stream().filter(Setting::isAvailable).toList();
-        float contentHeight = settings.size() * (32.0f + DropdownTheme.ROW_GAP);
+        float contentHeight = settings.size() * (28.0f + DropdownTheme.ROW_GAP);
         state.setMaxDetailScroll(contentHeight - viewport.height());
 
         DropdownScissor.apply(viewport, rectRenderer, roundRectRenderer, shadowRenderer, textRenderer, guiHeight);
@@ -92,7 +92,7 @@ public class ModuleDetailPanel {
             return false;
         }
 
-        DropdownLayout.Rect toggle = new DropdownLayout.Rect(headerBounds.right() - 42.0f, headerBounds.y() + 10.0f, 28.0f, 16.0f);
+        DropdownLayout.Rect toggle = new DropdownLayout.Rect(headerBounds.right() - DropdownTheme.ROW_TRAILING_INSET - 24.0f, headerBounds.y() + 8.0f, 24.0f, 14.0f);
         if (toggle.contains(event.x(), event.y())) {
             module.toggle();
             return true;
@@ -126,7 +126,7 @@ public class ModuleDetailPanel {
         if (headerBounds == null) {
             return new DropdownLayout.Rect(bounds.x(), bounds.y(), bounds.width(), bounds.height());
         }
-        return new DropdownLayout.Rect(bounds.x() + 8.0f, headerBounds.bottom() + 8.0f, bounds.width() - 16.0f, bounds.bottom() - headerBounds.bottom() - 12.0f);
+        return new DropdownLayout.Rect(bounds.x() + DropdownTheme.PANEL_VIEWPORT_INSET, headerBounds.bottom() + 6.0f, bounds.width() - DropdownTheme.PANEL_VIEWPORT_INSET * 2.0f, bounds.bottom() - headerBounds.bottom() - 10.0f);
     }
 
     private void drawSwitch(DropdownLayout.Rect rect, boolean enabled) {

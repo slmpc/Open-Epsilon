@@ -28,6 +28,7 @@ public class DropdownState {
     private SortMode sortMode = SortMode.NAME;
     private ActivePopup activePopup = ActivePopup.NONE;
     private Module listeningKeyBindModule;
+    private boolean sidebarExpanded;
     private float moduleScroll;
     private float detailScroll;
     private float maxModuleScroll;
@@ -88,6 +89,18 @@ public class DropdownState {
 
     public void setListeningKeyBindModule(Module listeningKeyBindModule) {
         this.listeningKeyBindModule = listeningKeyBindModule;
+    }
+
+    public boolean isSidebarExpanded() {
+        return sidebarExpanded;
+    }
+
+    public void setSidebarExpanded(boolean sidebarExpanded) {
+        this.sidebarExpanded = sidebarExpanded;
+    }
+
+    public void toggleSidebarExpanded() {
+        sidebarExpanded = !sidebarExpanded;
     }
 
     public List<Module> getVisibleModules() {
@@ -158,6 +171,7 @@ public class DropdownState {
     }
 
     private float clampScroll(float scroll, float maxScroll) {
-        return Math.max(0.0f, Math.min(Math.max(0.0f, maxScroll), scroll));
+        return Math.clamp(scroll, 0, maxScroll);
     }
+
 }
