@@ -11,9 +11,12 @@ import com.github.lumin.utils.player.InvUtils;
 import com.github.lumin.utils.timer.TimerUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -84,42 +87,32 @@ public class AutoFarm extends Module {
             }
 
             BlockState state = mc.level.getBlockState(pos);
-            if (autoPlant.getValue()) {
-                FindItemResult plantingItem = findPlantingItem();
-                if (plantingItem.found() && canPlantAt(pos, state, getPlantingItem(plantingItem)) && actionTimer.passedMillise(50.0)) {
+            if (autoHarvest.getValue() && isSupportedCrop(state.getBlock())) {
+                boolean grown = isHarvestReady(state, pos);
+                if (grown && harvestTimer.passedMillise(harvestDelay.getValue() * 1000.0)) {
                     if (shouldWaitForRotation(pos)) {
-                        continue;
+                        break;
                     }
-                    plantAt(pos, plantingItem);
-                    continue;
+
+                    if (mc.gameMode.startDestroyBlock(pos, Direction.UP)) {
+                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        actionTimer.reset();
+                        harvestTimer.reset();
+                        actionsThisTick++;
+                    }
+                    break;
                 }
             }
 
-            if (!autoHarvest.getValue() || !isSupportedCrop(state.getBlock())) {
-                continue;
-            }
-
-            boolean grown = isHarvestReady(state, pos);
-            if (state.is(Blocks.SUGAR_CANE) && !grown) {
-                continue;
-            }
-            if (!grown) {
-                continue;
-            }
-
-            if (!harvestTimer.passedMillise(harvestDelay.getValue() * 1000.0)) {
-                continue;
-            }
-
-            if (shouldWaitForRotation(pos)) {
-                continue;
-            }
-
-            if (mc.gameMode.startDestroyBlock(pos, Direction.UP)) {
-                mc.player.swing(InteractionHand.MAIN_HAND);
-                actionTimer.reset();
-                harvestTimer.reset();
-                actionsThisTick++;
+            if (autoPlant.getValue()) {
+                FindItemResult plantingItem = findPlantingItem(pos, state);
+                if (plantingItem.found() && actionTimer.passedMillise(50.0)) {
+                    if (shouldWaitForRotation(getPlantTarget(pos))) {
+                        break;
+                    }
+                    plantAt(pos, plantingItem);
+                    break;
+                }
             }
         }
     }
@@ -172,17 +165,21 @@ public class AutoFarm extends Module {
         return false;
     }
 
-    private Vector2f getRotation(BlockPos pos) {
-        float[] rotation = RotationManager.INSTANCE.getRotation(Vec3.atCenterOf(pos));
+    private Vector2f getRotation(Vec3 target) {
+        float[] rotation = RotationManager.INSTANCE.getRotation(target);
         return new Vector2f(rotation[0], rotation[1]);
     }
 
     private boolean shouldWaitForRotation(BlockPos pos) {
+        return shouldWaitForRotation(Vec3.atCenterOf(pos));
+    }
+
+    private boolean shouldWaitForRotation(Vec3 target) {
         if (!rotate.getValue()) {
             return false;
         }
 
-        Vector2f targetRotation = getRotation(pos);
+        Vector2f targetRotation = getRotation(target);
         RotationManager.INSTANCE.setRotations(targetRotation, rotationSpeed.getValue(), com.github.lumin.utils.rotation.MovementFix.OFF);
 
         Vector2f currentRotation = RotationManager.INSTANCE.getRotation();
@@ -191,16 +188,50 @@ public class AutoFarm extends Module {
         return yawDiff > 8.0f || pitchDiff > 8.0f;
     }
 
-    private FindItemResult findPlantingItem() {
+    private FindItemResult findPlantingItem(BlockPos pos, BlockState state) {
         // Current stage only supports main hand, offhand, and hotbar silent swap. Inventory planting can be added later.
-        return InvUtils.findInHotbar(this::isPlantingItem);
+        if (canPlantCropAt(pos, state)) {
+            return findPreferredHotbarItem(this::isCropPlantingItem);
+        }
+        if (canPlantSugarCaneAt(pos, state)) {
+            return findPreferredHotbarItem(stack -> stack.is(Items.SUGAR_CANE));
+        }
+        return new FindItemResult(-1, 0, 0);
+    }
+
+    private FindItemResult findPreferredHotbarItem(java.util.function.Predicate<net.minecraft.world.item.ItemStack> predicate) {
+        if (predicate.test(mc.player.getMainHandItem())) {
+            return new FindItemResult(mc.player.getInventory().getSelectedSlot(), mc.player.getMainHandItem().getCount(), mc.player.getMainHandItem().getMaxStackSize());
+        }
+
+        if (predicate.test(mc.player.getOffhandItem())) {
+            return new FindItemResult(40, mc.player.getOffhandItem().getCount(), mc.player.getOffhandItem().getMaxStackSize());
+        }
+
+        for (int slot = 0; slot <= 8; slot++) {
+            var stack = mc.player.getInventory().getItem(slot);
+            if (predicate.test(stack)) {
+                return new FindItemResult(slot, stack.getCount(), stack.getMaxStackSize());
+            }
+        }
+
+        return new FindItemResult(-1, 0, 0);
     }
 
     private boolean isPlantingItem(net.minecraft.world.item.ItemStack stack) {
         return isPlantingItem(stack.getItem());
     }
 
+    private boolean isCropPlantingItem(net.minecraft.world.item.ItemStack stack) {
+        return isCropPlantingItem(stack.getItem());
+    }
+
     private boolean isPlantingItem(Item item) {
+        return isCropPlantingItem(item)
+                || item == Items.SUGAR_CANE && sugarCane.getValue();
+    }
+
+    private boolean isCropPlantingItem(Item item) {
         return item == Items.WHEAT_SEEDS && wheat.getValue()
                 || item == Items.CARROT && carrots.getValue()
                 || item == Items.POTATO && potatoes.getValue()
@@ -217,8 +248,29 @@ public class AutoFarm extends Module {
         return mc.player.getInventory().getItem(result.slot()).getItem();
     }
 
-    private boolean canPlantAt(BlockPos pos, BlockState state, Item item) {
-        return isPlantingItem(item) && state.is(Blocks.FARMLAND) && mc.level.getBlockState(pos.above()).isAir();
+    private boolean canPlantCropAt(BlockPos pos, BlockState state) {
+        return mc.level.getBlockState(pos.above()).isAir() && state.is(Blocks.FARMLAND);
+    }
+
+    private boolean canPlantSugarCaneAt(BlockPos pos, BlockState state) {
+        if (!mc.level.getBlockState(pos.above()).isAir() || !(state.is(BlockTags.DIRT) || state.is(BlockTags.SAND))) {
+            return false;
+        }
+
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos sidePos = pos.relative(direction);
+            FluidState fluidState = mc.level.getFluidState(sidePos);
+            BlockState sideState = mc.level.getBlockState(sidePos);
+            if (fluidState.is(FluidTags.WATER) || sideState.is(Blocks.FROSTED_ICE)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Vec3 getPlantTarget(BlockPos pos) {
+        return new Vec3(pos.getX() + 0.5, pos.getY() + 0.95, pos.getZ() + 0.5);
     }
 
     private void plantAt(BlockPos pos, FindItemResult result) {
@@ -228,11 +280,10 @@ public class AutoFarm extends Module {
         }
 
         InteractionHand hand = result.getHand();
-        InteractionResult interaction = mc.gameMode.useItemOn(mc.player, hand, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
+        InteractionResult interaction = mc.gameMode.useItemOn(mc.player, hand, new BlockHitResult(getPlantTarget(pos), Direction.UP, pos, false));
         if (interaction.consumesAction()) {
             mc.player.swing(hand);
             actionTimer.reset();
-            harvestTimer.reset();
             actionsThisTick++;
         }
 
