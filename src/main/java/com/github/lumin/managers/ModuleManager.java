@@ -8,6 +8,7 @@ import com.github.lumin.modules.impl.combat.AutoClicker;
 import com.github.lumin.modules.impl.combat.KillAura;
 import com.github.lumin.modules.impl.player.*;
 import com.github.lumin.modules.impl.render.*;
+import com.github.lumin.modules.impl.world.CustomWeather;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.List;
@@ -56,7 +57,10 @@ public class ModuleManager {
                 HUD.INSTANCE,
                 ModuleList.INSTANCE,
                 Nametags.INSTANCE,
-                NoRender.INSTANCE
+                NoRender.INSTANCE,
+
+                // World
+                CustomWeather.INSTANCE
 
         );
     }

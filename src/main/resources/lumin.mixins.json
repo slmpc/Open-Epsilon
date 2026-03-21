@@ -17,9 +17,12 @@
     "MixinLocalPlayer",
     "MixinMultiPlayerGameMode",
     "MixinRegistryDataLoader",
+    "MixinMobEffectFogEnvironment",
+    "MixinParticleManager",
     "MixinScreenEffectRenderer",
     "MixinTitleScreen",
     "MixinAvatarRenderer",
+    "MixinWeatherEffectRenderer",
     "MixinWindow"
   ],
   "injectors": {
