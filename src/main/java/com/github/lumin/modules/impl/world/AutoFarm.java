@@ -41,6 +41,7 @@ public class AutoFarm extends Module {
     private final DoubleSetting range = doubleSetting("Range", 4.0, 1.0, 6.0, 0.5);
     private final BoolSetting autoHarvest = boolSetting("AutoHarvest", true);
     private final BoolSetting autoPlant = boolSetting("AutoPlant", true);
+    private final BoolSetting useBonemeal = boolSetting("UseBonemeal", false);
     private final BoolSetting rotate = boolSetting("Rotate", true);
     private final IntSetting rotationSpeed = intSetting("RotationSpeed", 10, 1, 10, 1, rotate::getValue);
     private final DoubleSetting harvestDelay = doubleSetting("HarvestDelay", 0.15, 0.0, 2.0, 0.05);
@@ -111,6 +112,17 @@ public class AutoFarm extends Module {
                         break;
                     }
                     plantAt(pos, plantingItem);
+                    break;
+                }
+            }
+
+            if (useBonemeal.getValue() && state.getBlock() instanceof CropBlock crop && crop.getAge(state) < crop.getMaxAge()) {
+                FindItemResult bonemealItem = findPreferredHotbarItem(stack -> stack.is(Items.BONE_MEAL));
+                if (bonemealItem.found() && actionTimer.passedMillise(50.0)) {
+                    if (shouldWaitForRotation(getBonemealTarget(pos))) {
+                        break;
+                    }
+                    applyBonemeal(pos, bonemealItem);
                     break;
                 }
             }
@@ -255,6 +267,10 @@ public class AutoFarm extends Module {
         return new Vec3(pos.getX() + 0.5, pos.getY() + 0.95, pos.getZ() + 0.5);
     }
 
+    private Vec3 getBonemealTarget(BlockPos pos) {
+        return Vec3.atCenterOf(pos);
+    }
+
     private void plantAt(BlockPos pos, FindItemResult result) {
         boolean swapped = result.slot() != 40 && result.slot() != mc.player.getInventory().getSelectedSlot();
         if (swapped && !InvUtils.swap(result.slot(), true)) {
@@ -263,6 +279,25 @@ public class AutoFarm extends Module {
 
         InteractionHand hand = result.getHand();
         InteractionResult interaction = mc.gameMode.useItemOn(mc.player, hand, new BlockHitResult(getPlantTarget(pos), Direction.UP, pos, false));
+        if (interaction.consumesAction()) {
+            mc.player.swing(hand);
+            actionTimer.reset();
+            actionsThisTick++;
+        }
+
+        if (swapped) {
+            InvUtils.swapBack();
+        }
+    }
+
+    private void applyBonemeal(BlockPos pos, FindItemResult result) {
+        boolean swapped = result.slot() != 40 && result.slot() != mc.player.getInventory().getSelectedSlot();
+        if (swapped && !InvUtils.swap(result.slot(), true)) {
+            return;
+        }
+
+        InteractionHand hand = result.getHand();
+        InteractionResult interaction = mc.gameMode.useItemOn(mc.player, hand, new BlockHitResult(getBonemealTarget(pos), Direction.UP, pos, false));
         if (interaction.consumesAction()) {
             mc.player.swing(hand);
             actionTimer.reset();
