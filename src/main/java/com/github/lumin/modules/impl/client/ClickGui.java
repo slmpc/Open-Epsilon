@@ -1,6 +1,6 @@
 package com.github.lumin.modules.impl.client;
 
-import com.github.lumin.gui.clickgui.ClickGuiScreen;
+import com.github.lumin.gui.dropdown.DropdownScreen;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
@@ -29,12 +29,12 @@ public class ClickGui extends Module {
     @Override
     protected void onEnable() {
         if (nullCheck()) return;
-        mc.setScreen(new ClickGuiScreen());
+        mc.setScreen(new DropdownScreen());
     }
 
     @Override
     protected void onDisable() {
-        if (mc.screen instanceof ClickGuiScreen) {
+        if (mc.screen instanceof DropdownScreen) {
             mc.setScreen(null);
         }
     }
