@@ -11,6 +11,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = Lumin.MODID, value = Dist.CLIENT)
 public class EventHandler {
@@ -22,7 +23,7 @@ public class EventHandler {
 
     @SubscribeEvent
     private static void onKeyPress(InputEvent.Key event) {
-        if (Minecraft.getInstance().level == null) return;
+        if (Minecraft.getInstance().level == null || event.getKey() == GLFW.GLFW_KEY_UNKNOWN) return;
         ModuleManager.INSTANCE.onKeyEvent(event.getKey(), event.getAction());
     }
 

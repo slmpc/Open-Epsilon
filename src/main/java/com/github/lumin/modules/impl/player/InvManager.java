@@ -1,7 +1,7 @@
 package com.github.lumin.modules.impl.player;
 
 import com.github.lumin.events.PacketEvent;
-import com.github.lumin.gui.clickgui.ClickGuiScreen;
+import com.github.lumin.gui.dropdown.DropdownScreen;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
@@ -233,7 +233,7 @@ public class InvManager extends Module {
     private void onTick(ClientTickEvent.Pre event) {
         if (nullCheck()) return;
 
-        if (!(mc.screen instanceof ClickGuiScreen) && !this.checkConfig()) {
+        if (!(mc.screen instanceof DropdownScreen) && !this.checkConfig()) {
             ChatUtils.addChatMessage("Duplicate slot config in Inventory Manager! Please check your config!");
             this.toggle();
             return;

@@ -57,7 +57,6 @@ public class ModuleManager {
                 Fullbright.INSTANCE,
                 HUD.INSTANCE,
                 ModuleList.INSTANCE,
-                Nametags.INSTANCE,
                 NoRender.INSTANCE,
 
                 // World
