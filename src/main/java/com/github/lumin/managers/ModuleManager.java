@@ -59,6 +59,7 @@ public class ModuleManager {
                 ModuleList.INSTANCE,
                 Nametags.INSTANCE,
                 NoRender.INSTANCE,
+                Mascot.INSTANCE,
 
                 // World
                 AutoFarm.INSTANCE,

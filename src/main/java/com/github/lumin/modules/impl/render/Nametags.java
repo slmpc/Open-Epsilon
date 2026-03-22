@@ -7,11 +7,15 @@ import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
 import com.github.lumin.settings.impl.ColorSetting;
+import com.github.lumin.settings.impl.IntSetting;
 import com.github.lumin.utils.render.WorldToScreen;
 import com.google.common.base.Suppliers;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -24,6 +28,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 public class Nametags extends Module {
 
@@ -33,9 +38,10 @@ public class Nametags extends Module {
         super("Nametags", Category.RENDER);
     }
 
-    private final BoolSetting showSelf = boolSetting("ShowSelf", false);
     private final BoolSetting showItems = boolSetting("ShowItems", false);
     private final BoolSetting showHealthText = boolSetting("ShowHealthText", true);
+    private final BoolSetting showMobs = boolSetting("ShowMobs", true);
+    private final IntSetting visualRange = intSetting("VisualRange", 20,0,256,1);
     private final ColorSetting backgroundColor = colorSetting("BackgroundColor", new Color(0, 0, 0, 140));
     private final ColorSetting textColor = colorSetting("TextColor", Color.WHITE);
 
@@ -74,15 +80,69 @@ public class Nametags extends Module {
 
                 guiGraphics.pose().popMatrix();
             }
+            //我去谁书写的一大坨狗屎给我鸡巴都吓软了
+            float prefixW = textRenderer.getWidth(tag.prefix(), tag.scale(), StaticFontLoader.REGULAR);
+            float nameW = textRenderer.getWidth(tag.name(), tag.scale(), StaticFontLoader.REGULAR);
+            float hpW = showHealthText.getValue()
+                    ? textRenderer.getWidth(tag.healthText(), tag.scale(), StaticFontLoader.REGULAR)
+                    : 0.0f;
 
-            float hpW = showHealthText.getValue() ? textRenderer.getWidth(tag.healthText(), tag.scale(), StaticFontLoader.REGULAR) : 0.0f;
-            float topLineW = (showHealthText.getValue() && hpW > 0.0f) ? textRenderer.getWidth(tag.text(), tag.scale(), StaticFontLoader.REGULAR) + 4.0f + hpW : textRenderer.getWidth(tag.text(), tag.scale(), StaticFontLoader.REGULAR);
+            float spacing = 4.0f;
 
-            roundRectRenderer.addRoundRect(tag.x() - topLineW + 8.0f * 0.5f + 21.5F, tag.y() - textRenderer.getHeight(tag.scale(), StaticFontLoader.REGULAR) + 8 - 15, topLineW + 8.0f, textRenderer.getHeight(tag.scale(), StaticFontLoader.REGULAR) + 8.0f, 6.0f * tag.scale(), backgroundColor.getValue());
-            textRenderer.addText(tag.text(), tag.x() - topLineW * 0.5f, tag.y() - textRenderer.getHeight(tag.scale(), StaticFontLoader.REGULAR) + 8.0f - 8.0f + 4.0f - 9, tag.scale(), textColor.getValue(), StaticFontLoader.REGULAR);
+            float totalW = prefixW + nameW;
+            if (showHealthText.getValue() && hpW > 0.0f) {
+                totalW += spacing + hpW;
+            }
+
+            totalW += spacing;
+
+            float leftX = tag.x() - totalW * 0.5f;
+
+            float textY = tag.y() - textRenderer.getHeight(tag.scale(), StaticFontLoader.REGULAR)
+                    + 8.0f - 8.0f + 4.0f - 9;
+
+            roundRectRenderer.addRoundRect(
+                    leftX - 4.0f,
+                    tag.y() - textRenderer.getHeight(tag.scale(), StaticFontLoader.REGULAR) + 8 - 15,
+                    totalW + 8.0f,
+                    textRenderer.getHeight(tag.scale(), StaticFontLoader.REGULAR) + 8.0f,
+                    6.0f * tag.scale(),
+                    backgroundColor.getValue()
+            );
+
+            float cursorX = leftX;
+
+            textRenderer.addText(
+                    tag.prefix(),
+                    cursorX,
+                    textY,
+                    tag.scale(),
+                    tag.prefixColor(),
+                    StaticFontLoader.REGULAR
+            );
+            cursorX += prefixW + spacing;
+
+            textRenderer.addText(
+                    tag.name(),
+                    cursorX,
+                    textY,
+                    tag.scale(),
+                    textColor.getValue(),
+                    StaticFontLoader.REGULAR
+            );
+            cursorX += nameW;
 
             if (showHealthText.getValue() && hpW > 0.0f) {
-                textRenderer.addText(tag.healthText(), tag.x() - topLineW * 0.5f + textRenderer.getWidth(tag.text(), tag.scale(), StaticFontLoader.REGULAR) + 4.0f, tag.y() - textRenderer.getHeight(tag.scale(), StaticFontLoader.REGULAR) + 8.0f - 8.0f + 4.0f - 9, tag.scale(), tag.healthColor(), StaticFontLoader.REGULAR);
+                cursorX += spacing;
+
+                textRenderer.addText(
+                        tag.healthText(),
+                        cursorX,
+                        textY,
+                        tag.scale(),
+                        tag.healthColor(),
+                        StaticFontLoader.REGULAR
+                );
             }
         }
 
@@ -103,55 +163,66 @@ public class Nametags extends Module {
         float guiWidth = (float) mc.getWindow().getGuiScaledWidth();
         float guiHeight = (float) mc.getWindow().getGuiScaledHeight();
 
-        for (Player player : mc.level.players()) {
-            if (!showSelf.getValue() && player == mc.player) continue;
 
-            Vec3 playerPos = player.getPosition(partialTick);
-            float dist = (float) playerPos.distanceTo(cameraPos);
-            if (dist > 256) continue;
+        for (Entity mob : StreamSupport.stream(mc.level.entitiesForRendering().spliterator(), false).toList())
+            if (mob instanceof LivingEntity entity) {
+                Vec3 playerPos = entity.getPosition(partialTick);
+                float dist = (float) playerPos.distanceTo(cameraPos);
+                if (dist > visualRange.getValue()) continue;
 
-            Vector4d screenPos = WorldToScreen.getEntityPositionsOn2D(player, partialTick);
+                Vector4d screenPos = WorldToScreen.getEntityPositionsOn2D(entity, partialTick);
 
-            float screenX = (float) screenPos.x;
-            float screenY = (float) screenPos.y;
+                float screenX = (float) screenPos.x;
+                float screenY = (float) screenPos.y;
 
-            if (screenX < -64.0f || screenY < -64.0f || screenX > guiWidth + 64.0f || screenY > guiHeight + 64.0f)
-                continue;
+                if (screenX < -64.0f || screenY < -64.0f || screenX > guiWidth + 64.0f || screenY > guiHeight + 64.0f)
+                    continue;
 
-            String text = player.getName().getString();
-            float scale = Math.max(0.65f, 1.0f - (dist / 256) * 0.35f);
+                String prefix = "[" + (entity instanceof Player ? "P" : "E") + "]";
+                String name = entity.getName().getString();
 
-            float maxHealth = player.getMaxHealth();
-            float health = player.getHealth() + player.getAbsorptionAmount();
-            String hpText = String.format("%.1f", health);
-            Color hpColor = getHealthColor(maxHealth > 0.0f ? health / maxHealth : 0.0f);
+                Color prefixColor = Color.CYAN;
+                float scale = Math.max(0.65f, 1.0f - (dist / 256) * 0.35f);
 
-            List<ItemStack> items = new ArrayList<>();
-            if (showItems.getValue()) {
-                ItemStack off = player.getOffhandItem();
-                if (!off.isEmpty()) items.add(off);
+                float maxHealth = entity.getMaxHealth();
+                float health = entity.getHealth() + entity.getAbsorptionAmount();
+                String hpText = String.format("%.1f", health);
+                Color hpColor = getHealthColor(maxHealth > 0.0f ? health / maxHealth : 0.0f);
 
-                ItemStack head = player.getItemBySlot(EquipmentSlot.HEAD);
-                ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
-                ItemStack legs = player.getItemBySlot(EquipmentSlot.LEGS);
-                ItemStack feet = player.getItemBySlot(EquipmentSlot.FEET);
+                List<ItemStack> items = new ArrayList<>();
+                if (showItems.getValue()) {
+                    ItemStack off = entity.getOffhandItem();
+                    if (!off.isEmpty()) items.add(off);
 
-                if (!head.isEmpty()) items.add(head);
-                if (!chest.isEmpty()) items.add(chest);
-                if (!legs.isEmpty()) items.add(legs);
-                if (!feet.isEmpty()) items.add(feet);
+                    ItemStack head = entity.getItemBySlot(EquipmentSlot.HEAD);
+                    ItemStack chest = entity.getItemBySlot(EquipmentSlot.CHEST);
+                    ItemStack legs = entity.getItemBySlot(EquipmentSlot.LEGS);
+                    ItemStack feet = entity.getItemBySlot(EquipmentSlot.FEET);
 
-                ItemStack main = player.getMainHandItem();
-                if (!main.isEmpty()) items.add(main);
+                    if (!head.isEmpty()) items.add(head);
+                    if (!chest.isEmpty()) items.add(chest);
+                    if (!legs.isEmpty()) items.add(legs);
+                    if (!feet.isEmpty()) items.add(feet);
+
+                    ItemStack main = entity.getMainHandItem();
+                    if (!main.isEmpty()) items.add(main);
+                }
+                if(!showMobs.getValue() && !(entity instanceof Player)) continue;
+                tags.add(new TagInfo(prefix, name, hpText, prefixColor, hpColor, items, screenX, screenY, scale));
             }
 
-            tags.add(new TagInfo(text, hpText, hpColor, items, screenX, screenY, scale));
-        }
     }
 
-    private record TagInfo(String text, String healthText, Color healthColor, List<ItemStack> items, float x, float y,
-                           float scale) {
-    }
+    private record TagInfo(
+            String prefix,
+            String name,
+            String healthText,
+            Color prefixColor,
+            Color healthColor,
+            List<ItemStack> items,
+            float x, float y,
+            float scale
+    ) {}
 
     private static Color getHealthColor(float frac) {
         frac = Mth.clamp(frac, 0.0f, 1.0f);
