@@ -286,5 +286,10 @@
   "lumin.modules.velocity.noblockpush": "No Block Push",
   "lumin.modules.velocity.noentitypush": "No Entity Push",
   "lumin.modules.velocity.nowaterpush": "No Water Push",
-  "lumin.modules.velocity.render": "Render"
+  "lumin.modules.velocity.render": "Render",
+  "lumin.modules.vclip": "VClip",
+  "lumin.modules.vclip.mode": "Mode",
+  "lumin.modules.vclip.mode.glitch": "Glitch",
+  "lumin.modules.vclip.mode.teleport": "Teleport",
+  "lumin.modules.vclip.mode.jump": "Jump"
 }
