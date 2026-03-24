@@ -51,6 +51,7 @@ public class ModuleManager {
                 Stealer.INSTANCE,
                 Stuck.INSTANCE,
                 Velocity.INSTANCE,
+                VClip.INSTANCE,
 
                 // Render
                 ESP.INSTANCE,

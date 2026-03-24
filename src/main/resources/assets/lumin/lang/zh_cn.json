@@ -286,5 +286,10 @@
   "lumin.modules.velocity.noblockpush": "无方块推动",
   "lumin.modules.velocity.noentitypush": "无实体推动",
   "lumin.modules.velocity.nowaterpush": "无水流推动",
-  "lumin.modules.velocity.render": "渲染"
+  "lumin.modules.velocity.render": "渲染",
+  "lumin.modules.vclip": "纵向穿墙",
+  "lumin.modules.vclip.mode": "模式",
+  "lumin.modules.vclip.mode.glitch": "Glitch",
+  "lumin.modules.vclip.mode.teleport": "传送",
+  "lumin.modules.vclip.mode.jump": "跳跃"
 }
