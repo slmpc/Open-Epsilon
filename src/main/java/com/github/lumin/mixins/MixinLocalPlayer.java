@@ -2,6 +2,7 @@ package com.github.lumin.mixins;
 
 import com.github.lumin.events.MotionEvent;
 import com.github.lumin.events.SlowdownEvent;
+import com.github.lumin.modules.impl.player.Velocity;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,6 +55,13 @@ public class MixinLocalPlayer {
     @Redirect(method = "sendPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;onGround()Z"))
     private boolean redirectOnGround(LocalPlayer instance) {
         return lumin$motionEvent.isOnGround();
+    }
+
+    @Inject(method = "moveTowardsClosestSpace", at = @At("HEAD"), cancellable = true)
+    private void onPushOutOfBlocksHook(double x, double d, CallbackInfo info) {
+        if (Velocity.INSTANCE.isEnabled() && Velocity.INSTANCE.blockPush.getValue()) {
+            info.cancel();
+        }
     }
 
     @Redirect(method = "modifyInput", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isUsingItem()Z"))

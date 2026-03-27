@@ -9,8 +9,6 @@ import com.github.lumin.settings.impl.DoubleSetting;
 import com.github.lumin.settings.impl.EnumSetting;
 import com.github.lumin.settings.impl.IntSetting;
 import com.github.lumin.utils.player.MoveUtils;
-import com.github.lumin.utils.render.Render3DUtils;
-import com.google.common.eventbus.Subscribe;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
@@ -19,19 +17,15 @@ import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -58,10 +52,11 @@ public class Velocity extends Module {
     }
 
     private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.NoXZ);
+    public final BoolSetting waterPush = boolSetting("NoWaterPush", true, () -> mode.is(Mode.Vanilla));
+    public final BoolSetting entityPush = boolSetting("NoEntityPush", true, () -> mode.is(Mode.Vanilla));
+    public final BoolSetting blockPush = boolSetting("NoBlockPush", true, () -> mode.is(Mode.Vanilla));
     private final IntSetting attacks = intSetting("Attacks", 4, 1, 5, 1, () -> mode.is(Mode.NoXZ));
     private final DoubleSetting delayTime = doubleSetting("MaxDelayTime", 2500.0, 50.0, 10000.0, 50.0, () -> mode.is(Mode.NoXZ));
-    private final BoolSetting render = boolSetting("Render", false);
-    private final BoolSetting debug = boolSetting("Debug", false);
 
     private Player target;
 
@@ -103,18 +98,18 @@ public class Velocity extends Module {
                     lag = true;
                     return;
                 }
-                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket(int id, Vec3 movement) && id == mc.player.getId()) {
+                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.getId() == mc.player.getId()) {
                     if (stage == VelocityStage.NONE) {
                         if (!lag) {
                             stage = VelocityStage.DELAY;
                             velocityTime = System.currentTimeMillis();
                             event.setCanceled(true);
-                            velocity = new Vec3(movement.x, movement.y, movement.z);
+                            velocity = packet.getMovement();
                         } else {
                             lag = false;
                         }
                     } else {
-                        velocity = new Vec3(movement.x, movement.y, movement.z);
+                        velocity = packet.getMovement();
                         stage = VelocityStage.LAG;
                         event.setCanceled(true);
                     }
@@ -168,7 +163,7 @@ public class Velocity extends Module {
             }
 
             case Legit -> {
-                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
+                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.getId() == mc.player.getId()) {
                     jump = true;
                 }
             }
@@ -222,7 +217,7 @@ public class Velocity extends Module {
 
     @SubscribeEvent
     public void onMoveInput(MovementInputUpdateEvent event) {
-        if (Objects.requireNonNull(mode.getValue()) == Mode.NoXZ) {
+        if (mode.is(Mode.NoXZ)) {
             if (stage == VelocityStage.DELAY && velocity != null && mc.hitResult instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof Player player && !AntiBot.INSTANCE.isBot(player)) {
                 event.getInput().moveVector = new Vec2(1, 0);
                 stage = VelocityStage.ATTACK;
@@ -234,25 +229,6 @@ public class Velocity extends Module {
                 event.getInput().makeJump();
             }
             jump = false;
-        }
-    }
-
-    @Subscribe
-    public void onRender(RenderLevelStageEvent.AfterLevel event) {
-        if (stage == VelocityStage.NONE) return;
-        for (Entity entity : targets.keySet()) {
-            if (!(entity instanceof Player)) continue;
-            Vec3 pos = targets.get(entity);
-
-            double width = entity.getBbWidth();
-            double height = entity.getBbHeight();
-
-            AABB box = new AABB(
-                    pos.x - width / 2.0, pos.y, pos.z - width / 2.0,
-                    pos.x + width / 2.0, pos.y + height, pos.z + width / 2.0
-            );
-
-            Render3DUtils.drawFilledBox(event.getPoseStack(), box, entity.equals(target) ? new Color(200, 0, 0, 60) : new Color(0, 200, 0, 60));
         }
     }
 

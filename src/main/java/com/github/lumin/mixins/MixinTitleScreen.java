@@ -19,11 +19,6 @@ public class MixinTitleScreen {
         if (clickGui.getKeyBind() == -1) {
             clickGui.setKeyBind(GLFW.GLFW_KEY_RIGHT_SHIFT);
         }
-
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.screen instanceof TitleScreen) {
-            mc.setScreen(MainMenuScreen.INSTANCE);
-        }
     }
 
 }

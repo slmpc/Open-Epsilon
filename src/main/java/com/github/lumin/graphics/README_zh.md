@@ -1,8 +1,8 @@
-# Lumin Graphics
+# Epsilon Graphics
 
 [English](README.md) | **简体中文**
 
-Lumin Graphics 是一个为现代 Minecraft 模组开发设计的轻量化、高性能渲染框架。
+Epsilon Graphics 是一个为现代 Minecraft 模组开发设计的轻量化、高性能渲染框架。
 
 ---
 
@@ -31,7 +31,7 @@ Lumin Graphics 是一个为现代 Minecraft 模组开发设计的轻量化、高
 
 ## 快速上手
 
-Lumin Graphics 的所有渲染操作均通过专门的 **Renderer（渲染器）** 完成。
+Epsilon Graphics 的所有渲染操作均通过专门的 **Renderer（渲染器）** 完成。
 
 ### 可用渲染器
 
@@ -50,7 +50,11 @@ Lumin Graphics 的所有渲染操作均通过专门的 **Renderer（渲染器）
 private final Supplier<RectRenderer> rectRenderer = Suppliers.memoize(RectRenderer::new);
 
 // 使用 .get() 获取渲染器实例
-rectRenderer.get().addRect(10f,10f,100f,100f,Color.WHITE);
+rectRenderer.
+
+get().
+
+addRect(10f,10f,100f,100f,Color.WHITE);
 
 ```
 
@@ -64,14 +68,28 @@ rectRenderer.get().addRect(10f,10f,100f,100f,Color.WHITE);
 
 ```java
 // 1. 向缓冲区添加形状
-rectRenderer.get().addRect(10f,10f,200f,200f,Color.WHITE);
+rectRenderer.get().
+
+addRect(10f,10f,200f,200f,Color.WHITE);
 
 // 2. 绘制到屏幕并在下一帧前清理数据
-rectRenderer.get().draw();
-rectRenderer.get().clear();
+rectRenderer.
+
+get().
+
+draw();
+rectRenderer.
+
+get().
+
+clear();
 
 // 你也可以直接使用 drawAndClear()
-rectRenderer.get().drawAndClear();
+rectRenderer.
+
+get().
+
+drawAndClear();
 
 ```
 
@@ -81,10 +99,16 @@ rectRenderer.get().drawAndClear();
 
 ```java
 // 在初始化阶段或首帧中：
-rectRenderer.get().addRect(10f,10f,200f,200f,Color.CYAN);
+rectRenderer.get().
+
+addRect(10f,10f,200f,200f,Color.CYAN);
 
 // 在渲染循环中：
-rectRenderer.get().draw(); // 内容会一直保存在 GPU 缓冲区中，直到调用 .clear()
+rectRenderer.
+
+get().
+
+draw(); // 内容会一直保存在 GPU 缓冲区中，直到调用 .clear()
 
 ```
 
@@ -92,14 +116,14 @@ rectRenderer.get().draw(); // 内容会一直保存在 GPU 缓冲区中，直到
 
 ### 💡 优化建议
 
-在使用 **Lumin Graphics** 时请记住：多次调用 `.draw()` 而不调用 `.clear()` 是极其高效的。它仅会重新触发现有 GPU
+在使用 **Epsilon Graphics** 时请记住：多次调用 `.draw()` 而不调用 `.clear()` 是极其高效的。它仅会重新触发现有 GPU
 数据的绘制指令，而无需重新上传顶点数据。
 
 ---
 
 ## 开源协议
 
-* **Lumin Graphics**：核心渲染组件（位于 `src/main/java/com/github/lumin/graphics/`）采用 [MIT License](LICENSE) 协议。
+* **Epsilon Graphics**：核心渲染组件（位于 `src/main/java/com/github/lumin/graphics/`）采用 [MIT License](LICENSE) 协议。
 
 ---
 

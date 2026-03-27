@@ -2,6 +2,7 @@ package com.github.lumin.mixins;
 
 import com.github.lumin.events.RayTraceEvent;
 import com.github.lumin.events.StrafeEvent;
+import com.github.lumin.modules.impl.player.Velocity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -9,7 +10,9 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Entity.class)
 public abstract class MixinEntity {
@@ -33,6 +36,17 @@ public abstract class MixinEntity {
             return event.getYaw();
         }
         return instance.getYRot();
+    }
+
+    @ModifyArgs(method = "push(Lnet/minecraft/world/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;push(DDD)V"))
+    private void pushAwayFromHook(Args args) {
+        if (Entity.class.cast(this) == Minecraft.getInstance().player) {
+            if (Velocity.INSTANCE.isEnabled() && Velocity.INSTANCE.entityPush.getValue()) {
+                args.set(0, 0d);
+                args.set(1, 0d);
+                args.set(2, 0d);
+            }
+        }
     }
 
 }

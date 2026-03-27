@@ -3,45 +3,49 @@ package com.github.lumin.mixins;
 import com.github.lumin.events.PacketEvent;
 import com.github.lumin.utils.network.PacketUtils;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.Connection;
-import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Iterator;
 
 @Mixin(Connection.class)
 public class MixinConnection {
 
     @Shadow
-    private void sendPacket(Packet<?> packet, @Nullable ChannelFutureListener sendListener, boolean flush) {
+    public void send(Packet<?> packet, @Nullable ChannelFutureListener sendListener) {
     }
 
-    @Shadow
-    private static <T extends PacketListener> void genericsFtw(Packet<T> packet, PacketListener listener) {
-    }
-
-    @Redirect(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;genericsFtw(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;)V"))
-    private void onReceivePacket(Packet<?> packet, PacketListener pListener) {
-        PacketEvent.Receive event = NeoForge.EVENT_BUS.post(new PacketEvent.Receive(packet));
-
-        if (!event.isCanceled()) {
-            genericsFtw(event.getPacket(), pListener);
+    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;genericsFtw(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;)V", shift = At.Shift.BEFORE), cancellable = true)
+    private void onReceivePacket(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
+        if (packet instanceof ClientboundBundlePacket bundle) {
+            for (Iterator<Packet<? super ClientGamePacketListener>> it = bundle.subPackets().iterator(); it.hasNext(); ) {
+                if (NeoForge.EVENT_BUS.post(new PacketEvent.Receive(it.next())).isCanceled()) {
+                    it.remove();
+                }
+            }
+        } else if (NeoForge.EVENT_BUS.post(new PacketEvent.Receive(packet)).isCanceled()) {
+            ci.cancel();
         }
     }
 
-    @Redirect(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;sendPacket(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V"))
-    private void onSend(Connection instance, Packet<?> packet, @Nullable ChannelFutureListener sendListener, boolean flush) {
+    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V", at = @At("HEAD"), cancellable = true)
+    private void onSendPacket(Packet<?> packet, @Nullable ChannelFutureListener sendListener, CallbackInfo ci) {
         if (PacketUtils.bypassPackets.contains(packet)) {
             PacketUtils.bypassPackets.remove(packet);
-            this.sendPacket(packet, sendListener, flush);
+            send(packet, sendListener);
         } else {
-            PacketEvent.Send event = NeoForge.EVENT_BUS.post(new PacketEvent.Send(packet));
-            if (!event.isCanceled()) {
-                this.sendPacket(event.getPacket(), sendListener, flush);
+            if (NeoForge.EVENT_BUS.post(new PacketEvent.Send(packet)).isCanceled()) {
+                ci.cancel();
             }
         }
     }

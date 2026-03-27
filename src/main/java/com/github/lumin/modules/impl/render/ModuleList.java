@@ -3,7 +3,7 @@ package com.github.lumin.modules.impl.render;
 import com.github.lumin.graphics.renderers.ShadowRenderer;
 import com.github.lumin.graphics.renderers.TextRenderer;
 import com.github.lumin.graphics.text.StaticFontLoader;
-import com.github.lumin.managers.Managers;
+import com.github.lumin.managers.ModuleManager;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
@@ -39,7 +39,7 @@ public class ModuleList extends Module {
     private void onRenderGui(RenderGuiEvent.Post event) {
         if (nullCheck()) return;
 
-        List<Module> enabledModules = Managers.MODULE.getModules().stream()
+        List<Module> enabledModules = ModuleManager.INSTANCE.getModules().stream()
                 .filter(Module::isEnabled)
                 .collect(Collectors.toList());
 

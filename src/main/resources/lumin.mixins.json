@@ -4,22 +4,35 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "MixinClientLevel",
+    "MixinClientPacketListener",
     "MixinConnection",
     "MixinEntity",
     "MixinEntityRenderer",
     "MixinGlDebug",
     "MixinGui",
+    "MixinHumanoidMobRenderer",
+    "MixinLightTexture",
     "MixinLivingEntity",
     "MixinLivingEntityRenderer",
     "MixinLocalPlayer",
-    "MixinMinecraft",
     "MixinMultiPlayerGameMode",
-    "MixinTitleScreen"
+    "MixinRegistryDataLoader",
+    "MixinMobEffectFogEnvironment",
+    "MixinParticleManager",
+    "MixinScreenEffectRenderer",
+    "MixinTitleScreen",
+    "MixinAvatarRenderer",
+    "MixinWeatherEffectRenderer",
+    "MixinWindow"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "overwrites": {
     "requireAnnotations": true
-  }
+  },
+  "mixins": [
+    "MixinFireworkRocketEntity",
+    "MixinFlowingFluid"
+  ]
 }

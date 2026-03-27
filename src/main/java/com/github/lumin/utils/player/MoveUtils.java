@@ -11,7 +11,7 @@ public class MoveUtils {
     static Minecraft mc = Minecraft.getInstance();
 
     public static boolean isMoving() {
-        return mc.player.zza != 0 || mc.player.xxa != 0;
+        return mc.player.zza != 0 || mc.player.xxa != 0 || mc.options.keyJump.isDown() || mc.options.keyLeft.isDown() || mc.options.keyRight.isDown() || mc.options.keyUp.isDown() || mc.options.keyDown.isDown();
     }
 
     public static double getDirection(float rotationYaw, final double moveForward, final double moveStrafing) {

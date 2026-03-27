@@ -177,7 +177,7 @@ public class InvHelper {
     }
 
     public static List<ItemStack> getAllItems() {
-        ArrayList<ItemStack> list = new ArrayList<>(40);
+        List<ItemStack> list = new ArrayList<>(40);
         for (int i = 0; i < mc.player.getInventory().getContainerSize(); i++) {
             list.add(mc.player.getInventory().getItem(i));
         }
@@ -187,7 +187,11 @@ public class InvHelper {
     public static float getBestArmorScore(EquipmentSlot slot) {
         return getAllItems()
                 .stream()
-                .filter(item -> !item.isEmpty() && item.getEquipmentSlot() == slot)
+                .filter(item -> {
+                    if (item.isEmpty() || !item.is(ItemTags.ARMOR_ENCHANTABLE)) return false;
+                    var equippable = item.get(DataComponents.EQUIPPABLE);
+                    return equippable != null && equippable.slot() == slot;
+                })
                 .map(InvHelper::getProtection)
                 .max(Float::compareTo)
                 .orElse(0.0F);

@@ -1,6 +1,6 @@
 package com.github.lumin.assets.i18n;
 
-import com.github.lumin.managers.Managers;
+import com.github.lumin.managers.ModuleManager;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.Setting;
@@ -31,7 +31,7 @@ public class I18NFileGenerator {
         root.addProperty("lumin.gui.search", "");
         root.addProperty("lumin.gui.gameaccount", "");
 
-        for (Module module : Managers.MODULE.getModules()) {
+        for (Module module : ModuleManager.INSTANCE.getModules()) {
             String modulePrefix = "modules." + module.getName().toLowerCase();
             root.addProperty("lumin." + modulePrefix, "");
 

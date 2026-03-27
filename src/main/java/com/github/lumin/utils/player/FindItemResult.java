@@ -11,9 +11,6 @@ public record FindItemResult(int slot, int count, int maxCount) {
         if (slot == 40) { // offhand
             return InteractionHand.OFF_HAND;
         }
-        /*if (slot == mc.player.getInventory().selectedSlot) {
-            return Hand.MAIN_HAND;
-        }*/
         return InteractionHand.MAIN_HAND;
     }
 

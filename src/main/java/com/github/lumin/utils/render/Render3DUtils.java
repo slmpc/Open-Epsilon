@@ -123,7 +123,7 @@ public class Render3DUtils {
         vertex(bufferBuilder, matrix, minX, maxY, maxZ, c1);
         vertex(bufferBuilder, matrix, minX, maxY, minZ, c1);
 
-        FILLED_BOX.draw(bufferBuilder.build());
+        FILLED_BOX.draw(bufferBuilder.buildOrThrow());
     }
 
     public static void drawOutlineBox(PoseStack stack, AABB box, int color, float thickness) {
@@ -155,7 +155,7 @@ public class Render3DUtils {
         vertexLine(buffer, matrix, entry, maxX, minY, maxZ, maxX, maxY, maxZ, color, thickness);
         vertexLine(buffer, matrix, entry, minX, minY, maxZ, minX, maxY, maxZ, color, thickness);
 
-        LINES.draw(buffer.build());
+        LINES.draw(buffer.buildOrThrow());
     }
 
     private static void vertex(BufferBuilder buffer, Matrix4f matrix, float x, float y, float z, int color) {

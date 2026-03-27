@@ -1,7 +1,7 @@
 package com.github.lumin.modules.impl.player;
 
 import com.github.lumin.events.PacketEvent;
-import com.github.lumin.gui.clickgui.ClickGuiScreen;
+import com.github.lumin.gui.dropdown.DropdownScreen;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
@@ -9,10 +9,10 @@ import com.github.lumin.settings.impl.DoubleSetting;
 import com.github.lumin.settings.impl.EnumSetting;
 import com.github.lumin.settings.impl.IntSetting;
 import com.github.lumin.utils.math.MathUtils;
-import com.github.lumin.utils.math.TimerUtils;
 import com.github.lumin.utils.player.ChatUtils;
 import com.github.lumin.utils.player.InvHelper;
 import com.github.lumin.utils.player.MoveUtils;
+import com.github.lumin.utils.timer.TimerUtils;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.component.DataComponents;
@@ -231,8 +231,10 @@ public class InvManager extends Module {
     }
 
     @SubscribeEvent
-    private void onTick(ClientTickEvent.Pre e) {
-        if (!(mc.screen instanceof ClickGuiScreen) && !this.checkConfig()) {
+    private void onTick(ClientTickEvent.Pre event) {
+        if (nullCheck()) return;
+
+        if (!(mc.screen instanceof DropdownScreen) && !this.checkConfig()) {
             ChatUtils.addChatMessage("Duplicate slot config in Inventory Manager! Please check your config!");
             this.toggle();
             return;

@@ -58,7 +58,8 @@ public class TtfTextRenderer implements ITextRenderer {
         float xOffset = 0f;
         float yOffset = 0f;
 
-        for (char ch : text.toCharArray()) {
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
             if (ch == ' ') {
                 xOffset += 3.0f * scale;
                 continue;
@@ -75,7 +76,6 @@ public class TtfTextRenderer implements ITextRenderer {
             TtfGlyphAtlas atlas = glyph.atlas();
 
             Batch batch = batches.computeIfAbsent(atlas, k -> new Batch(new LuminRingBuffer(bufferSize, GpuBuffer.USAGE_VERTEX)));
-
             batch.buffer.tryMap();
 
             float baselineY = yOffset + y + (fontLoader.fontFile.pixelAscent * finalScale);
@@ -105,11 +105,8 @@ public class TtfTextRenderer implements ITextRenderer {
 
         if (ttfInfoUniformBuf == null) {
             final var size = new Std140SizeCalculator().putFloat().get();
-            ttfInfoUniformBuf = RenderSystem.getDevice().createBuffer(
-                    () -> "Lumin TTF UBO", GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE, size);
-
-            try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder()
-                    .mapBuffer(ttfInfoUniformBuf, false, true)) {
+            ttfInfoUniformBuf = RenderSystem.getDevice().createBuffer(() -> "Lumin TTF UBO", GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE, size);
+            try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice().createCommandEncoder().mapBuffer(ttfInfoUniformBuf, false, true)) {
                 Std140Builder.intoBuffer(mappedView.data()).putFloat(0.5f);
             }
         }

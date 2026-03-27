@@ -1,16 +1,29 @@
 package com.github.lumin.modules.impl.client;
 
-import com.github.lumin.gui.clickgui.ClickGuiScreen;
+import com.github.lumin.gui.dropdown.DropdownScreen;
 import com.github.lumin.modules.Category;
 import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
-import com.github.lumin.settings.impl.ColorSetting;
-import com.github.lumin.settings.impl.DoubleSetting;
 import com.github.lumin.settings.impl.EnumSetting;
 
-import java.awt.*;
-
 public class ClickGui extends Module {
+
+    public enum ThemePreset {
+        TonalSpot,
+        Neutral,
+        Vibrant,
+        Expressive,
+        Fidelity,
+        Content,
+        Rainbow,
+        FruitSalad,
+        Monochrome
+    }
+
+    public enum ThemeMode {
+        Dark,
+        Light
+    }
 
     public static final ClickGui INSTANCE = new ClickGui();
 
@@ -18,23 +31,19 @@ public class ClickGui extends Module {
         super("ClickGui", Category.CLIENT);
     }
 
-    public final DoubleSetting scale = doubleSetting("Scale", 1.0, 0.5, 2.0, 0.05);
-    public final ColorSetting shadowColor = colorSetting("ShadowColor", new Color(0, 0, 0, 113));
-
-    public final BoolSetting backgroundBlackColor = boolSetting("BackgroundBlackColor", true);
     private final BoolSetting backgroundBlur = boolSetting("BackgroundBlur", true);
-    private final DoubleSetting blurStrength = doubleSetting("BlurStrength", 10.5, 1.0, 15, 0.5, backgroundBlur::getValue);
-    private final EnumSetting<BlurMode> blurMode = enumSetting("BlurMode", BlurMode.FullScreen, backgroundBlur::getValue);
+    public final EnumSetting<ThemeMode> themeMode = enumSetting("ThemeMode", ThemeMode.Dark);
+    public final EnumSetting<ThemePreset> themePreset = enumSetting("ThemePreset", ThemePreset.TonalSpot);
 
     @Override
     protected void onEnable() {
         if (nullCheck()) return;
-        mc.setScreen(ClickGuiScreen.INSTANCE);
+        mc.setScreen(new DropdownScreen());
     }
 
     @Override
     protected void onDisable() {
-        if (mc.screen instanceof ClickGuiScreen) {
+        if (mc.screen instanceof DropdownScreen) {
             mc.setScreen(null);
         }
     }
@@ -43,21 +52,12 @@ public class ClickGui extends Module {
         return backgroundBlur.getValue();
     }
 
-    public boolean isFullScreenBlur() {
-        return shouldBlur() && blurMode.is(BlurMode.FullScreen);
+    public ThemePreset getThemePreset() {
+        return themePreset.getValue();
     }
 
-    public boolean isSidebarBlur() {
-        return shouldBlur() && blurMode.is(BlurMode.OnlySideBar);
-    }
-
-    public float getBlurStrength() {
-        return blurStrength.getValue().floatValue();
-    }
-
-    private enum BlurMode {
-        FullScreen,
-        OnlySideBar,
+    public ThemeMode getThemeMode() {
+        return themeMode.getValue();
     }
 
 }

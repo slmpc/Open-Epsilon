@@ -1,8 +1,8 @@
 package com.github.lumin;
 
 import com.github.lumin.assets.i18n.I18NFileGenerator;
-import com.github.lumin.managers.Managers;
-import com.github.lumin.utils.AuthUtils;
+import com.github.lumin.managers.ConfigManager;
+import com.github.lumin.managers.ModuleManager;
 import com.mojang.logging.LogUtils;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -80,28 +80,29 @@ import org.slf4j.Logger;
 public class Lumin {
 
     public static final String MODID = "lumin";
+    public static final String VERSION = "5.0.1"; // NeoForge咋获取mod版本号我不知道啊。。
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static int skipTicks;
 
     @SubscribeEvent
     private static void onClientSetup(FMLClientSetupEvent event) {
+        LOGGER.info("Welcome to Epsilon, Meow~");
 
-        AuthUtils.checkConnection();
+        // 初始化 Managers
+        ModuleManager.INSTANCE.initModules();
+        ConfigManager.INSTANCE.initConfig();
 
-        LOGGER.info("Welcome to Lumin, Meow~");
+        // 生成空的 i18n 文件
+        I18NFileGenerator.generate("epsilon-config/empty-i18n.json");
 
-        Managers.initManagers();
-
-        I18NFileGenerator.generate("lumin-config/empty-i18n.json");
-
+        // 添加一个退出游戏时候的钩子
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            Managers.CONFIG.saveNow();
+            ConfigManager.INSTANCE.saveNow();
             Lumin.LOGGER.info("お兄ちゃん、私はあなたを一番愛しています~");
         }));
 
-        Lumin.LOGGER.info("Lumin has loaded successfully, Meow~");
-
+        Lumin.LOGGER.info("Epsilon has loaded successfully, Meow~");
     }
 
 }

@@ -14,7 +14,7 @@ public abstract class Setting<V> {
     public Setting(String name, Module module, Dependency dependency) {
         this.name = name;
         this.dependency = dependency;
-        // lumin.modules.<module>.<setting>
+        // Usage: lumin.modules.<module>.<setting>
         String prefix = "modules." + module.getName().toLowerCase();
         this.translateComponent = TranslateComponent.create(prefix, name.toLowerCase());
     }

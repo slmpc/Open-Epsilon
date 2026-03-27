@@ -5,15 +5,15 @@ import com.github.lumin.modules.Module;
 import com.github.lumin.settings.impl.BoolSetting;
 import com.github.lumin.settings.impl.IntSetting;
 import com.github.lumin.utils.math.MathUtils;
-import com.github.lumin.utils.math.TimerUtils;
 import com.github.lumin.utils.player.InvHelper;
+import com.github.lumin.utils.timer.TimerUtils;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.*;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -105,6 +105,7 @@ public class Stealer extends Module {
     @SubscribeEvent
     public void onTick(ClientTickEvent.Pre event) {
         if (nullCheck()) return;
+
         Screen currentScreen = mc.screen;
         if (currentScreen instanceof ContainerScreen container) {
             ChestMenu menu = container.getMenu();
@@ -119,7 +120,7 @@ public class Stealer extends Module {
                         || chestTitle.equals(largeChest)
                         || chestTitle.equals("Chest")
                         || this.pickEnderChest.getValue() && chestTitle.equals(enderChest)) {
-                    if (this.isChestEmpty(menu) && timer.delay(MathUtils.getRandom(minDelay.getValue(), maxDelay.getValue()))) {
+                    if (this.isChestEmpty(menu) && timer.passedMillise(MathUtils.getRandom(minDelay.getValue(), maxDelay.getValue()))) {
                         mc.player.closeContainer();
                     } else {
                         List<Integer> slots = IntStream.range(0, menu.getRowCount() * 9).boxed().collect(Collectors.toList());
@@ -127,8 +128,8 @@ public class Stealer extends Module {
 
                         for (Integer pSlotId : slots) {
                             ItemStack stack = menu.getSlot(pSlotId).getItem();
-                            if (isItemUseful(stack) && this.isBestItemInChest(menu, stack) && timer.delay(MathUtils.getRandom(minDelay.getValue(), maxDelay.getValue()))) {
-                                mc.gameMode.handleContainerInput(menu.containerId, pSlotId, 0, ContainerInput.QUICK_MOVE, mc.player);
+                            if (isItemUseful(stack) && this.isBestItemInChest(menu, stack) && timer.passedMillise(MathUtils.getRandom(minDelay.getValue(), maxDelay.getValue()))) {
+                                mc.gameMode.handleInventoryMouseClick(menu.containerId, pSlotId, 0, ClickType.QUICK_MOVE, mc.player);
                                 timer.reset();
                                 break;
                             }

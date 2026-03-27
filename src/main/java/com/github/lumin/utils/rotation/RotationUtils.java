@@ -1,6 +1,6 @@
 package com.github.lumin.utils.rotation;
 
-import com.github.lumin.managers.Managers;
+import com.github.lumin.managers.RotationManager;
 import com.github.lumin.utils.math.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -27,12 +27,11 @@ public class RotationUtils {
 
     public static boolean isInFov(LivingEntity entity, float fov) {
         if (fov >= 360.0) return true;
-        float[] rotations = RotationUtils.getRotationsToEntity(entity);
-        float yawDiff = Math.abs(Mth.wrapDegrees(rotations[0] - mc.player.getYRot()));
+        float yawDiff = Math.abs(Mth.wrapDegrees(RotationUtils.getRotationsToEntity(entity).x - mc.player.getYRot()));
         return yawDiff <= fov / 2.0;
     }
 
-    public static float[] getRotationsToEntity(LivingEntity entity) {
+    public static Vector2f getRotationsToEntity(LivingEntity entity) {
         Vec3 eyePos = mc.player.getEyePosition();
         Vec3 targetPos = entity.position().add(0, entity.getBbHeight() / 2.0, 0);
         double dx = targetPos.x - eyePos.x;
@@ -43,7 +42,7 @@ public class RotationUtils {
         float yaw = (float) Math.toDegrees(-Math.atan2(dx, dz));
         float pitch = (float) Math.toDegrees(-Math.atan2(dy, dist));
 
-        return new float[]{yaw, Mth.clamp(pitch, -90, 90)};
+        return new Vector2f(yaw, Mth.clamp(pitch, -90, 90));
     }
 
     public static double getEyeDistanceToEntity(LivingEntity entity) {
@@ -181,7 +180,7 @@ public class RotationUtils {
     }
 
     public static Vector2f smooth(final Vector2f targetRotation, final double speed) {
-        return smooth(Managers.ROTATION.lastRotations, targetRotation, speed);
+        return smooth(RotationManager.INSTANCE.lastRotations, targetRotation, speed);
     }
 
     public static Vector2f smooth(final Vector2f lastRotation, final Vector2f targetRotation, final double speed) {

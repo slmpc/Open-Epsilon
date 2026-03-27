@@ -3,6 +3,8 @@ package com.github.lumin;
 import com.github.lumin.assets.i18n.LanguageReloadListener;
 import com.github.lumin.assets.resources.ResourceLocationUtils;
 import com.github.lumin.graphics.LuminRenderPipelines;
+import com.github.lumin.managers.ModuleManager;
+import net.minecraft.client.Minecraft;
 import com.github.lumin.gui.clickgui.ClickGuiScreen;
 import com.github.lumin.gui.menu.MainMenuScreen;
 import com.github.lumin.managers.Managers;
@@ -15,6 +17,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import org.lwjgl.glfw.GLFW;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 
 @EventBusSubscriber(modid = Lumin.MODID, value = Dist.CLIENT)
@@ -27,7 +30,9 @@ public class EventHandler {
 
     @SubscribeEvent
     private static void onKeyPress(InputEvent.Key event) {
-        Managers.MODULE.onKeyEvent(event.getKey(), event.getAction());
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.screen != null || event.getKey() == GLFW.GLFW_KEY_UNKNOWN) return;
+        ModuleManager.INSTANCE.onKeyEvent(event.getKey(), event.getAction());
     }
 
     @SubscribeEvent

@@ -175,7 +175,6 @@ public class BlurShader implements AutoCloseable {
 
         RenderSystem.restoreProjectionMatrix();
 
-
         return outputTarget;
     }
 
@@ -222,10 +221,7 @@ public class BlurShader implements AutoCloseable {
         // Vertex 3: x2, y
         writeVertex(buf, x2, y, u1, v0, color, x, y, x2, y2, rTL, rTR, rBR, rBL);
 
-        // No flip needed as we are writing to mapped buffer directly and not passing it to createBuffer
-
         try {
-            // Draw
             LuminRenderSystem.applyOrthoProjection();
             RenderTarget mainTarget = mc.getMainRenderTarget();
 
