@@ -46,7 +46,7 @@ public class ESP extends Module {
                         BlockPos blockPos = entity.getBlockPos();
                         if (blockPos.distSqr(playerPos) > maxRange * maxRange) continue;
 
-                        Render3DUtils.drawFilledBox(event.getPoseStack(), getAABB(blockPos), getColor(entity));
+                        Render3DUtils.drawFilledBox(getAABB(blockPos), getColor(entity));
                     }
                 }
             }

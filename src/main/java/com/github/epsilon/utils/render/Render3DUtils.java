@@ -46,41 +46,20 @@ public class Render3DUtils {
             .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
             .createRenderSetup());
 
-    public static void drawFullBox(PoseStack stack, BlockPos blockPos, Color sideColor, Color lineColor) {
-        drawFullBox(stack, blockPos, sideColor, lineColor, 2f);
+    public static void drawFilledBox(BlockPos blockPos, Color color) {
+        drawFilledBox(new AABB(blockPos), color.getRGB());
     }
 
-    public static void drawFullBox(PoseStack stack, AABB box, Color sideColor, Color lineColor) {
-        drawFullBox(stack, box, sideColor, lineColor, 2f);
-    }
-
-    public static void drawFullBox(PoseStack stack, BlockPos blockPos, Color sideColor, Color lineColor, float lineWidth) {
-        drawFullBox(stack, new AABB(blockPos), sideColor, lineColor, lineWidth);
-    }
-
-    public static void drawFullBox(PoseStack stack, AABB box, Color sideColor, Color lineColor, float lineWidth) {
-        drawFullBox(stack, box, sideColor.getRGB(), lineColor.getRGB(), lineWidth);
-    }
-
-    public static void drawFullBox(PoseStack stack, AABB box, int sideColor, int lineColor, float thickness) {
-        drawFilledBox(stack, box, sideColor);
-        drawOutlineBox(stack, box, lineColor, thickness);
-    }
-
-    public static void drawFilledBox(PoseStack stack, BlockPos blockPos, Color color) {
-        drawFilledBox(stack, new AABB(blockPos), color.getRGB());
-    }
-
-    public static void drawFilledBox(PoseStack stack, AABB box, Color color) {
+    public static void drawFilledBox(AABB box, Color color) {
         int c = color.getRGB();
-        drawFilledFadeBox(stack, box, c, c);
+        drawFilledFadeBox(box, c, c);
     }
 
-    public static void drawFilledBox(PoseStack stack, AABB box, int c) {
-        drawFilledFadeBox(stack, box, c, c);
+    public static void drawFilledBox(AABB box, int c) {
+        drawFilledFadeBox(box, c, c);
     }
 
-    public static void drawFilledFadeBox(PoseStack stack, AABB box, int c, int c1) {
+    public static void drawFilledFadeBox(AABB box, int c, int c1) {
         BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         Vec3 camPos = mc.getEntityRenderDispatcher().camera.position();
@@ -91,7 +70,7 @@ public class Render3DUtils {
         float maxY = (float) (box.maxY - camPos.y);
         float maxZ = (float) (box.maxZ - camPos.z);
 
-        Matrix4f matrix = stack.last().pose();
+        Matrix4f matrix = mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.viewRotationMatrix;
 
         vertex(bufferBuilder, matrix, minX, minY, minZ, c);
         vertex(bufferBuilder, matrix, minX, minY, maxZ, c);
@@ -137,7 +116,7 @@ public class Render3DUtils {
         float maxY = (float) (box.maxY - camPos.y);
         float maxZ = (float) (box.maxZ - camPos.z);
 
-        Matrix4f matrix = stack.last().pose();
+        Matrix4f matrix = mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.viewRotationMatrix;
         PoseStack.Pose entry = stack.last();
 
         vertexLine(buffer, matrix, entry, minX, minY, minZ, maxX, minY, minZ, color, thickness);
