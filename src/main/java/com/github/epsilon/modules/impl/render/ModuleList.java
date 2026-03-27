@@ -4,6 +4,7 @@ import com.github.epsilon.graphics.renderers.ShadowRenderer;
 import com.github.epsilon.graphics.renderers.TextRenderer;
 import com.github.epsilon.graphics.text.StaticFontLoader;
 import com.github.epsilon.managers.ModuleManager;
+import com.github.epsilon.managers.RenderManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -105,8 +106,10 @@ public class ModuleList extends Module {
             currentY += item.boxHeight() + 2.0f * moduleScale;
         }
 
-        shadowRenderer.drawAndClear();
-        textRenderer.drawAndClear();
+        RenderManager.INSTANCE.applyRenderAfterFrame(() -> {
+            shadowRenderer.drawAndClear();
+            textRenderer.drawAndClear();
+        });
     }
 
     private int getTextWidth(Module module) {

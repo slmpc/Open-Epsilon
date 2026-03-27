@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.player;
 
 import com.github.epsilon.events.PacketEvent;
-import com.github.epsilon.gui.dropdown.DropdownScreen;
+import com.github.epsilon.gui.panel.PanelScreen;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -233,7 +233,7 @@ public class InvManager extends Module {
     private void onTick(ClientTickEvent.Pre event) {
         if (nullCheck()) return;
 
-        if (!(mc.screen instanceof DropdownScreen) && !this.checkConfig()) {
+        if (!(mc.screen instanceof PanelScreen) && !this.checkConfig()) {
             ChatUtils.addChatMessage("Duplicate slot config in Inventory Manager! Please check your config!");
             this.toggle();
             return;
