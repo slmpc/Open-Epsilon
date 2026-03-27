@@ -17,12 +17,18 @@ public class RenderManager {
 	public void applyRenderAfterFrame(Consumer<DeltaTracker> func) {
 		renderQueue.add(func);
 	}
+
+	public void applyRenderAfterFrame(Runnable func) {
+		renderQueue.add((delta) -> func.run());
+	}
 	
 	public void callAndClear(DeltaTracker t) {
-		renderQueue.forEach((func) -> {
-			func.accept(t);
-		});
+		if (renderQueue.isEmpty()) {
+			return;
+		}
+		ArrayList<Consumer<DeltaTracker>> pending = new ArrayList<>(renderQueue);
 		renderQueue.clear();
+		pending.forEach((func) -> func.accept(t));
 	}
 	
 }

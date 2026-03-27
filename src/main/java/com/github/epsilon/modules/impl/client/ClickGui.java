@@ -1,6 +1,6 @@
 package com.github.epsilon.modules.impl.client;
 
-import com.github.epsilon.gui.dropdown.DropdownScreen;
+import com.github.epsilon.gui.panel.PanelScreen;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -38,12 +38,12 @@ public class ClickGui extends Module {
     @Override
     protected void onEnable() {
         if (nullCheck()) return;
-        mc.setScreen(DropdownScreen.INSTANCE);
+        mc.setScreen(PanelScreen.INSTANCE);
     }
 
     @Override
     protected void onDisable() {
-        if (mc.screen instanceof DropdownScreen) {
+        if (mc.screen instanceof PanelScreen) {
             mc.setScreen(null);
         }
     }
