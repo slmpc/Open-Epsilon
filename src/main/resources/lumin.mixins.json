@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "com.github.lumin.mixins",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "MixinClientLevel",
     "MixinClientPacketListener",
@@ -11,18 +11,15 @@
     "MixinGlDebug",
     "MixinGui",
     "MixinHumanoidMobRenderer",
-    "MixinLightTexture",
     "MixinLivingEntity",
     "MixinLivingEntityRenderer",
     "MixinLocalPlayer",
     "MixinMultiPlayerGameMode",
-    "MixinRegistryDataLoader",
     "MixinMobEffectFogEnvironment",
     "MixinParticleManager",
     "MixinScreenEffectRenderer",
     "MixinTitleScreen",
     "MixinAvatarRenderer",
-    "MixinWeatherEffectRenderer",
     "MixinWindow"
   ],
   "injectors": {

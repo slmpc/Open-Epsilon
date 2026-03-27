@@ -4,13 +4,9 @@ import com.github.lumin.assets.i18n.LanguageReloadListener;
 import com.github.lumin.assets.resources.ResourceLocationUtils;
 import com.github.lumin.graphics.LuminRenderPipelines;
 import com.github.lumin.managers.ModuleManager;
+import com.github.lumin.managers.RenderManager;
 import net.minecraft.client.Minecraft;
-import com.github.lumin.gui.clickgui.ClickGuiScreen;
-import com.github.lumin.gui.menu.MainMenuScreen;
-import com.github.lumin.managers.Managers;
-import com.github.lumin.managers.impl.RenderManager;
 
-import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

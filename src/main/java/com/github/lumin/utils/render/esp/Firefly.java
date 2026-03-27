@@ -1,9 +1,8 @@
 package com.github.lumin.utils.render.esp;
 
 import com.github.lumin.assets.resources.ResourceLocationUtils;
-import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
@@ -28,10 +27,8 @@ public class Firefly {
 
     private static final RenderPipeline fireflyPipeline = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
             .withLocation("pipeline/firefly")
-            .withBlend(BlendFunction.LIGHTNING)
+            .withColorTargetState(ColorTargetState.DEFAULT)
             .withCull(false)
-            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-            .withDepthWrite(false)
             .build();
 
     private static final RenderType fireflyLayer = RenderType.create("firefly_layer", RenderSetup.builder(fireflyPipeline)

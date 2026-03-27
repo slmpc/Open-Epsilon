@@ -9,6 +9,7 @@ import com.github.lumin.gui.dropdown.panel.CategoryRailPanel;
 import com.github.lumin.gui.dropdown.panel.ModuleDetailPanel;
 import com.github.lumin.gui.dropdown.panel.ModuleListPanel;
 import com.github.lumin.gui.dropdown.popup.DropdownPopupHost;
+import com.github.lumin.managers.RenderManager;
 import com.github.lumin.modules.impl.client.ClickGui;
 import com.google.common.base.Suppliers;
 import net.minecraft.client.gui.GuiGraphics;
@@ -59,13 +60,16 @@ public class DropdownScreen extends Screen {
         moduleListPanel.render(guiGraphics, layout.modules(), mouseX, mouseY, partialTick);
         moduleDetailPanel.render(guiGraphics, layout.detail(), mouseX, mouseY, partialTick);
 
-        shadowRendererSupplier.get().drawAndClear();
-        roundRectRendererSupplier.get().drawAndClear();
-        rectRendererSupplier.get().drawAndClear();
-        textRendererSupplier.get().drawAndClear();
-        moduleListPanel.flushContent();
-        moduleDetailPanel.flushContent();
-        categoryRailPanel.flushClippedText();
+        RenderManager.INSTANCE.applyRenderAfterFrame((delta) -> {
+            shadowRendererSupplier.get().drawAndClear();
+            roundRectRendererSupplier.get().drawAndClear();
+            rectRendererSupplier.get().drawAndClear();
+            textRendererSupplier.get().drawAndClear();
+            moduleListPanel.flushContent();
+            moduleDetailPanel.flushContent();
+            categoryRailPanel.flushClippedText();
+        });
+
         popupHost.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 

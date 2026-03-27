@@ -145,7 +145,7 @@ public class KillAura extends Module {
     }
 
     @SubscribeEvent
-    private void onRender3D(RenderLevelStageEvent.AfterEntities event) {
+    private void onRender3D(RenderLevelStageEvent.AfterLevel event) {
         if (nullCheck() || !esp.getValue() || target == null) return;
 
         switch (espMode.getValue()) {
