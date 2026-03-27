@@ -12,7 +12,6 @@ public class NoRender extends Module {
         super("NoRender", Category.RENDER);
     }
 
-    public final BoolSetting vignette = boolSetting("Vignette", true);
     public final BoolSetting potionEffects = boolSetting("PotionEffects", true);
     public final BoolSetting playerNameTags = boolSetting("PlayerNameTags", true);
     public final BoolSetting blockOverlay = boolSetting("BlockOverlay", true);
@@ -24,10 +23,6 @@ public class NoRender extends Module {
     public final BoolSetting fireOverlay = boolSetting("FireOverlay", true);
     public final BoolSetting negativeEffects = boolSetting("NegativeEffects", true);
     public final BoolSetting potionParticles = boolSetting("PotionParticles", true);
-
-    public boolean noVignette() {
-        return isEnabled() && vignette.getValue();
-    }
 
     public boolean noPotionEffects() {
         return isEnabled() && potionEffects.getValue();

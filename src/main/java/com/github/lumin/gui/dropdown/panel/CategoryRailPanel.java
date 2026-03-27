@@ -1,5 +1,6 @@
 package com.github.lumin.gui.dropdown.panel;
 
+import com.github.lumin.Lumin;
 import com.github.lumin.graphics.renderers.RectRenderer;
 import com.github.lumin.graphics.renderers.RoundRectRenderer;
 import com.github.lumin.graphics.renderers.TextRenderer;
@@ -12,7 +13,7 @@ import com.github.lumin.modules.Category;
 import com.github.lumin.utils.render.animation.Animation;
 import com.github.lumin.utils.render.animation.Easing;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 
 import java.awt.*;
@@ -55,9 +56,9 @@ public class CategoryRailPanel {
         return expandAnimation.getValue();
     }
 
-    public void render(GuiGraphics guiGraphics, DropdownLayout.Rect bounds, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor GuiGraphicsExtractor, DropdownLayout.Rect bounds, int mouseX, int mouseY, float partialTick) {
         this.bounds = bounds;
-        applyTextScissor(bounds, guiGraphics.guiHeight());
+        applyTextScissor(bounds, GuiGraphicsExtractor.guiHeight());
         float progress = Math.max(0.0f, Math.min(1.0f, (getAnimatedWidth() - DropdownTheme.RAIL_COLLAPSED_WIDTH) / (DropdownTheme.RAIL_EXPANDED_WIDTH - DropdownTheme.RAIL_COLLAPSED_WIDTH)));
         contentAnimation.run(state.isSidebarExpanded() ? 1.0f : 0.0f);
         float contentProgress = contentAnimation.getValue();
@@ -88,9 +89,9 @@ public class CategoryRailPanel {
             float subtitleY = titleY + titleHeight + pad;
             float titleOffset = (1.0f - titleProgress) * 8.0f;
             float subtitleOffset = (1.0f - subtitleProgress) * 10.0f;
-            clippedTextRenderer.addText("Epsilon 5.0", bounds.x() + 38.0f + titleOffset, titleY, titleScale, brandColor, StaticFontLoader.DUCKSANS);
+            clippedTextRenderer.addText("Epsilon " + Lumin.VERSION, bounds.x() + 38.0f + titleOffset, titleY, titleScale, brandColor, StaticFontLoader.DUCKSANS);
             if (subtitleProgress > 0.02f) {
-                clippedTextRenderer.addText("1.21.11 Rewrite", bounds.x() + 38.0f + subtitleOffset, subtitleY, subtitleScale, subColor);
+                clippedTextRenderer.addText("26.1 Rewrite", bounds.x() + 38.0f + subtitleOffset, subtitleY, subtitleScale, subColor);
             }
             if (dividerProgress > 0.02f) {
                 float dividerY = subtitleY + clippedTextRenderer.getHeight(subtitleScale) + 4.0f;

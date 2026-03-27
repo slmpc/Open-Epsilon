@@ -2,7 +2,7 @@ package com.github.lumin.gui.dropdown.popup;
 
 import com.github.lumin.gui.dropdown.DropdownLayout;
 import com.github.lumin.modules.Module;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 
@@ -26,7 +26,7 @@ public class KeyBindPopup implements DropdownPopupHost.Popup {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractGui(GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
     }
 
     @Override

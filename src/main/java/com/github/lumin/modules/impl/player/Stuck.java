@@ -37,7 +37,7 @@ public class Stuck extends Module {
 
     @SubscribeEvent
     public void onPacket(PacketEvent.Send e) {
-        if (e.getPacket() instanceof ServerboundMovePlayerPacket || (e.getPacket() instanceof ClientboundSetEntityMotionPacket setEntityMotionPacket && setEntityMotionPacket.getId() == mc.player.getId())) {
+        if (e.getPacket() instanceof ServerboundMovePlayerPacket || (e.getPacket() instanceof ClientboundSetEntityMotionPacket setEntityMotionPacket && setEntityMotionPacket.id() == mc.player.getId())) {
             e.setCanceled(true);
         }
         if (e.getPacket() instanceof ClientboundPlayerPositionPacket) {

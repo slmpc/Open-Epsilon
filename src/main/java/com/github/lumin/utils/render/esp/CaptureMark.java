@@ -3,8 +3,8 @@ package com.github.lumin.utils.render.esp;
 import com.github.lumin.assets.resources.ResourceLocationUtils;
 import com.github.lumin.utils.render.ColorUtils;
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
@@ -30,10 +30,8 @@ public class CaptureMark {
 
     private static final RenderPipeline TARGET_ICON_PIPELINE = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
             .withLocation("pipeline/target_icon")
-            .withBlend(BlendFunction.TRANSLUCENT)
+            .withColorTargetState(ColorTargetState.DEFAULT)
             .withCull(false)
-            .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-            .withDepthWrite(false)
             .build();
 
     private static final RenderType TARGET_ICON_LAYER = RenderType.create(

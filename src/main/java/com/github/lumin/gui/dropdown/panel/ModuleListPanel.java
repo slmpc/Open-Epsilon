@@ -14,7 +14,7 @@ import com.github.lumin.gui.dropdown.util.DropdownScissor;
 import com.github.lumin.modules.Module;
 import com.github.lumin.utils.render.animation.Animation;
 import com.github.lumin.utils.render.animation.Easing;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -59,9 +59,9 @@ public class ModuleListPanel {
         this.searchFocusAnimation.setStartValue(0.0f);
     }
 
-    public void render(GuiGraphics guiGraphics, DropdownLayout.Rect bounds, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor GuiGraphicsExtractor, DropdownLayout.Rect bounds, int mouseX, int mouseY, float partialTick) {
         this.bounds = bounds;
-        this.guiHeight = guiGraphics.guiHeight();
+        this.guiHeight = GuiGraphicsExtractor.guiHeight();
         rows.clear();
 
         textRenderer.addText(state.getSelectedCategory().getName(), bounds.x() + DropdownTheme.PANEL_TITLE_INSET, bounds.y() + 10.0f, 0.78f, DropdownTheme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);

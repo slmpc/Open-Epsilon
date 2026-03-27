@@ -28,7 +28,7 @@ public class ESP extends Module {
     private final DoubleSetting range = doubleSetting("Range", 64.0, 1.0, 128.0, 1.0);
 
     @SubscribeEvent
-    public void onRender3D(RenderLevelStageEvent.AfterEntities event) {
+    public void onRender3D(RenderLevelStageEvent.AfterLevel event) {
         if (nullCheck()) return;
 
         if (chests.getValue()) {
@@ -40,7 +40,7 @@ public class ESP extends Module {
 
             for (int x = -renderDistance; x <= renderDistance; x++) {
                 for (int z = -renderDistance; z <= renderDistance; z++) {
-                    for (BlockEntity entity : mc.level.getChunk(playerChunk.x + x, playerChunk.z + z).getBlockEntities().values()) {
+                    for (BlockEntity entity : mc.level.getChunk(playerChunk.x() + x, playerChunk.z() + z).getBlockEntities().values()) {
                         if (!(entity instanceof RandomizableContainerBlockEntity)) continue;
 
                         BlockPos blockPos = entity.getBlockPos();

@@ -23,7 +23,7 @@ import com.github.lumin.settings.Setting;
 import com.github.lumin.utils.render.animation.Animation;
 import com.github.lumin.utils.render.animation.Easing;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -78,9 +78,9 @@ public class ModuleDetailPanel {
         this.moduleToggleHandleSizeAnimation.setStartValue(8.0f);
     }
 
-    public void render(GuiGraphics guiGraphics, DropdownLayout.Rect bounds, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor GuiGraphicsExtractor, DropdownLayout.Rect bounds, int mouseX, int mouseY, float partialTick) {
         this.bounds = bounds;
-        this.guiHeight = guiGraphics.guiHeight();
+        this.guiHeight = GuiGraphicsExtractor.guiHeight();
         settingEntries.clear();
         boolean popupConsumesHover = popupHost.getActivePopup() != null && popupHost.getActivePopup().getBounds().contains(mouseX, mouseY);
         int effectiveMouseX = popupConsumesHover ? Integer.MIN_VALUE : mouseX;
@@ -129,7 +129,7 @@ public class ModuleDetailPanel {
             settingEntries.add(new SettingEntry(row, rowBounds));
             Animation hoverAnimation = hoverAnimations.computeIfAbsent(setting, ignored -> new Animation(Easing.EASE_OUT_CUBIC, 120L));
             hoverAnimation.run(rowBounds.contains(effectiveMouseX, effectiveMouseY) ? 1.0f : 0.0f);
-            row.render(guiGraphics, contentRoundRectRenderer, contentRectRenderer, contentTextRenderer, rowBounds, hoverAnimation.getValue(), effectiveMouseX, effectiveMouseY, partialTick);
+            row.render(GuiGraphicsExtractor, contentRoundRectRenderer, contentRectRenderer, contentTextRenderer, rowBounds, hoverAnimation.getValue(), effectiveMouseX, effectiveMouseY, partialTick);
             y += row.getHeight() + DropdownTheme.ROW_GAP;
         }
         contentPending = true;

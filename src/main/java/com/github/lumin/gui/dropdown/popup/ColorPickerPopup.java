@@ -11,7 +11,7 @@ import com.github.lumin.modules.impl.client.ClickGui;
 import com.github.lumin.settings.impl.ColorSetting;
 import com.github.lumin.utils.render.animation.Animation;
 import com.github.lumin.utils.render.animation.Easing;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -71,7 +71,7 @@ public class ColorPickerPopup implements DropdownPopupHost.Popup {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractGui(GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
         openAnimation.run(1.0f);
         float progress = openAnimation.getValue();
         float popupY = bounds.y() - (1.0f - progress) * 6.0f;

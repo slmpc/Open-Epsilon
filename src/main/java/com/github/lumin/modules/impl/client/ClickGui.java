@@ -25,11 +25,11 @@ public class ClickGui extends Module {
         Light
     }
 
-    public static final ClickGui INSTANCE = new ClickGui();
-
     private ClickGui() {
         super("ClickGui", Category.CLIENT);
     }
+
+    public static final ClickGui INSTANCE = new ClickGui();
 
     private final BoolSetting backgroundBlur = boolSetting("BackgroundBlur", true);
     public final EnumSetting<ThemeMode> themeMode = enumSetting("ThemeMode", ThemeMode.Dark);
@@ -38,7 +38,7 @@ public class ClickGui extends Module {
     @Override
     protected void onEnable() {
         if (nullCheck()) return;
-        mc.setScreen(new DropdownScreen());
+        mc.setScreen(DropdownScreen.INSTANCE);
     }
 
     @Override

@@ -9,7 +9,7 @@ import com.github.lumin.gui.dropdown.DropdownTheme;
 import com.github.lumin.settings.impl.EnumSetting;
 import com.github.lumin.utils.render.animation.Animation;
 import com.github.lumin.utils.render.animation.Easing;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 
 import java.awt.*;
@@ -42,7 +42,7 @@ public class EnumSelectPopup implements DropdownPopupHost.Popup {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractGui(GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
         openAnimation.run(1.0f);
         float progress = openAnimation.getValue();
         float popupY = bounds.y() - (1.0f - progress) * 6.0f;

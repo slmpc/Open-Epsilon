@@ -80,7 +80,7 @@ import org.slf4j.Logger;
 public class Lumin {
 
     public static final String MODID = "lumin";
-    public static final String VERSION = "5.0.1"; // NeoForge咋获取mod版本号我不知道啊。。
+    public static String VERSION = "NO VERSION";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static int skipTicks;
@@ -88,6 +88,8 @@ public class Lumin {
     @SubscribeEvent
     private static void onClientSetup(FMLClientSetupEvent event) {
         LOGGER.info("Welcome to Epsilon, Meow~");
+
+        VERSION = event.getContainer().getModInfo().getVersion().toString();
 
         // 初始化 Managers
         ModuleManager.INSTANCE.initModules();

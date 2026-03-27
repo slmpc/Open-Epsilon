@@ -286,7 +286,7 @@ public class InvHelper {
                     return false;
                 } else if (block instanceof BushBlock) {
                     return false;
-                } else if (block instanceof FungusBlock) {
+                } else if (block instanceof FlowerPotBlock || block instanceof NetherFungusBlock) {
                     return false;
                 } else if (block instanceof CropBlock) {
                     return false;

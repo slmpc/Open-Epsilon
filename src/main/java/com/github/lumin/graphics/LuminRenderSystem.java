@@ -7,25 +7,32 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.CachedOrthoProjectionMatrixBuffer;
+import net.minecraft.client.renderer.Projection;
+import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.client.renderer.rendertype.TextureTransform;
+import net.minecraft.client.renderer.state.WindowRenderState;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 public class LuminRenderSystem {
 
-    public static final CachedOrthoProjectionMatrixBuffer guiOrthoProjection =
-            new CachedOrthoProjectionMatrixBuffer("gui", -1000.0F, 11000.0F, true);
+    public static final Projection guiOrthoProjection =
+            new Projection();
+
+    private static final ProjectionMatrixBuffer guiProjectionMatrixBuffer =
+            new ProjectionMatrixBuffer("lumin-gui");
 
     public static void applyOrthoProjection() {
-        final var window = Minecraft.getInstance().getWindow();
+        WindowRenderState windowState = Minecraft.getInstance().gameRenderer.getGameRenderState().windowRenderState;
 
+        guiOrthoProjection
+                .setupOrtho(-1000.0F, 1000.0F,
+                        (float)windowState.width / windowState.guiScale,
+                        (float)windowState.height / windowState.guiScale,
+                        true
+                );
         RenderSystem.setProjectionMatrix(
-                guiOrthoProjection.getBuffer(
-                        (float) window.getWidth() / window.getGuiScale(),
-                        (float) window.getHeight() / window.getGuiScale()
-                ),
-                ProjectionType.ORTHOGRAPHIC);
+                guiProjectionMatrixBuffer.getBuffer(guiOrthoProjection), ProjectionType.ORTHOGRAPHIC);
     }
 
     public static QuadRenderingInfo prepareQuadRendering(int vertexCount) {

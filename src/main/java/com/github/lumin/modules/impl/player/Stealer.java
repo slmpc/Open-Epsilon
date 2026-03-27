@@ -13,7 +13,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.*;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -129,7 +129,7 @@ public class Stealer extends Module {
                         for (Integer pSlotId : slots) {
                             ItemStack stack = menu.getSlot(pSlotId).getItem();
                             if (isItemUseful(stack) && this.isBestItemInChest(menu, stack) && timer.passedMillise(MathUtils.getRandom(minDelay.getValue(), maxDelay.getValue()))) {
-                                mc.gameMode.handleInventoryMouseClick(menu.containerId, pSlotId, 0, ClickType.QUICK_MOVE, mc.player);
+                                mc.gameMode.handleContainerInput(menu.containerId, pSlotId, 0, ContainerInput.QUICK_MOVE, mc.player);
                                 timer.reset();
                                 break;
                             }

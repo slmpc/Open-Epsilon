@@ -24,7 +24,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
@@ -260,10 +260,10 @@ public class ElytraFly extends Module {
         if (inventorySlot != -1) {
             int syncId = mc.player.containerMenu.containerId;
             int selectedSlot = mc.player.getInventory().getSelectedSlot();
-            mc.gameMode.handleInventoryMouseClick(syncId, inventorySlot, selectedSlot, ClickType.SWAP, mc.player);
+            mc.gameMode.handleContainerInput(syncId, inventorySlot, selectedSlot, ContainerInput.SWAP, mc.player);
             clearArmoredStatus();
             useCurrentArmoredFirework();
-            mc.gameMode.handleInventoryMouseClick(syncId, inventorySlot, selectedSlot, ClickType.SWAP, mc.player);
+            mc.gameMode.handleContainerInput(syncId, inventorySlot, selectedSlot, ContainerInput.SWAP, mc.player);
             syncArmoredInventory();
             return;
         }
@@ -503,9 +503,9 @@ public class ElytraFly extends Module {
 
     private void swapContainerSlotWithChest(int slot) {
         int syncId = mc.player.containerMenu.containerId;
-        mc.gameMode.handleInventoryMouseClick(syncId, slot, 0, ClickType.PICKUP, mc.player);
-        mc.gameMode.handleInventoryMouseClick(syncId, CHEST_ARMOR_MENU_SLOT, 0, ClickType.PICKUP, mc.player);
-        mc.gameMode.handleInventoryMouseClick(syncId, slot, 0, ClickType.PICKUP, mc.player);
+        mc.gameMode.handleContainerInput(syncId, slot, 0, ContainerInput.PICKUP, mc.player);
+        mc.gameMode.handleContainerInput(syncId, CHEST_ARMOR_MENU_SLOT, 0, ContainerInput.PICKUP, mc.player);
+        mc.gameMode.handleContainerInput(syncId, slot, 0, ContainerInput.PICKUP, mc.player);
     }
 
     private int findContainerSlot(int start, int end, Predicate<ItemStack> predicate) {

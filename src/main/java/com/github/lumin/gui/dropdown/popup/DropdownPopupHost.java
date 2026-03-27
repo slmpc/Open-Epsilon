@@ -1,7 +1,7 @@
 package com.github.lumin.gui.dropdown.popup;
 
 import com.github.lumin.gui.dropdown.DropdownLayout;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -22,9 +22,9 @@ public class DropdownPopupHost {
         return activePopup;
     }
 
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
         if (activePopup != null) {
-            activePopup.render(guiGraphics, mouseX, mouseY, partialTick);
+            activePopup.extractGui(GuiGraphicsExtractor, mouseX, mouseY, partialTick);
         }
     }
 
@@ -80,7 +80,7 @@ public class DropdownPopupHost {
     public interface Popup {
         DropdownLayout.Rect getBounds();
 
-        void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick);
+        void extractGui(GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick);
 
         boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick);
 

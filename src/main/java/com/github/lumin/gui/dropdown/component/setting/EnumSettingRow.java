@@ -8,7 +8,7 @@ import com.github.lumin.gui.dropdown.DropdownLayout;
 import com.github.lumin.gui.dropdown.DropdownTheme;
 import com.github.lumin.gui.dropdown.component.SettingRow;
 import com.github.lumin.settings.impl.EnumSetting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 
 public class EnumSettingRow extends SettingRow<EnumSetting<?>> {
@@ -20,7 +20,7 @@ public class EnumSettingRow extends SettingRow<EnumSetting<?>> {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, TextRenderer textRenderer, DropdownLayout.Rect bounds, float hoverProgress, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor GuiGraphicsExtractor, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, TextRenderer textRenderer, DropdownLayout.Rect bounds, float hoverProgress, int mouseX, int mouseY, float partialTick) {
         float labelScale = 0.68f;
         float labelY = bounds.y() + (bounds.height() - textRenderer.getHeight(labelScale)) / 2.0f - 1.0f;
         float chipTextScale = 0.60f;

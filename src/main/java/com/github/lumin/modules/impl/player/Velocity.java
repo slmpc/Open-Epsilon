@@ -98,18 +98,18 @@ public class Velocity extends Module {
                     lag = true;
                     return;
                 }
-                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.getId() == mc.player.getId()) {
+                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
                     if (stage == VelocityStage.NONE) {
                         if (!lag) {
                             stage = VelocityStage.DELAY;
                             velocityTime = System.currentTimeMillis();
                             event.setCanceled(true);
-                            velocity = packet.getMovement();
+                            velocity = packet.movement();
                         } else {
                             lag = false;
                         }
                     } else {
-                        velocity = packet.getMovement();
+                        velocity = packet.movement();
                         stage = VelocityStage.LAG;
                         event.setCanceled(true);
                     }
@@ -163,7 +163,7 @@ public class Velocity extends Module {
             }
 
             case Legit -> {
-                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.getId() == mc.player.getId()) {
+                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
                     jump = true;
                 }
             }
