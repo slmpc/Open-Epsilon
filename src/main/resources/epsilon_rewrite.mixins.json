@@ -4,16 +4,16 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "debug.MixinGlDebug",
-    "packet.MixinClientPacketListener",
-    "packet.MixinConnection",
-    "level.MixinEntity",
     "level.MixinClientLevel",
+    "level.MixinEntity",
+    "level.MixinFlowingFluid",
     "level.MixinLivingEntity",
     "level.MixinLocalPlayer",
-    "level.MixinMultiPlayerGameMode",
     "level.MixinMobEffectFogEnvironment",
-    "level.MixinFlowingFluid",
-    "level.MixinFireworkRocketEntity",
+    "level.MixinMultiPlayerGameMode",
+    "packet.MixinClientPacketListener",
+    "packet.MixinConnection",
+    "render.MixinAvatarRenderer",
     "render.MixinEntityRenderer",
     "render.MixinGui",
     "render.MixinHumanoidMobRenderer",
@@ -22,7 +22,6 @@
     "render.MixinParticleManager",
     "render.MixinScreenEffectRenderer",
     "render.MixinTitleScreen",
-    "render.MixinAvatarRenderer",
     "render.MixinWindow"
   ],
   "injectors": {
@@ -32,5 +31,6 @@
     "requireAnnotations": true
   },
   "mixins": [
+    "level.MixinPlayer"
   ]
 }

@@ -19,7 +19,7 @@ public class TranslateComponent {
 
     private String cachedName;
 
-    public static String LUMIN_PREFIX = "lumin";
+    public static String LUMIN_PREFIX = "epsilon";
 
     public static TranslateComponent create(String prefix, String suffix) {
         TranslateComponent component = new TranslateComponent(prefix, suffix);

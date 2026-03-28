@@ -12,9 +12,13 @@ void main() {
     vec2 center = (f_InnerRect.xy + f_InnerRect.zw) * 0.5;
     vec2 p = f_Position - center;
 
-    float r_current = (p.x > 0.0) ? 
-        ((p.y > 0.0) ? f_Radius.z : f_Radius.y) : 
-        ((p.y > 0.0) ? f_Radius.w : f_Radius.x);
+    vec2 s = step(0.0, p);
+
+    float r_current = mix(
+        mix(f_Radius.x, f_Radius.w, s.y),
+        mix(f_Radius.y, f_Radius.z, s.y),
+        s.x
+    );
 
     vec2 q = abs(p) - halfSize + r_current;
     float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r_current;
@@ -22,6 +26,6 @@ void main() {
     float delta = fwidth(dist);
     float alpha = 1.0 - smoothstep(-delta, delta, dist);
 
-    if (alpha < 0.001) discard;
     fragColor = vec4(f_Color.rgb, f_Color.a * alpha);
+    if (alpha < 0.001) discard;
 }
