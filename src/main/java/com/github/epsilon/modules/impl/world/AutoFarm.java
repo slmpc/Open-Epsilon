@@ -152,7 +152,7 @@ public class AutoFarm extends Module {
         }
 
         Vector2f targetRotation = getRotation(target);
-        RotationManager.INSTANCE.applyRotation(targetRotation, rotationSpeed.getValue(), com.github.epsilon.utils.rotation.MovementFix.OFF, Priority.Low);
+        RotationManager.INSTANCE.applyRotation(targetRotation, rotationSpeed.getValue(), Priority.Low);
 
         Vector2f currentRotation = RotationManager.INSTANCE.getRotation();
         float yawDiff = Math.abs(Mth.wrapDegrees(targetRotation.x - currentRotation.x));

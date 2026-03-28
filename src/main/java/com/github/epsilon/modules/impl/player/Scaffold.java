@@ -15,7 +15,6 @@ import com.github.epsilon.utils.player.InvUtils;
 import com.github.epsilon.utils.player.MoveUtils;
 import com.github.epsilon.utils.render.Render3DUtils;
 import com.github.epsilon.utils.render.animation.Easing;
-import com.github.epsilon.utils.rotation.MovementFix;
 import com.github.epsilon.utils.rotation.Priority;
 import com.github.epsilon.utils.rotation.RaytraceUtils;
 import com.github.epsilon.utils.rotation.RotationUtils;
@@ -95,7 +94,6 @@ public class Scaffold extends Module {
     private final IntSetting rotationSpeed = intSetting("RotationSpeed", 10, 1, 10, 1);
     private final IntSetting rotationBackSpeed = intSetting("RotationBackSpeed", 10, 0, 10, 1, () -> mode.is(Mode.TellyBridge));
     private final BoolSetting sideCheck = boolSetting("SideCheck", false);
-    private final BoolSetting moveFix = boolSetting("MoveFix", true);
     private final BoolSetting safeWalk = boolSetting("SafeWalk", true);
 
     private final BoolSetting render = boolSetting("Render", true);
@@ -145,19 +143,18 @@ public class Scaffold extends Module {
 
         updateBlockInfo();
 
-        MovementFix movementFix = moveFix.getValue() ? MovementFix.ON : MovementFix.OFF;
         if (mode.getValue() == Mode.TellyBridge) {
             if (mc.player.onGround()) {
                 yLevel = Mth.floor(mc.player.getY()) - 1;
                 airTicks = 0;
                 blockInfo = null;
                 Vector2f rotation = new Vector2f(mc.player.getYRot(), mc.player.getXRot());
-                RotationManager.INSTANCE.applyRotation(rotation, rotationBackSpeed.getValue(), movementFix, Priority.Low.priority);
+                RotationManager.INSTANCE.applyRotation(rotation, rotationBackSpeed.getValue(), Priority.Low.priority);
             } else {
                 if (airTicks >= tellyTick.getValue() && blockInfo != null) {
                     FindItemResult item = findItem();
                     if (item.found()) {
-                        queuePlaceWithRotation(blockInfo, item, movementFix);
+                        queuePlaceWithRotation(blockInfo, item);
                     }
                 }
                 airTicks++;
@@ -165,7 +162,7 @@ public class Scaffold extends Module {
         } else if (blockInfo != null) {
             FindItemResult item = findItem();
             if (item.found()) {
-                queuePlaceWithRotation(blockInfo, item, movementFix);
+                queuePlaceWithRotation(blockInfo, item);
             }
         }
 
@@ -269,11 +266,11 @@ public class Scaffold extends Module {
         }
     }
 
-    private void queuePlaceWithRotation(BlockInfo targetBlockInfo, FindItemResult item, MovementFix movementFix) {
+    private void queuePlaceWithRotation(BlockInfo targetBlockInfo, FindItemResult item) {
         final int requestPriority = Priority.High.priority;
         final Vector2f requestedRotation = getRotation(targetBlockInfo);
 
-        RotationManager.INSTANCE.applyRotation(requestedRotation, rotationSpeed.getValue(), movementFix, requestPriority, record -> {
+        RotationManager.INSTANCE.applyRotation(requestedRotation, rotationSpeed.getValue(), requestPriority, record -> {
             if (!isEnabled() || nullCheck()) return;
             if (record.selectedPriorityValue() != requestPriority) return;
             if (blockInfo == null || !blockInfo.equals(targetBlockInfo)) return;

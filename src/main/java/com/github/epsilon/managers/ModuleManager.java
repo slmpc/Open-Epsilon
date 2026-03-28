@@ -41,6 +41,7 @@ public class ModuleManager {
                 ElytraFly.INSTANCE,
                 InvManager.INSTANCE,
                 JumpCooldown.INSTANCE,
+                MovementFix.INSTANCE,
                 NoRotate.INSTANCE,
                 NoSlow.INSTANCE,
                 Phase.INSTANCE,

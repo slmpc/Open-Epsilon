@@ -7,7 +7,6 @@ import com.github.epsilon.settings.impl.*;
 import com.github.epsilon.utils.math.MathUtils;
 import com.github.epsilon.utils.render.esp.CaptureMark;
 import com.github.epsilon.utils.render.esp.Firefly;
-import com.github.epsilon.utils.rotation.MovementFix;
 import com.github.epsilon.utils.rotation.Priority;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import net.minecraft.world.InteractionHand;
@@ -122,7 +121,6 @@ public class KillAura extends Module {
             RotationManager.INSTANCE.applyRotation(
                     RotationUtils.getRotationsToEntity(requestedTarget),
                     rotationSpeed.getValue().floatValue(),
-                    MovementFix.ON,
                     requestPriority,
                     record -> {
                         if (!isEnabled() || nullCheck()) return;
