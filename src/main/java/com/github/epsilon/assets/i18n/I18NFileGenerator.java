@@ -15,28 +15,30 @@ import java.io.IOException;
 
 public class I18NFileGenerator {
 
+    private static final String PREFIX = "epsilon.";
+
     public static void generate(String filePath) {
         JsonObject root = new JsonObject();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         for (Category category : Category.values()) {
-            String catKey = "lumin.categories." + category.toString().toLowerCase();
+            String catKey = PREFIX + "categories." + category.toString().toLowerCase();
             root.addProperty(catKey, "");
         }
 
-        root.addProperty("lumin.keybind.none", "");
-        root.addProperty("lumin.keybind.toggle", "");
-        root.addProperty("lumin.keybind.hold", "");
+        root.addProperty(PREFIX + "keybind.none", "");
+        root.addProperty(PREFIX + "keybind.toggle", "");
+        root.addProperty(PREFIX + "keybind.hold", "");
 
-        root.addProperty("lumin.gui.search", "");
-        root.addProperty("lumin.gui.gameaccount", "");
+        root.addProperty(PREFIX + "gui.search", "");
+        root.addProperty(PREFIX + "gui.gameaccount", "");
 
         for (Module module : ModuleManager.INSTANCE.getModules()) {
             String modulePrefix = "modules." + module.getName().toLowerCase();
-            root.addProperty("lumin." + modulePrefix, "");
+            root.addProperty(PREFIX + modulePrefix, "");
 
             for (Setting<?> setting : module.getSettings()) {
-                String settingKey = "lumin." + modulePrefix + "." + setting.getName().toLowerCase();
+                String settingKey = PREFIX + modulePrefix + "." + setting.getName().toLowerCase();
                 root.addProperty(settingKey, "");
 
                 if (setting instanceof EnumSetting<?> enumSetting) {

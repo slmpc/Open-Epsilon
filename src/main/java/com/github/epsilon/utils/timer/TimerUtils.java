@@ -2,37 +2,38 @@ package com.github.epsilon.utils.timer;
 
 public class TimerUtils {
 
-    public long lastMS;
+    private long startTime = -1L;
 
-    public long getCurrentMS() {
-        return System.nanoTime() / 1000000L;
-    }
-
-    public boolean delay(double ticks) {
-        return getCurrentMS() - lastMS >= ticks * 50;
-    }
-
-    public boolean passedSecond(double ticks) {
-        return getCurrentMS() - lastMS >= ticks * 1000;
-    }
-
-    public boolean passedMillise(double milliseconds) {
-        if (milliseconds == 0) {
-            return true;
-        }
-        return (double) (this.getCurrentMS() - this.lastMS) >= milliseconds;
+    public TimerUtils() {
+        reset();
     }
 
     public void reset() {
-        this.lastMS = this.getCurrentMS();
+        startTime = System.currentTimeMillis();
     }
 
-    public long getTime() {
-        return getCurrentMS() - this.lastMS;
+    public long getMs() {
+        return System.currentTimeMillis() - startTime;
     }
 
-    public void setTime(long time) {
-        this.lastMS = time;
+    public void setMs(long ms) {
+        startTime = System.currentTimeMillis() - ms;
+    }
+
+    public boolean passedSecond(double seconds) {
+        return passedMillise((long) seconds * 1000L);
+    }
+
+    public boolean delay(int ticks) {
+        return passedMillise((long) ticks * 50L);
+    }
+
+    public boolean passedMillise(double ms) {
+        return passedMillise((long) ms);
+    }
+
+    public boolean passedMillise(long ms) {
+        return System.currentTimeMillis() - startTime >= ms;
     }
 
 }
