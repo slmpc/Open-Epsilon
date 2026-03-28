@@ -78,6 +78,8 @@ public class PanelPopupHost {
     }
 
     public interface Popup {
+        float POPUP_SHADOW_RADIUS = 2.5f;
+
         PanelLayout.Rect getBounds();
 
         void extractGui(GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick);

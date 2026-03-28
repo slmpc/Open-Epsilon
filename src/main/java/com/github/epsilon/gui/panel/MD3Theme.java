@@ -60,7 +60,7 @@ public final class MD3Theme {
     public static final float ROW_CONTENT_INSET = 5.0f;
     public static final float ROW_TRAILING_INSET = 5.0f;
     public static final float RAIL_COLLAPSED_WIDTH = 42.0f;
-    public static final float RAIL_EXPANDED_WIDTH = 148.0f;
+    public static final float RAIL_EXPANDED_WIDTH = 120.0f;
 
     private MD3Theme() {
     }
