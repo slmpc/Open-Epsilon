@@ -1,6 +1,7 @@
 package com.github.epsilon.modules.impl.combat;
 
 import com.github.epsilon.managers.RotationManager;
+import com.github.epsilon.managers.TargetManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.*;
@@ -10,12 +11,7 @@ import com.github.epsilon.utils.render.esp.Firefly;
 import com.github.epsilon.utils.rotation.Priority;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.villager.Villager;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -23,7 +19,6 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class KillAura extends Module {
@@ -95,7 +90,18 @@ public class KillAura extends Module {
         if (nullCheck()) return;
 
         targets.clear();
-        updateTargets();
+        targets.addAll(TargetManager.INSTANCE.acquireTargets(
+                TargetManager.TargetRequest.of(
+                        aimRange.getValue(),
+                        fov.getValue().floatValue(),
+                        player.getValue(),
+                        mob.getValue(),
+                        animal.getValue(),
+                        animal.getValue(),
+                        Invisible.getValue(),
+                        64
+                )
+        ));
 
         if (targets.isEmpty()) {
             target = null;
@@ -178,35 +184,5 @@ public class KillAura extends Module {
         mc.player.swing(InteractionHand.MAIN_HAND);
     }
 
-    private void updateTargets() {
-        for (Entity entity : mc.level.entitiesForRendering()) {
-            if (!(entity instanceof LivingEntity living)) continue;
-            if (living == mc.player) continue;
-            if (!living.isAlive() || living.isDeadOrDying()) continue;
-            if (AntiBot.INSTANCE.isBot(entity)) continue;
-
-            double dist = RotationUtils.getEyeDistanceToEntity(living);
-            if (dist > aimRange.getValue()) continue;
-
-            if (!isValidTarget(living)) continue;
-            if (!RotationUtils.isInFov(living, fov.getValue().floatValue())) continue;
-            targets.sort(Comparator.comparingDouble(o -> (double) o.distanceTo(mc.player)));
-            targets.add(living);
-        }
-        targets.sort(Comparator.comparingDouble(RotationUtils::getEyeDistanceToEntity));
-    }
-
-    private boolean isValidTarget(LivingEntity entity) {
-        if (entity instanceof Player) {
-            if (!player.getValue()) return false;
-            return !entity.isInvisible() || Invisible.getValue();
-        } else if (entity instanceof Animal || entity instanceof Villager) {
-            return animal.getValue();
-        } else if (entity instanceof Monster) {
-            return mob.getValue();
-        } else {
-            return false;
-        }
-    }
 
 }

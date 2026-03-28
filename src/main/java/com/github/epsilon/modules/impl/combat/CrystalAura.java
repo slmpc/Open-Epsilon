@@ -1,8 +1,10 @@
 package com.github.epsilon.modules.impl.combat;
 
+import com.github.epsilon.managers.TargetManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.*;
+import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
@@ -27,6 +29,12 @@ public class CrystalAura extends Module {
     private final BoolSetting motionPrediction = boolSetting("Motion Prediction", false);
     private final IntSetting predictTick = intSetting("Predict Tick", 6, 0, 10, 1, motionPrediction::getValue);
 
+    /* Force Place */
+    private final DoubleSetting forcePlaceHealth = doubleSetting("Force Place Health", 8.0, 0.0, 36.0, 0.5);
+    private final IntSetting forcePlaceArmorRate = intSetting("Force Place Armor Rate", 3, 0, 25, 1);
+    private final DoubleSetting forcePlaceMinDamage = doubleSetting("Force Place Min Dmg", 2.0, 0.0, 20.0, 0.25);
+    private final DoubleSetting forcePlaceBalance = doubleSetting("Force Place Balance", -3.0, -10.0, 10.0, 0.25);
+
     /* Place */
     private final EnumSetting<SwingMode> placeSwing = enumSetting("Place Swing", SwingMode.None);
     private final EnumSetting<SwapMode> placeSwapMode = enumSetting("Place Swap Mode", SwapMode.None);
@@ -50,10 +58,31 @@ public class CrystalAura extends Module {
     private final IntSetting movingLength = intSetting("Moving Length", 400, 0, 1000, 50);
     private final IntSetting fadeLength = intSetting("Fade Length", 200, 0, 1000, 50);
 
+    private LivingEntity target;
+
+    @Override
+    protected void onDisable() {
+        target = null;
+    }
+
     @SubscribeEvent
     private void onTick(ClientTickEvent.Pre event) {
         if (nullCheck()) return;
 
+        target = TargetManager.INSTANCE.acquirePrimary(
+                TargetManager.TargetRequest.of(
+                        targetRange.getValue(),
+                        360.0f,
+                        true,
+                        false,
+                        false,
+                        false,
+                        true,
+                        1
+                )
+        );
+
+        
 
     }
 

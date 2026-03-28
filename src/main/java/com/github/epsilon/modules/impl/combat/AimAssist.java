@@ -1,5 +1,6 @@
 package com.github.epsilon.modules.impl.combat;
 
+import com.github.epsilon.managers.TargetManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -8,19 +9,11 @@ import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import org.joml.Vector2f;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 public class AimAssist extends Module {
 
@@ -112,37 +105,18 @@ public class AimAssist extends Module {
     }
 
     private LivingEntity findTarget() {
-        List<LivingEntity> targets = new ArrayList<>();
-
-        for (Entity entity : mc.level.entitiesForRendering()) {
-            if (!(entity instanceof LivingEntity living)) continue;
-            if (living == mc.player) continue;
-            if (!living.isAlive() || living.isDeadOrDying()) continue;
-
-            double dist = RotationUtils.getEyeDistanceToEntity(living);
-            if (dist > range.getValue()) continue;
-
-            if (!isValidTarget(living)) continue;
-
-            targets.add(living);
-        }
-
-        targets.sort(Comparator.comparingDouble(RotationUtils::getEyeDistanceToEntity));
-
-        if (targets.isEmpty()) return null;
-        return targets.getFirst();
-    }
-
-    private boolean isValidTarget(LivingEntity entity) {
-        if (entity instanceof Player) {
-            if (!player.getValue()) return false;
-            return !entity.isInvisible() || invisible.getValue();
-        } else if (entity instanceof Monster) {
-            return mob.getValue();
-        } else if (entity instanceof Animal) {
-            return animal.getValue();
-        }
-        return false;
+        return TargetManager.INSTANCE.acquirePrimary(
+                TargetManager.TargetRequest.of(
+                        range.getValue(),
+                        360.0f,
+                        player.getValue(),
+                        mob.getValue(),
+                        animal.getValue(),
+                        false,
+                        invisible.getValue(),
+                        1
+                )
+        );
     }
 
     private AngleSmooth getAngleSmooth() {
