@@ -1,14 +1,11 @@
 package com.github.epsilon.managers;
 
 import com.github.epsilon.modules.Module;
-import com.github.epsilon.modules.impl.client.ClickGui;
-import com.github.epsilon.modules.impl.combat.AimAssist;
-import com.github.epsilon.modules.impl.combat.AntiBot;
-import com.github.epsilon.modules.impl.combat.AutoClicker;
-import com.github.epsilon.modules.impl.combat.KillAura;
+import com.github.epsilon.modules.impl.client.*;
+import com.github.epsilon.modules.impl.combat.*;
 import com.github.epsilon.modules.impl.player.*;
 import com.github.epsilon.modules.impl.render.*;
-import com.github.epsilon.modules.impl.world.AutoFarm;
+import com.github.epsilon.modules.impl.world.*;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.List;
