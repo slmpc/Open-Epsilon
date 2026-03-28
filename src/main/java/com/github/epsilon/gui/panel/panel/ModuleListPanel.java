@@ -1,5 +1,6 @@
 package com.github.epsilon.gui.panel.panel;
 
+import com.github.epsilon.assets.i18n.TranslateComponent;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.ShadowRenderer;
@@ -27,7 +28,6 @@ public class ModuleListPanel {
     protected final PanelState state;
     private final RoundRectRenderer roundRectRenderer;
     private final RectRenderer rectRenderer;
-    private final ShadowRenderer shadowRenderer;
     private final TextRenderer textRenderer;
     private final RoundRectRenderer contentRoundRectRenderer = new RoundRectRenderer();
     private final RectRenderer contentRectRenderer = new RectRenderer();
@@ -57,11 +57,12 @@ public class ModuleListPanel {
     private boolean searchFocused;
     private int searchCursorIndex;
 
+    private static final TranslateComponent searchComponent = TranslateComponent.create("gui", "search");
+
     public ModuleListPanel(PanelState state, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, ShadowRenderer shadowRenderer, TextRenderer textRenderer) {
         this.state = state;
         this.roundRectRenderer = roundRectRenderer;
         this.rectRenderer = rectRenderer;
-        this.shadowRenderer = shadowRenderer;
         this.textRenderer = textRenderer;
         this.searchHoverAnimation.setStartValue(0.0f);
         this.searchFocusAnimation.setStartValue(0.0f);
@@ -311,7 +312,7 @@ public class ModuleListPanel {
 
         String query = state.getSearchQuery();
         boolean showPlaceholder = query.isEmpty() && !searchFocused;
-        String display = showPlaceholder ? I18n.get("lumin.gui.search") : query;
+        String display = showPlaceholder ? searchComponent.getTranslatedName() : query;
         float scale = 0.52f;
         float textY = searchBounds.y() + (searchBounds.height() - textRenderer.getHeight(scale)) / 2.0f - 1.0f;
         float textX = searchBounds.x() + 8.0f;

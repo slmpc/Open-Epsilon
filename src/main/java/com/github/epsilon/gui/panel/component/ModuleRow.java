@@ -1,5 +1,6 @@
 package com.github.epsilon.gui.panel.component;
 
+import com.github.epsilon.assets.i18n.TranslateComponent;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.TextRenderer;
@@ -17,6 +18,8 @@ public class ModuleRow {
 
     private final ModuleViewModel module;
     private final PanelLayout.Rect bounds;
+
+    private static final TranslateComponent noneComponent = TranslateComponent.create("keybind", "none");
 
     public ModuleRow(ModuleViewModel module, PanelLayout.Rect bounds) {
         this.module = module;
@@ -64,27 +67,30 @@ public class ModuleRow {
     }
 
     private void drawSwitch(RoundRectRenderer roundRectRenderer, PanelLayout.Rect rect, float toggleProgress, float toggleHoverProgress) {
-        Color trackBase = MD3Theme.isLightTheme() ? MD3Theme.SURFACE_CONTAINER_HIGH : MD3Theme.SURFACE_CONTAINER_HIGHEST;
-        Color knobBase = MD3Theme.isLightTheme() ? MD3Theme.TEXT_SECONDARY : MD3Theme.OUTLINE;
-        Color track = MD3Theme.lerp(trackBase, MD3Theme.PRIMARY, toggleProgress);
-        Color knob = MD3Theme.lerp(knobBase, MD3Theme.ON_PRIMARY_CONTAINER, toggleProgress);
+        Color track = MD3Theme.lerp(MD3Theme.SURFACE_CONTAINER_HIGHEST, MD3Theme.PRIMARY, toggleProgress);
+        Color knob = MD3Theme.lerp(MD3Theme.OUTLINE, MD3Theme.ON_PRIMARY, toggleProgress);
+
         float knobSize = 8.0f + 3.0f * toggleProgress;
         float knobTravel = rect.width() - 10.0f - knobSize;
         float knobX = rect.x() + 5.0f + knobTravel * toggleProgress;
         float knobY = rect.centerY() - knobSize / 2.0f;
+
         roundRectRenderer.addRoundRect(rect.x(), rect.y(), rect.width(), rect.height(), rect.height() / 2.0f, track);
-        if (toggleHoverProgress > 0.01f) {
+
+        if (toggleHoverProgress > 0.02f) {
             float haloSize = 16.0f;
             float haloX = knobX + knobSize / 2.0f - haloSize / 2.0f;
             float haloY = rect.centerY() - haloSize / 2.0f;
-            roundRectRenderer.addRoundRect(haloX, haloY, haloSize, haloSize, haloSize / 2.0f, MD3Theme.withAlpha(MD3Theme.TEXT_PRIMARY, (int) (18 * toggleHoverProgress)));
+            roundRectRenderer.addRoundRect(haloX, haloY, haloSize, haloSize, haloSize / 2.0f,
+                    MD3Theme.withAlpha(MD3Theme.TEXT_PRIMARY, (int) (18 * toggleHoverProgress)));
         }
+
         roundRectRenderer.addRoundRect(knobX, knobY, knobSize, knobSize, knobSize / 2.0f, knob);
     }
 
     private String formatKeybind(int keyCode) {
         if (keyCode < 0) {
-            return "NONE";
+            return noneComponent.getTranslatedName();
         }
         return InputConstants.Type.KEYSYM.getOrCreate(keyCode).getDisplayName().getString().toUpperCase();
     }

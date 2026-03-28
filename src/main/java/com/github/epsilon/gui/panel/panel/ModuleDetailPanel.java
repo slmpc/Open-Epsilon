@@ -1,5 +1,6 @@
 package com.github.epsilon.gui.panel.panel;
 
+import com.github.epsilon.assets.i18n.TranslateComponent;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.ShadowRenderer;
@@ -27,6 +28,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.resources.language.I18n;
 
 import java.awt.*;
 import java.util.*;
@@ -37,7 +39,6 @@ public class ModuleDetailPanel {
     protected final PanelState state;
     private final RoundRectRenderer roundRectRenderer;
     private final RectRenderer rectRenderer;
-    private final ShadowRenderer shadowRenderer;
     private final TextRenderer textRenderer;
     private final PanelPopupHost popupHost;
     private final RoundRectRenderer contentRoundRectRenderer = new RoundRectRenderer();
@@ -66,11 +67,14 @@ public class ModuleDetailPanel {
     private final Animation keybindHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private final Animation keybindFocusAnimation = new Animation(Easing.EASE_OUT_CUBIC, 150L);
 
+    private static final TranslateComponent toggleComponent = TranslateComponent.create("keybind", "toggle");
+    private static final TranslateComponent holdComponent = TranslateComponent.create("keybind", "hold");
+    private static final TranslateComponent noneComponent = TranslateComponent.create("keybind", "none");
+
     public ModuleDetailPanel(PanelState state, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, ShadowRenderer shadowRenderer, TextRenderer textRenderer, PanelPopupHost popupHost) {
         this.state = state;
         this.roundRectRenderer = roundRectRenderer;
         this.rectRenderer = rectRenderer;
-        this.shadowRenderer = shadowRenderer;
         this.textRenderer = textRenderer;
         this.popupHost = popupHost;
         this.bindModeAnimation.setStartValue(0.0f);
@@ -381,15 +385,18 @@ public class ModuleDetailPanel {
         rectRenderer.addRect(dividerX, innerY + 3.0f, 1.0f, innerHeight - 6.0f, MD3Theme.OUTLINE_SOFT);
         roundRectRenderer.addRoundRect(indicatorX, indicatorY, indicatorWidth, indicatorHeight, indicatorRadius, MD3Theme.SECONDARY_CONTAINER);
 
+        String toggleText = toggleComponent.getTranslatedName();
+        String holdText = holdComponent.getTranslatedName();
+
         float toggleScale = 0.52f;
         float holdScale = 0.52f;
-        float toggleWidth = textRenderer.getWidth("Toggle", toggleScale);
-        float holdWidth = textRenderer.getWidth("Hold", holdScale);
+        float toggleWidth = textRenderer.getWidth(toggleText, toggleScale);
+        float holdWidth = textRenderer.getWidth(holdText, holdScale);
         float textHeight = textRenderer.getHeight(toggleScale);
         float centerY = innerY + (innerHeight - textHeight) / 2.0f - 1.0f;
         Color inactiveText = MD3Theme.isLightTheme() ? MD3Theme.TEXT_SECONDARY : MD3Theme.TEXT_MUTED;
-        textRenderer.addText("Toggle", innerX + (segmentWidth - toggleWidth) / 2.0f, centerY, toggleScale, MD3Theme.lerp(MD3Theme.ON_SECONDARY_CONTAINER, inactiveText, progress));
-        textRenderer.addText("Hold", innerX + segmentWidth + (segmentWidth - holdWidth) / 2.0f, centerY, holdScale, MD3Theme.lerp(inactiveText, MD3Theme.ON_SECONDARY_CONTAINER, progress));
+        textRenderer.addText(toggleText, innerX + (segmentWidth - toggleWidth) / 2.0f, centerY, toggleScale, MD3Theme.lerp(MD3Theme.ON_SECONDARY_CONTAINER, inactiveText, progress));
+        textRenderer.addText(holdText, innerX + segmentWidth + (segmentWidth - holdWidth) / 2.0f, centerY, holdScale, MD3Theme.lerp(inactiveText, MD3Theme.ON_SECONDARY_CONTAINER, progress));
     }
 
     private void drawKeybindControl(Module module, int mouseX, int mouseY) {
@@ -424,7 +431,7 @@ public class ModuleDetailPanel {
 
     private String formatCompactKeybind(int keyCode) {
         if (keyCode < 0) {
-            return "-";
+            return noneComponent.getTranslatedName();
         }
         String label = formatKeybind(keyCode).trim();
         if (label.isEmpty()) {
