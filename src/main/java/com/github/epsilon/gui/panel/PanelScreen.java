@@ -12,7 +12,7 @@ import com.github.epsilon.gui.panel.panel.ModuleDetailPanel;
 import com.github.epsilon.gui.panel.panel.ModuleListPanel;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
 import com.github.epsilon.managers.RenderManager;
-import com.github.epsilon.modules.impl.client.ClickGui;
+import com.github.epsilon.modules.impl.ClientSetting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
@@ -128,8 +128,8 @@ public class PanelScreen extends Screen {
     }
 
     private void drawChrome(PanelLayout.Layout layout) {
-        ClickGui clickGui = ClickGui.INSTANCE;
-        if (clickGui.shouldBlur()) {
+        ClientSetting clientSetting = ClientSetting.INSTANCE;
+        if (clientSetting.shouldBlur()) {
             BlurShader.INSTANCE.drawBlur(layout.panel().x(), layout.panel().y(), layout.panel().width(), layout.panel().height(), MD3Theme.PANEL_RADIUS, 10.0f);
         }
 
@@ -254,7 +254,7 @@ public class PanelScreen extends Screen {
 
     @Override
     public void onClose() {
-        ClickGui.INSTANCE.setEnabled(false);
+        ClientSetting.INSTANCE.setEnabled(false);
         super.onClose();
     }
 

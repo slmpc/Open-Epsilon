@@ -1,4 +1,4 @@
-package com.github.epsilon.modules.impl.client;
+package com.github.epsilon.modules.impl;
 
 import com.github.epsilon.gui.panel.PanelScreen;
 import com.github.epsilon.modules.Module;
@@ -6,7 +6,7 @@ import com.github.epsilon.settings.impl.BoolSetting;
 import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.settings.impl.KeybindSetting;
 
-public class ClickGui extends Module {
+public class ClientSetting extends Module {
 
     public enum ThemePreset {
         TonalSpot,
@@ -25,11 +25,11 @@ public class ClickGui extends Module {
         Light
     }
 
-    private ClickGui() {
+    private ClientSetting() {
         super("ClickGui", null);
     }
 
-    public static final ClickGui INSTANCE = new ClickGui();
+    public static final ClientSetting INSTANCE = new ClientSetting();
 
     public final KeybindSetting guiKeybind = addKeybindSetting(new KeybindSetting("Keybind", this, -1) {
         @Override

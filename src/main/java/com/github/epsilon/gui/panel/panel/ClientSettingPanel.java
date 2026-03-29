@@ -20,7 +20,7 @@ import com.github.epsilon.gui.panel.popup.ColorPickerPopup;
 import com.github.epsilon.gui.panel.popup.EnumSelectPopup;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
 import com.github.epsilon.gui.panel.util.PanelScissor;
-import com.github.epsilon.modules.impl.client.ClickGui;
+import com.github.epsilon.modules.impl.ClientSetting;
 import com.github.epsilon.settings.Setting;
 import com.github.epsilon.settings.impl.KeybindSetting;
 import com.github.epsilon.utils.render.animation.Animation;
@@ -81,7 +81,7 @@ public class ClientSettingPanel {
         textRenderer.addText("Settings", bounds.x() + MD3Theme.PANEL_TITLE_INSET, bounds.y() + 21.0f, 0.56f, MD3Theme.TEXT_SECONDARY);
 
         PanelLayout.Rect viewport = getViewport();
-        List<Setting<?>> settings = ClickGui.INSTANCE.getSettings().stream().filter(Setting::isAvailable).toList();
+        List<Setting<?>> settings = ClientSetting.INSTANCE.getSettings().stream().filter(Setting::isAvailable).toList();
         rowCache.keySet().removeIf(setting -> !settings.contains(setting));
         float contentHeight = settings.size() * (28.0f + MD3Theme.ROW_GAP);
         state.setMaxClientSettingScroll(contentHeight - viewport.height());

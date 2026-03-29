@@ -1,7 +1,7 @@
 package com.github.epsilon.managers;
 
 import com.github.epsilon.modules.Module;
-import com.github.epsilon.modules.impl.client.ClickGui;
+import com.github.epsilon.modules.impl.ClientSetting;
 import com.github.epsilon.modules.impl.combat.*;
 import com.github.epsilon.modules.impl.player.*;
 import com.github.epsilon.modules.impl.render.*;
@@ -23,7 +23,7 @@ public class ModuleManager {
         modules = List.of(
 
                 // Client
-                ClickGui.INSTANCE,
+                ClientSetting.INSTANCE,
 
                 // Combat
                 AimAssist.INSTANCE,
