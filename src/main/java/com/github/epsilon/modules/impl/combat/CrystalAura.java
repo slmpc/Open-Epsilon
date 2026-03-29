@@ -615,11 +615,16 @@ public class CrystalAura extends Module {
         float textScale = 1.0f;
         float textWidth = textRenderer.getWidth(text, textScale);
         float textHeight = textRenderer.getHeight(textScale);
+        float textX = screenPos.x - textWidth / 2.0f;
+        float textY = screenPos.y - textHeight / 2.0f;
+        float screenWidth = mc.getWindow().getGuiScaledWidth();
+        float screenHeight = mc.getWindow().getGuiScaledHeight();
+        if (textX + textWidth < 0.0f || textY + textHeight < 0.0f || textX > screenWidth || textY > screenHeight) return;
         Color textColor = new Color(255, 255, 255, Math.max(0, Math.min(255, (int) (220 * renderScale))));
 
         RenderManager.INSTANCE.applyRenderWorldHud(() -> {
             TextRenderer tr = rectRenderer.get();
-            tr.addText(text, screenPos.x - textWidth / 2.0f, screenPos.y - textHeight / 2.0f, textScale, textColor);
+            tr.addText(text, textX, textY, textScale, textColor);
             tr.drawAndClear();
         });
     }
@@ -646,7 +651,10 @@ public class CrystalAura extends Module {
         float screenHeight = mc.getWindow().getGuiScaledHeight();
 
         if (maxX < 0 || maxY < 0 || minX > screenWidth || minY > screenHeight) return null;
-        return new Vector2f((float) ((minX + maxX) * 0.5), (float) ((minY + maxY) * 0.5));
+        float centerX = (float) ((minX + maxX) * 0.5);
+        float centerY = (float) ((minY + maxY) * 0.5);
+        if (centerX < 0.0f || centerY < 0.0f || centerX > screenWidth || centerY > screenHeight) return null;
+        return new Vector2f(centerX, centerY);
     }
 
     private record PlaceCandidate(

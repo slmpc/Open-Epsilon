@@ -49,6 +49,7 @@ public final class WorldToScreen {
     public static Vector4d projectEntity(final int[] viewport, final Matrix4f matrix, final AABB absoluteBoundingBox, final Vec3 cameraPos) {
         final Vector4f out = new Vector4f();
         Vector4d result = null;
+        boolean hasProjectedPoint = false;
 
         for (int i = 0; i < 8; i++) {
             Vector3f point = new Vector3f(
@@ -60,6 +61,15 @@ public final class WorldToScreen {
             matrix.project(point, viewport, out);
             out.y = viewport[3] - out.y;
 
+            if (!Float.isFinite(out.x) || !Float.isFinite(out.y) || !Float.isFinite(out.z)) {
+                continue;
+            }
+            if (out.z < 0.0f || out.z > 1.0f) {
+                continue;
+            }
+
+            hasProjectedPoint = true;
+
             if (result == null) {
                 result = new Vector4d(out.x, out.y, out.x, out.y);
             } else {
@@ -69,7 +79,7 @@ public final class WorldToScreen {
                 result.w = Math.max(result.w, out.y);
             }
         }
-        return result;
+        return hasProjectedPoint ? result : null;
     }
 
     public static Vector4d projectEntity(final int[] viewport, final Matrix4f matrix, final AABB absoluteBoundingBox) {

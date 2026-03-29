@@ -88,6 +88,8 @@ public class NameTags extends Module {
             float x = centerX - boxWidth * 0.5f;
             float y = (float) projected.y - boxHeight - 4.0f * renderScale;
 
+            if (x + boxWidth < 0.0f || y + boxHeight < 0.0f || x > screenWidth || y > screenHeight) continue;
+
             Color healthColor = totalHealth < 10.0f ? new Color(255, 214, 64, 240) : new Color(120, 255, 120, 240);
             drawList.add(new TagDrawData(equipmentLines, nameText, healthText, healthColor, x, y, boxWidth, boxHeight, renderScale, padding, lineGap));
         }
