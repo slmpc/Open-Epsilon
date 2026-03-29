@@ -12,6 +12,7 @@ import com.github.epsilon.gui.panel.PanelState;
 import com.github.epsilon.gui.panel.adapter.ModuleViewModel;
 import com.github.epsilon.gui.panel.component.ModuleRow;
 import com.github.epsilon.gui.panel.util.PanelScissor;
+import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.utils.render.animation.Animation;
 import com.github.epsilon.utils.render.animation.Easing;
@@ -32,6 +33,7 @@ public class ModuleListPanel {
     private final RectRenderer contentRectRenderer = new RectRenderer();
     private final ShadowRenderer contentShadowRenderer = new ShadowRenderer();
     private final TextRenderer contentTextRenderer = new TextRenderer();
+    private final RoundRectRenderer scrollBarRenderer = new RoundRectRenderer();
     private PanelLayout.Rect bounds;
     private int guiHeight;
     private final List<ModuleRow> rows = new ArrayList<>();
@@ -79,6 +81,9 @@ public class ModuleListPanel {
         List<Module> modules = state.getVisibleModules();
         float contentHeight = modules.size() * (ModuleRow.HEIGHT + MD3Theme.ROW_GAP);
         state.setMaxModuleScroll(contentHeight - viewport.height());
+        float maxModuleScroll = Math.max(0, contentHeight - viewport.height());
+        boolean hasScrollBar = maxModuleScroll > 0;
+        float rowWidth = hasScrollBar ? viewport.width() - ScrollBarUtil.TOTAL_WIDTH : viewport.width();
 
         if (shouldRebuildContent(bounds, mouseX, mouseY, modules, GuiGraphicsExtractor.guiHeight())) {
             rows.clear();
@@ -90,7 +95,7 @@ public class ModuleListPanel {
 
             float y = viewport.y() - state.getModuleScroll();
             for (Module module : modules) {
-                ModuleRow row = new ModuleRow(ModuleViewModel.from(module), new PanelLayout.Rect(viewport.x(), y, viewport.width(), ModuleRow.HEIGHT));
+                ModuleRow row = new ModuleRow(ModuleViewModel.from(module), new PanelLayout.Rect(viewport.x(), y, rowWidth, ModuleRow.HEIGHT));
                 rows.add(row);
                 Animation hoverAnimation = hoverAnimations.computeIfAbsent(module, ignored -> new Animation(Easing.EASE_OUT_CUBIC, 120L));
                 Animation selectionAnimation = selectionAnimations.computeIfAbsent(module, ignored -> new Animation(Easing.EASE_OUT_CUBIC, 160L));
@@ -114,6 +119,8 @@ public class ModuleListPanel {
         }
 
         PanelScissor.apply(viewport, contentRectRenderer, contentRoundRectRenderer, contentShadowRenderer, contentTextRenderer, guiHeight);
+        scrollBarRenderer.clear();
+        ScrollBarUtil.draw(scrollBarRenderer, viewport, state.getModuleScroll(), maxModuleScroll, contentHeight);
         contentPending = true;
     }
 
@@ -126,6 +133,7 @@ public class ModuleListPanel {
         contentRectRenderer.draw();
         contentTextRenderer.draw();
         PanelScissor.clear(contentRectRenderer, contentRoundRectRenderer, contentShadowRenderer, contentTextRenderer);
+        scrollBarRenderer.drawAndClear();
         contentPending = false;
     }
 

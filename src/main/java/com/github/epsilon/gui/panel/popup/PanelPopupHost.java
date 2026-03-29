@@ -77,6 +77,16 @@ public class PanelPopupHost {
         return true;
     }
 
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (activePopup == null) {
+            return false;
+        }
+        if (activePopup.getBounds().contains(mouseX, mouseY)) {
+            return activePopup.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        }
+        return false;
+    }
+
     public interface Popup {
         float POPUP_SHADOW_RADIUS = 2.5f;
 
@@ -95,6 +105,10 @@ public class PanelPopupHost {
         }
 
         default boolean charTyped(CharacterEvent event) {
+            return false;
+        }
+
+        default boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
             return false;
         }
 

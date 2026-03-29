@@ -20,6 +20,7 @@ import com.github.epsilon.gui.panel.popup.ColorPickerPopup;
 import com.github.epsilon.gui.panel.popup.EnumSelectPopup;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
 import com.github.epsilon.gui.panel.util.PanelScissor;
+import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.modules.impl.ClientSetting;
 import com.github.epsilon.settings.Setting;
 import com.github.epsilon.settings.impl.KeybindSetting;
@@ -43,6 +44,7 @@ public class ClientSettingPanel {
     private final RectRenderer contentRectRenderer = new RectRenderer();
     private final ShadowRenderer contentShadowRenderer = new ShadowRenderer();
     private final TextRenderer contentTextRenderer = new TextRenderer();
+    private final RoundRectRenderer scrollBarRenderer = new RoundRectRenderer();
     private PanelLayout.Rect bounds;
     private int guiHeight;
     private final List<SettingEntry> settingEntries = new ArrayList<>();
@@ -85,6 +87,9 @@ public class ClientSettingPanel {
         rowCache.keySet().removeIf(setting -> !settings.contains(setting));
         float contentHeight = settings.size() * (28.0f + MD3Theme.ROW_GAP);
         state.setMaxClientSettingScroll(contentHeight - viewport.height());
+        float maxClientScroll = Math.max(0, contentHeight - viewport.height());
+        boolean hasScrollBar = maxClientScroll > 0;
+        float rowWidth = hasScrollBar ? viewport.width() - ScrollBarUtil.TOTAL_WIDTH : viewport.width();
 
         if (shouldRebuildContent(bounds, mouseX, mouseY, settings, GuiGraphicsExtractor.guiHeight())) {
             settingEntries.clear();
@@ -103,7 +108,7 @@ public class ClientSettingPanel {
                 if (row instanceof KeybindSettingRow keybindRow) {
                     keybindRow.setListening(state.getListeningKeybindSetting() == keybindRow.getSetting());
                 }
-                PanelLayout.Rect rowBounds = new PanelLayout.Rect(viewport.x(), y, viewport.width(), row.getHeight());
+                PanelLayout.Rect rowBounds = new PanelLayout.Rect(viewport.x(), y, rowWidth, row.getHeight());
                 settingEntries.add(new SettingEntry(row, rowBounds));
                 Animation hoverAnimation = hoverAnimations.computeIfAbsent(setting, ignored -> new Animation(Easing.EASE_OUT_CUBIC, 120L));
                 hoverAnimation.run(rowBounds.contains(effectiveMouseX, effectiveMouseY) ? 1.0f : 0.0f);
@@ -117,6 +122,8 @@ public class ClientSettingPanel {
         }
 
         PanelScissor.apply(viewport, contentRectRenderer, contentRoundRectRenderer, contentShadowRenderer, contentTextRenderer, guiHeight);
+        scrollBarRenderer.clear();
+        ScrollBarUtil.draw(scrollBarRenderer, viewport, state.getClientSettingScroll(), maxClientScroll, contentHeight);
         contentPending = true;
     }
 
@@ -263,7 +270,8 @@ public class ClientSettingPanel {
     private EnumSelectPopup createEnumPopup(EnumSettingRow enumRow, PanelLayout.Rect rowBounds) {
         PanelLayout.Rect chipBounds = enumRow.getChipBounds(textRenderer, rowBounds);
         int optionCount = enumRow.getSetting().getModes().length;
-        float popupHeight = optionCount * 24.0f + 12.0f;
+        int visibleCount = Math.min(optionCount, EnumSelectPopup.MAX_VISIBLE_ITEMS);
+        float popupHeight = visibleCount * 24.0f + 12.0f;
         float popupWidth = Math.max(108.0f, chipBounds.width() + 24.0f);
         float popupX = Math.max(bounds.x() + MD3Theme.PANEL_VIEWPORT_INSET, chipBounds.right() - popupWidth);
         float popupY = chipBounds.bottom() + 4.0f;
@@ -297,6 +305,7 @@ public class ClientSettingPanel {
         contentRectRenderer.draw();
         contentTextRenderer.draw();
         PanelScissor.clear(contentRectRenderer, contentRoundRectRenderer, contentShadowRenderer, contentTextRenderer);
+        scrollBarRenderer.drawAndClear();
         contentPending = false;
     }
 

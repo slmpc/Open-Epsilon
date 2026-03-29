@@ -194,6 +194,10 @@ public class PanelScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (popupHost.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            dirtyState.markAllDirty();
+            return true;
+        }
         if (state.isClientSettingMode()) {
             if (clientSettingPanel.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
                 dirtyState.markClientSettingDirty();
