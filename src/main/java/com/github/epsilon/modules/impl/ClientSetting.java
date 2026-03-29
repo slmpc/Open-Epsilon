@@ -26,12 +26,12 @@ public class ClientSetting extends Module {
     }
 
     private ClientSetting() {
-        super("ClickGui", null);
+        super("ClientSetting", null);
     }
 
     public static final ClientSetting INSTANCE = new ClientSetting();
 
-    public final KeybindSetting guiKeybind = addKeybindSetting(new KeybindSetting("Keybind", this, -1) {
+    public final KeybindSetting guiKeybind = addKeybindSetting(new KeybindSetting("Gui Keybind", this, -1) {
         @Override
         public void setValue(Integer value) {
             super.setValue(value);
