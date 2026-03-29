@@ -1,6 +1,7 @@
 package com.github.epsilon.managers;
 
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -28,18 +29,18 @@ public class RenderManager {
     }
 
     public void callAndClear(DeltaTracker tracker) {
-        if (!renderWorldHudQueue.isEmpty()) {
+        if (!renderWorldHudQueue.isEmpty() && Minecraft.getInstance().screen == null) {
             ArrayList<Consumer<DeltaTracker>> pending = new ArrayList<>(renderWorldHudQueue);
-            renderWorldHudQueue.clear();
             pending.forEach(func -> func.accept(tracker));
         }
 
         if (!renderGuiQueue.isEmpty()) {
             ArrayList<Consumer<DeltaTracker>> pending = new ArrayList<>(renderGuiQueue);
-            renderGuiQueue.clear();
             pending.forEach(func -> func.accept(tracker));
         }
 
+        renderWorldHudQueue.clear();
+        renderGuiQueue.clear();
     }
 
 }
