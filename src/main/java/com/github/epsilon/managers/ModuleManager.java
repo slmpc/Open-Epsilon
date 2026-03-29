@@ -40,6 +40,7 @@ public class ModuleManager {
                 Velocity.INSTANCE,
 
                 // Player
+                AutoTool.INSTANCE,
                 BreakCooldown.INSTANCE,
                 Disabler.INSTANCE,
                 ElytraFly.INSTANCE,

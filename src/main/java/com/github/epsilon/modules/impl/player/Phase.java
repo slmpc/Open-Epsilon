@@ -1,18 +1,31 @@
 package com.github.epsilon.modules.impl.player;
 
+import com.github.epsilon.events.CollisionEvent;
+import com.github.epsilon.events.DestroyBlockEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
+import com.github.epsilon.settings.impl.DoubleSetting;
 import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.settings.impl.IntSetting;
-import com.github.epsilon.utils.player.FindItemResult;
 import com.github.epsilon.utils.player.InvUtils;
+import com.github.epsilon.utils.player.MoveUtils;
+import com.github.epsilon.utils.rotation.RotationUtils;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import org.joml.Vector2f;
 
 public class Phase extends Module {
 
@@ -23,135 +36,222 @@ public class Phase extends Module {
     }
 
     private enum Mode {
+        Vanilla,
         Pearl,
-        Clip,
-        Hybrid
+        Sunrise,
+        ForceMine,
+        CCClip
     }
 
-    private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Hybrid);
+    private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Vanilla);
+    private final BoolSetting pauseOnPhase = boolSetting("PauseOnPhase", false, () -> mode.is(Mode.Pearl));
+    private final BoolSetting swingHand = boolSetting("SwingHand", true, () -> mode.is(Mode.Pearl));
+    private final BoolSetting silent = boolSetting("Silent", false, () -> mode.is(Mode.Sunrise));
+    private final BoolSetting waitBreak = boolSetting("WaitBreak", true, () -> mode.is(Mode.Sunrise));
+    private final BoolSetting onlyOnGround = boolSetting("OnlyOnGround", false, () -> mode.is(Mode.Pearl));
+    private final BoolSetting autoDisable = boolSetting("AutoDisable", false, () -> mode.is(Mode.Pearl));
+    private final IntSetting afterBreak = intSetting("BreakTimeout", 4, 1, 20, 1, () -> mode.is(Mode.Sunrise) && waitBreak.getValue());
+    private final IntSetting afterPearl = intSetting("PearlTimeout", 0, 0, 60, 1, () -> mode.is(Mode.Pearl));
+    private final DoubleSetting pitch = doubleSetting("Pitch", 80.0, 0.0, 90.0, 1.0, () -> mode.is(Mode.Pearl));
+    private final BoolSetting strict = boolSetting("Strict", false, () -> mode.is(Mode.ForceMine));
 
-    private final BoolSetting onlyOnGround = boolSetting("OnlyOnGround", false, this::usePearlMode);
-    private final BoolSetting autoDisable = boolSetting("AutoDisable", false, this::usePearlMode);
-    private final IntSetting pearlDelay = intSetting("PearlDelay", 20, 0, 60, 1, this::usePearlMode);
-    private final IntSetting afterPearl = intSetting("AfterPearl", 0, 0, 60, 1, this::usePearlMode);
-    private final IntSetting pitch = intSetting("Pitch", 80, 0, 90, 1, this::usePearlMode);
-    private final BoolSetting swingHand = boolSetting("SwingHand", true, this::usePearlMode);
-
-    private final IntSetting clipDelay = intSetting("ClipDelay", 4, 0, 20, 1, this::useClipMode);
-    private final IntSetting clipDistance = intSetting("ClipDistance", 26, 5, 80, 1, this::useClipMode);
-
-    private int clipTimer;
-    private int afterPearlTimer;
+    public int clipTimer;
+    public int afterPearlTime;
 
     @Override
     protected void onEnable() {
+        afterPearlTime = 0;
         clipTimer = 0;
-        afterPearlTimer = 0;
+
+        if (mc.player.onGround() && mode.is(Mode.CCClip)) {
+            double[] diagonalOffset = MoveUtils.forwardWithoutStrafe(0.44);
+            boolean diagonal = mc.player.getYRot() % 90 > 35 && mc.player.getYRot() % 90 < 55;
+
+            mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_SPRINTING));
+
+            if (diagonal) {
+                double[] directionVec = MoveUtils.forwardWithoutStrafe(0.51);
+
+                int height = mc.level.clip(
+                        new ClipContext(mc.player.getEyePosition(), mc.player.getEyePosition().add(diagonalOffset[0], 0, diagonalOffset[1]), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player)
+                ).getType().equals(HitResult.Type.MISS) ? 1 : 2;
+
+                mc.player.setPos(mc.player.getX() + directionVec[0], mc.player.getY() + height, mc.player.getZ() + directionVec[1]);
+                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true, false));
+
+                height = mc.level.getBlockState(BlockPos.containing(mc.player.position().add(diagonalOffset[0], -2, diagonalOffset[1]))).isAir() ? 2 : 1;
+
+                mc.player.setPos(mc.player.getX() + directionVec[0], mc.player.getY() - height, mc.player.getZ() + directionVec[1]);
+                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true, false));
+                toggle();
+
+            } else {
+                double[] directionVec = MoveUtils.forwardWithoutStrafe(0.57);
+
+                int height = mc.level.clip(
+                        new ClipContext(mc.player.getEyePosition(), mc.player.getEyePosition().add(diagonalOffset[0], 0, diagonalOffset[1]), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player)
+                ).getType().equals(HitResult.Type.MISS) ? 1 : 2;
+
+                mc.player.setPos(mc.player.getX() + directionVec[0], mc.player.getY() + height, mc.player.getZ() + directionVec[1]);
+                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true, false));
+
+                mc.player.setPos(mc.player.getX() + directionVec[0], mc.player.getY(), mc.player.getZ() + directionVec[1]);
+                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true, false));
+
+                height = mc.level.getBlockState(BlockPos.containing(mc.player.position().add(diagonalOffset[0], -2, diagonalOffset[1]))).isAir() ? 2 : 1;
+
+                mc.player.setPos(mc.player.getX() + directionVec[0], mc.player.getY() - height, mc.player.getZ() + directionVec[1]);
+                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true, false));
+                toggle();
+            }
+        }
     }
 
     @SubscribeEvent
-    private void onTick(ClientTickEvent.Pre event) {
-        if (nullCheck()) return;
+    private void onDestroyBlock(DestroyBlockEvent event) {
+        clipTimer = afterBreak.getValue();
+    }
 
-        if (clipTimer > 0) {
-            clipTimer--;
-        }
-        if (afterPearlTimer > 0) {
-            afterPearlTimer--;
-        }
+    @SubscribeEvent
+    private void onCollide(CollisionEvent event) {
+        BlockPos playerPos = BlockPos.containing(mc.player.position());
 
-        if (mc.screen != null) {
-            return;
-        }
-
-        boolean usePearl = usePearlMode();
-        boolean useClip = useClipMode();
-
-        boolean touchingWall = mc.player.horizontalCollision || (useClip && afterPearlTimer > 0);
-        if (!touchingWall) {
-            return;
-        }
-
-        if (usePearl && mc.player.horizontalCollision && canPearlPhase() && tryPearlPhase()) {
-            clipTimer = pearlDelay.getValue();
-            afterPearlTimer = afterPearl.getValue();
-            if (autoDisable.getValue()) {
-                toggle();
+        if (!mode.is(Mode.CCClip) && !mode.is(Mode.Pearl) && !mode.is(Mode.ForceMine) && canNoClip() || afterPearlTime > 0) {
+            if (!event.getPos().equals(playerPos.below()) || mc.options.keyShift.isDown()) {
+                event.setState(Blocks.AIR.defaultBlockState());
             }
-            return;
         }
 
-        if (!useClip || clipTimer > 0) {
-            return;
-        }
+        if (mode.is(Mode.ForceMine)) {
+            float xDelta = Math.abs(playerPos.getX() - event.getPos().getX());
+            float zDelta = Math.abs(playerPos.getZ() - event.getPos().getZ());
 
-        if (tryVanillaClip()) {
-            clipTimer = clipDelay.getValue();
+            if (xDelta != 0 && zDelta != 0 && strict.getValue()) {
+                return;
+            }
+
+            if (!event.getPos().equals(playerPos.below()) || mc.options.keyShift.isDown()) {
+                event.setState(Blocks.AIR.defaultBlockState());
+            }
         }
     }
 
-    private boolean canPearlPhase() {
-        return usePearlMode() && clipTimer <= 0 && (!onlyOnGround.getValue() || mc.player.onGround()) && mc.player.tickCount > 60 && !mc.player.isPassenger() && !mc.player.isUsingItem();
-    }
+    @SubscribeEvent
+    public void onClientTickPre(ClientTickEvent.Pre event) {
+        if (nullCheck()) return;
+        if (clipTimer > 0) clipTimer--;
+        if (afterPearlTime > 0) afterPearlTime--;
 
-    private boolean usePearlMode() {
-        return mode.is(Mode.Pearl) || mode.is(Mode.Hybrid);
-    }
+        if (mode.getValue() == Mode.Sunrise && (mc.player.horizontalCollision || isPlayerInBlock()) && !mc.player.isInWater() && !mc.player.isInLava() && clipTimer <= 0) {
+            double[] dir = MoveUtils.forward(0.5);
 
-    private boolean useClipMode() {
-        return mode.is(Mode.Clip) || mode.is(Mode.Hybrid);
-    }
+            BlockPos blockToBreak = null;
 
-    private boolean tryPearlPhase() {
-        FindItemResult pearl = InvUtils.findInHotbar(Items.ENDER_PEARL);
-        if (!pearl.found()) {
-            return false;
+            if (mc.options.keyJump.isDown()) {
+                blockToBreak = BlockPos.containing(mc.player.getX() + dir[0], mc.player.getY() + 2, mc.player.getZ() + dir[1]);
+            } else if (mc.options.keyShift.isDown()) {
+                blockToBreak = BlockPos.containing(mc.player.getX() + dir[0], mc.player.getY() - 1, mc.player.getZ() + dir[1]);
+            } else if (MoveUtils.isMoving()) {
+                blockToBreak = BlockPos.containing(mc.player.getX() + dir[0], mc.player.getY(), mc.player.getZ() + dir[1]);
+            }
+
+            if (blockToBreak == null) return;
+            int bestTool = AutoTool.INSTANCE.getTool(blockToBreak);
+            if (bestTool == -1) return;
+
+            InvUtils.swap(bestTool, silent.getValue());
+            mc.gameMode.continueDestroyBlock(blockToBreak, mc.player.getDirection());
+            mc.player.swing(InteractionHand.MAIN_HAND);
+            if (silent.getValue()) {
+                InvUtils.swapBack();
+            }
         }
 
-        float prevPitch = mc.player.getXRot();
+        if (mode.getValue() == Mode.ForceMine && (mc.player.horizontalCollision || isPlayerInBlock()) && !mc.player.isInWater() && !mc.player.isInLava())
+            for (int x = -2; x < 2; x++) {
+                for (int y = -1; y < 3; y++) {
+                    for (int z = -2; z < 2; z++) {
+                        if (((x == 0 && y == 0 && z == 0) || (x == 0 && y == 1 && z == 0)) && !mc.options.keyShift.isDown()) {
+                            continue;
+                        }
+                        BlockPos bp = BlockPos.containing(mc.player.position()).offset(x, y, z);
+                        if (mc.player.getBoundingBox().intersects(new AABB(bp)) && !mc.level.getBlockState(bp).isAir()) {
+                            mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bp, Direction.UP));
+                        }
+                    }
+                }
+            }
+        if (mode.getValue() == Mode.Pearl && (mc.player.onGround() || !onlyOnGround.getValue())) {
+            if (mc.player.horizontalCollision && clipTimer <= 0 && mc.player.tickCount > 60) {
+                if (pauseOnPhase.getValue() && isPlayerInBlock()) {
+                    return;
+                }
 
-        InteractionHand hand = pearl.getHand();
-        boolean swapped = InvUtils.swap(pearl.slot(), true);
+                double[] dir = MoveUtils.forward(0.5);
+                BlockPos block = BlockPos.containing(mc.player.getX() + dir[0], mc.player.getY(), mc.player.getZ() + dir[1]);
 
-        mc.player.setXRot(pitch.getValue().floatValue());
+                if (mc.options.keyShift.isDown()) {
+                    return;
+                }
 
-        mc.gameMode.useItem(mc.player, hand);
+                Vector2f angle = RotationUtils.calculate(block.getCenter());
+                int epSlot = getEnderPearlSlot();
+                if (epSlot != -1) {
+                    float prevYaw = mc.player.getYRot();
+                    float prevPitch = mc.player.getXRot();
 
+                    mc.player.setYRot(angle.x);
+                    mc.player.setXRot(pitch.getValue().floatValue());
+
+                    doUsePearl(epSlot);
+
+                    mc.player.setYRot(prevYaw);
+                    mc.player.setXRot(prevPitch);
+                }
+            }
+        }
+    }
+
+    private void doUsePearl(int slot) {
+        InvUtils.swap(slot, true);
+        mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
         if (swingHand.getValue()) {
-            mc.player.swing(hand);
+            mc.player.swing(InteractionHand.MAIN_HAND);
         } else {
-            mc.getConnection().send(new ServerboundSwingPacket(hand));
+            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
         }
-
-        mc.player.setXRot(prevPitch);
-
-        if (swapped) {
-            InvUtils.swapBack();
+        InvUtils.swapBack();
+        if (autoDisable.getValue()) {
+            toggle();
         }
-
-        return true;
+        clipTimer = 20;
+        afterPearlTime = afterPearl.getValue();
     }
 
-    private boolean tryVanillaClip() {
-        double distance = clipDistance.getValue() / 100.0;
-        float yaw = mc.player.getYRot();
-        double radians = Math.toRadians(yaw);
-        double x = -Mth.sin((float) radians) * distance;
-        double z = Mth.cos((float) radians) * distance;
-
-        if (mc.level.noCollision(mc.player, mc.player.getBoundingBox().move(x, 0.0, z))) {
-            mc.player.setPos(mc.player.getX() + x, mc.player.getY(), mc.player.getZ() + z);
-            return true;
+    private int getEnderPearlSlot() {
+        int epSlot = -1;
+        if (mc.player.getMainHandItem().getItem() == Items.ENDER_PEARL) {
+            epSlot = mc.player.getInventory().getSelectedSlot();
         }
-
-        double halfX = x * 0.5;
-        double halfZ = z * 0.5;
-        if (mc.level.noCollision(mc.player, mc.player.getBoundingBox().move(halfX, 0.0, halfZ))) {
-            mc.player.setPos(mc.player.getX() + halfX, mc.player.getY(), mc.player.getZ() + halfZ);
-            return true;
+        if (epSlot == -1) {
+            for (int l = 0; l < 9; ++l) {
+                if (mc.player.getInventory().getItem(l).getItem() == Items.ENDER_PEARL) {
+                    epSlot = l;
+                    break;
+                }
+            }
         }
+        return epSlot;
+    }
 
-        return false;
+    private boolean canNoClip() {
+        if (mode.is(Mode.Vanilla)) return true;
+        if (!waitBreak.getValue()) return true;
+        return clipTimer != 0;
+    }
+
+    private boolean isPlayerInBlock() {
+        return !mc.level.getBlockState(BlockPos.containing(mc.player.position())).isAir();
     }
 
 }

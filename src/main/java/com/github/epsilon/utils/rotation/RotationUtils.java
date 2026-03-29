@@ -11,14 +11,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2f;
-import org.joml.Vector3d;
 
 public class RotationUtils {
 
     private static final Minecraft mc = Minecraft.getInstance();
 
-    public static Vector2f calculate(final Vector3d from, final Vector3d to) {
-        final Vector3d diff = to.sub(from);
+    public static Vector2f calculate(Vec3 from, Vec3 to) {
+        final Vec3 diff = to.subtract(from);
         final double distance = Math.hypot(diff.x, diff.z);
         final float yaw = (float) (Mth.atan2(diff.z, diff.x) * MathUtils.TO_DEGREES) - 90.0F;
         final float pitch = (float) (-(Mth.atan2(diff.y, distance) * MathUtils.TO_DEGREES));
@@ -55,7 +54,12 @@ public class RotationUtils {
     }
 
     public static Vector2f calculate(final Entity entity) {
-        return calculate(new Vector3d(entity.getX(), entity.getY(), entity.getZ()).add(0, Math.max(0, Math.min(mc.player.getY() - entity.getY() + mc.player.getEyeHeight(mc.player.getPose()), (entity.getBoundingBox().maxY - entity.getBoundingBox().minY) * 0.9)), 0));
+        return calculate(entity.position().add(0,
+                Mth.clamp(
+                        mc.player.getY() - entity.getY() + mc.player.getEyeHeight(mc.player.getPose()),
+                        0,
+                        (entity.getBoundingBox().maxY - entity.getBoundingBox().minY) * 0.9
+                ), 0));
     }
 
     public static Vector2f calculate(final Entity entity, final boolean adaptive, final double range) {
@@ -67,11 +71,11 @@ public class RotationUtils {
         for (double yPercent = 1; yPercent >= 0; yPercent -= 0.25 + Math.random() * 0.1) {
             for (double xPercent = 1; xPercent >= -0.5; xPercent -= 0.5) {
                 for (double zPercent = 1; zPercent >= -0.5; zPercent -= 0.5) {
-                    Vector2f adaptiveRotations = calculate(new Vector3d(entity.getX(), entity.getY(), entity.getZ()).add(
+                    Vector2f adaptiveRotations = calculate(entity.position().add(
                             (entity.getBoundingBox().maxX - entity.getBoundingBox().minX) * xPercent,
                             (entity.getBoundingBox().maxY - entity.getBoundingBox().minY) * yPercent,
-                            (entity.getBoundingBox().maxZ - entity.getBoundingBox().minZ) * zPercent));
-
+                            (entity.getBoundingBox().maxZ - entity.getBoundingBox().minZ) * zPercent)
+                    );
                     if (RaytraceUtils.facingEnemy(mc.player, entity, adaptiveRotations, range, 0)) {
                         return adaptiveRotations;
                     }
@@ -82,31 +86,23 @@ public class RotationUtils {
         return normalRotations;
     }
 
-    public static Vector2f calculate(final Vec3 to, final Direction direction) {
-        return calculate(new Vector3d(to.x, to.y, to.z), direction);
+    public static Vector2f calculate(Vec3 to) {
+        return calculate(mc.player.position().add(0, mc.player.getEyeHeight(mc.player.getPose()), 0), to);
     }
 
-    public static Vector2f calculate(final Vec3 to) {
-        return calculate(new Vector3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ()), new Vector3d(to.x, to.y, to.z));
+    public static Vector2f calculate(BlockPos to) {
+        return calculate(mc.player.position().add(0, mc.player.getEyeHeight(mc.player.getPose()), 0), to.getCenter());
     }
 
-    public static Vector2f calculate(final BlockPos to) {
-        return calculate(new Vector3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ()), new Vector3d(to.getX(), to.getY(), to.getZ()).add(0.5, 0.5, 0.5));
-    }
-
-    public static Vector2f calculate(final Vector3d to) {
-        return calculate(new Vector3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ()), to);
-    }
-
-    public static Vector2f calculate(Vector3d position, Direction direction) {
-        double x = position.x + 0.5;
-        double y = position.y + 0.5;
-        double z = position.z + 0.5;
+    public static Vector2f calculate(Vec3 to, Direction direction) {
+        double x = to.x + 0.5;
+        double y = to.y + 0.5;
+        double z = to.z + 0.5;
 
         x += (double) direction.getStepX() * 0.5;
         y += (double) direction.getStepY() * 0.5;
         z += (double) direction.getStepZ() * 0.5;
-        return calculate(new Vector3d(x, y, z));
+        return calculate(new Vec3(x, y, z));
     }
 
     public static Vector2f calculate(BlockPos position, Direction direction) {

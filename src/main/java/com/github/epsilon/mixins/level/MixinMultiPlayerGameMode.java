@@ -1,6 +1,7 @@
 package com.github.epsilon.mixins.level;
 
 import com.github.epsilon.events.AttackBlockEvent;
+import com.github.epsilon.events.DestroyBlockEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.impl.player.BreakCooldown;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -33,6 +34,14 @@ public class MixinMultiPlayerGameMode {
 
     @Unique
     private boolean rotationModified;
+
+    @Inject(method = "destroyBlock", at = @At("RETURN"), cancellable = true)
+    public void hookDestroyBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        DestroyBlockEvent event = NeoForge.EVENT_BUS.post(new DestroyBlockEvent(pos));
+        if (event.isCanceled()) {
+            cir.setReturnValue(false);
+        }
+    }
 
     @Inject(method = "startDestroyBlock", at = @At("HEAD"), cancellable = true)
     private void onStartDestroyBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
