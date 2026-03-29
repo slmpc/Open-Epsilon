@@ -38,7 +38,7 @@ public class Velocity extends Module {
     }
 
     private enum Mode {
-        Vanilla,
+        Cancel,
         Legit,
         NoXZ
     }
@@ -51,11 +51,12 @@ public class Velocity extends Module {
         LAG
     }
 
-    private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Vanilla);
-    private final BoolSetting explosion = boolSetting("Explosion", true, () -> mode.is(Mode.Vanilla));
-    public final BoolSetting waterPush = boolSetting("NoWaterPush", true, () -> mode.is(Mode.Vanilla));
-    public final BoolSetting entityPush = boolSetting("NoEntityPush", true, () -> mode.is(Mode.Vanilla));
-    public final BoolSetting blockPush = boolSetting("NoBlockPush", true, () -> mode.is(Mode.Vanilla));
+    private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Cancel);
+    private final BoolSetting serverMotion = boolSetting("ServerMotion", true, () -> mode.is(Mode.Cancel));
+    private final BoolSetting explosion = boolSetting("Explosion", true, () -> mode.is(Mode.Cancel));
+    public final BoolSetting waterPush = boolSetting("NoWaterPush", true, () -> mode.is(Mode.Cancel));
+    public final BoolSetting entityPush = boolSetting("NoEntityPush", true, () -> mode.is(Mode.Cancel));
+    public final BoolSetting blockPush = boolSetting("NoBlockPush", true, () -> mode.is(Mode.Cancel));
     private final IntSetting attacks = intSetting("Attacks", 4, 1, 5, 1, () -> mode.is(Mode.NoXZ));
     private final DoubleSetting delayTime = doubleSetting("MaxDelayTime", 2500.0, 50.0, 10000.0, 50.0, () -> mode.is(Mode.NoXZ));
 
@@ -94,10 +95,10 @@ public class Velocity extends Module {
     @SubscribeEvent
     public void onPacket(PacketEvent.Receive event) {
         switch (mode.getValue()) {
-            case Vanilla -> {
+            case Cancel -> {
                 if (nullCheck()) return;
 
-                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
+                if (serverMotion.getValue() && event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
                     event.setCanceled(true);
                     return;
                 }
@@ -114,24 +115,23 @@ public class Velocity extends Module {
                     ));
                 }
             }
-
             case NoXZ -> {
                 if (event.getPacket() instanceof ClientboundPlayerPositionPacket && stage == VelocityStage.NONE) {
                     lag = true;
                     return;
                 }
-                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
+                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket(int id, Vec3 movement) && id == mc.player.getId()) {
                     if (stage == VelocityStage.NONE) {
                         if (!lag) {
                             stage = VelocityStage.DELAY;
                             velocityTime = System.currentTimeMillis();
                             event.setCanceled(true);
-                            velocity = packet.movement();
+                            velocity = movement;
                         } else {
                             lag = false;
                         }
                     } else {
-                        velocity = packet.movement();
+                        velocity = movement;
                         stage = VelocityStage.LAG;
                         event.setCanceled(true);
                     }
@@ -183,7 +183,6 @@ public class Velocity extends Module {
                     event.setCanceled(true);
                 }
             }
-
             case Legit -> {
                 if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
                     jump = true;

@@ -331,7 +331,7 @@ public class RotationManager {
             float fixedLeft = left * cos - forward * sin;
             float fixedForward = forward * cos + left * sin;
 
-            event.getInput().moveVector = (new Vec2(fixedLeft, fixedForward)).normalized();
+            event.getInput().moveVector = (new Vec2(fixedLeft, fixedForward));
         }
     }
 
@@ -362,9 +362,9 @@ public class RotationManager {
     }
 
     @SubscribeEvent
-    public void onFallFlying(FallFlyingEvent e) {
+    public void onFallFlying(FallFlyingEvent event) {
         if (rotations != null) {
-            e.setPitch(rotations.y);
+            event.setPitch(rotations.y);
         }
     }
 
