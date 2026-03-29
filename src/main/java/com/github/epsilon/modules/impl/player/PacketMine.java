@@ -169,20 +169,17 @@ public class PacketMine extends Module {
 
     @SubscribeEvent
     private void onRenderLevel(RenderLevelStageEvent.AfterLevel event) {
-        if (nullCheck() || !render.getValue() || actions.isEmpty() || mode.is(Mode.Damage)) return;
+        if (!render.getValue() || actions.isEmpty() || mode.is(Mode.Damage)) return;
 
         float partialTick = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
         for (MineAction action : actions) {
-            BlockPos blockPos = action.pos;
-            if(mc.level.getBlockState(blockPos).isAir()) return;
-
             float progress = smooth.getValue() ? Mth.lerp(partialTick, action.getPrevProgress(), action.getProgress()) : action.getProgress();
             progress = Mth.clamp(progress, 0.0f, 1.0f);
 
             Color lineColor = lerpColor(startLineColor.getValue(), endLineColor.getValue(), progress);
             Color fillColor = lerpColor(startFillColor.getValue(), endFillColor.getValue(), progress);
-            AABB box = getRenderBox(blockPos, progress);
+            AABB box = getRenderBox(action.pos, progress);
 
             Render3DUtils.drawFilledBox(box, fillColor);
             Render3DUtils.drawOutlineBox(event.getPoseStack(), box, lineColor.getRGB(), lineWidth.getValue().floatValue());
@@ -274,12 +271,10 @@ public class PacketMine extends Module {
         float destroySpeed = 1;
         int slot = getTool(position);
 
-        if (mc.player == null) {
-            return 0;
-        }
-
-        if (slot != -1 && mc.player.getInventory().getItem(slot) != null && !mc.player.getInventory().getItem(slot).isEmpty()) {
-            destroySpeed *= mc.player.getInventory().getItem(slot).getDestroySpeed(state);
+        if (slot != -1) {
+            if (!mc.player.getInventory().getItem(slot).isEmpty()) {
+                destroySpeed *= mc.player.getInventory().getItem(slot).getDestroySpeed(state);
+            }
         }
 
         return destroySpeed;
@@ -481,7 +476,6 @@ public class PacketMine extends Module {
                 }
 
                 int delay = doubleMine.getValue() ? 100 : swapDelay.getValue();
-
                 schedule(delay, () -> switchTo(prevSlot, pickSlot));
 
                 mineBreaks++;
@@ -509,7 +503,7 @@ public class PacketMine extends Module {
             } else if (switchMode.is(SwitchMode.Silent)) {
                 mc.getConnection().send(new ServerboundSetCarriedItemPacket(slot));
             } else {
-                InvUtils.swap(slot, true);
+                InvUtils.swap(slot, false);
             }
         }
 
@@ -552,14 +546,7 @@ public class PacketMine extends Module {
         }
     }
 
-    private static class DelayedAction {
-        private final long runAt;
-        private final Runnable runnable;
-
-        private DelayedAction(long runAt, Runnable runnable) {
-            this.runAt = runAt;
-            this.runnable = runnable;
-        }
+    private record DelayedAction(long runAt, Runnable runnable) {
     }
 
 }
