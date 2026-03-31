@@ -25,7 +25,6 @@
     "render.MixinParticleManager",
     "render.MixinScreenEffectRenderer",
     "render.MixinTitleScreen",
-    "render.MixinWindow"
   ],
   "injectors": {
     "defaultRequire": 1

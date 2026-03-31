@@ -12,9 +12,56 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RotationUtils {
 
     private static final Minecraft mc = Minecraft.getInstance();
+
+    public static Direction getDirection(BlockPos blockPos, Direction fallback) {
+        Vec3 eyesPos = mc.player.getEyePosition();
+        AABB box = new AABB(blockPos);
+        List<Direction> validDirections = new ArrayList<>(6);
+
+        if (eyesPos.x < box.minX) validDirections.add(Direction.WEST);
+        if (eyesPos.x > box.maxX) validDirections.add(Direction.EAST);
+        if (eyesPos.y < box.minY) validDirections.add(Direction.DOWN);
+        if (eyesPos.y > box.maxY) validDirections.add(Direction.UP);
+        if (eyesPos.z < box.minZ) validDirections.add(Direction.NORTH);
+        if (eyesPos.z > box.maxZ) validDirections.add(Direction.SOUTH);
+
+        if (fallback != null && validDirections.contains(fallback)) {
+            return fallback;
+        }
+
+        if (!validDirections.isEmpty()) {
+            Direction bestDirection = validDirections.getFirst();
+            double bestDistance = distanceToFace(eyesPos, box, bestDirection);
+            for (int i = 1; i < validDirections.size(); i++) {
+                Direction direction = validDirections.get(i);
+                double distance = distanceToFace(eyesPos, box, direction);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestDirection = direction;
+                }
+            }
+            return bestDirection;
+        }
+
+        return fallback != null ? fallback : mc.player.getDirection();
+    }
+
+    private static double distanceToFace(Vec3 eyesPos, AABB box, Direction direction) {
+        return switch (direction) {
+            case WEST -> box.minX - eyesPos.x;
+            case EAST -> eyesPos.x - box.maxX;
+            case DOWN -> box.minY - eyesPos.y;
+            case UP -> eyesPos.y - box.maxY;
+            case NORTH -> box.minZ - eyesPos.z;
+            case SOUTH -> eyesPos.z - box.maxZ;
+        };
+    }
 
     public static Vector2f calculate(Vec3 from, Vec3 to) {
         final Vec3 diff = to.subtract(from);

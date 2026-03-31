@@ -11,6 +11,7 @@ import com.github.epsilon.utils.player.InvUtils;
 import com.github.epsilon.utils.player.PlayerUtils;
 import com.github.epsilon.utils.render.Render3DUtils;
 import com.github.epsilon.utils.render.animation.Easing;
+import com.github.epsilon.utils.rotation.RotationUtils;
 import com.github.epsilon.utils.timer.TimerUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,7 +22,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +33,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -330,55 +329,6 @@ public class PacketMine extends Module {
         return getDigSpeed(state, position) / hardness / (canBreak(position) ? 30f : 100f);
     }
 
-    public static Vec3 getEyesPos(Entity entity) {
-        return entity.position().add(0, entity.getEyeHeight(entity.getPose()), 0);
-    }
-
-    private List<Direction> getStrictDirections(BlockPos bp) {
-        List<Direction> visibleSides = new ArrayList<>();
-        Vec3 positionVector = bp.getCenter();
-
-        double westDelta = getEyesPos(mc.player).x - (positionVector.add(0.5, 0, 0).x);
-        double eastDelta = getEyesPos(mc.player).x - (positionVector.add(-0.5, 0, 0).x);
-        double northDelta = getEyesPos(mc.player).z - (positionVector.add(0, 0, 0.5).z);
-        double southDelta = getEyesPos(mc.player).z - (positionVector.add(0, 0, -0.5).z);
-        double upDelta = getEyesPos(mc.player).y - (positionVector.add(0, 0.5, 0).y);
-        double downDelta = getEyesPos(mc.player).y - (positionVector.add(0, -0.5, 0).y);
-
-        if (westDelta > 0 && isSolid(bp.west()))
-            visibleSides.add(Direction.EAST);
-        if (westDelta < 0 && isSolid(bp.east()))
-            visibleSides.add(Direction.WEST);
-        if (eastDelta < 0 && isSolid(bp.east()))
-            visibleSides.add(Direction.WEST);
-        if (eastDelta > 0 && isSolid(bp.west()))
-            visibleSides.add(Direction.EAST);
-
-        if (northDelta > 0 && isSolid(bp.north()))
-            visibleSides.add(Direction.SOUTH);
-        if (northDelta < 0 && isSolid(bp.south()))
-            visibleSides.add(Direction.NORTH);
-        if (southDelta < 0 && isSolid(bp.south()))
-            visibleSides.add(Direction.NORTH);
-        if (southDelta > 0 && isSolid(bp.north()))
-            visibleSides.add(Direction.SOUTH);
-
-        if (upDelta > 0 && isSolid(bp.below()))
-            visibleSides.add(Direction.UP);
-        if (upDelta < 0 && isSolid(bp.above()))
-            visibleSides.add(Direction.DOWN);
-        if (downDelta < 0 && isSolid(bp.above()))
-            visibleSides.add(Direction.DOWN);
-        if (downDelta > 0 && isSolid(bp.below()))
-            visibleSides.add(Direction.UP);
-
-        return visibleSides;
-    }
-
-    private boolean isSolid(BlockPos bp) {
-        return mc.level.getBlockState(bp).isSolid();
-    }
-
     public void placeCrystal() {
 //        if (AutoCrystal.target == null) return;
 //
@@ -403,7 +353,7 @@ public class PacketMine extends Module {
 
         private final TimerUtils attackTimer = new TimerUtils();
 
-        public MineAction(@NotNull BlockPos pos, Direction direction) {
+        public MineAction(BlockPos pos, Direction direction) {
             this.pos = pos;
             progress = 0;
             mineBreaks = 0;
@@ -411,7 +361,7 @@ public class PacketMine extends Module {
         }
 
         public void start(Direction direction) {
-            Direction startDirection = direction == null ? mc.player.getDirection() : direction;
+            Direction startDirection = RotationUtils.getDirection(pos, direction);
             if (doubleMine.getValue()) {
                 mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, startDirection));
                 mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, startDirection));
@@ -423,7 +373,7 @@ public class PacketMine extends Module {
         }
 
         public boolean update() {
-            Direction dir = getStrictDirections(pos).stream().findFirst().orElse(mc.player.getDirection());
+            Direction dir = RotationUtils.getDirection(pos, null);
 
             if (mineBreaks >= breakAttempts.getValue() && !mode.is(Mode.Instant))
                 return true;
@@ -530,14 +480,14 @@ public class PacketMine extends Module {
                 return;
 
             prevProgress = progress = 0;
-            Direction dir = getStrictDirections(pos).stream().findFirst().orElse(mc.player.getDirection());
+            Direction dir = RotationUtils.getDirection(pos, null);
             mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, pos, dir));
             start(dir);
         }
 
         public void cancel() {
             if (progress != 0) {
-                mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, pos, Direction.DOWN));
+                mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, pos, RotationUtils.getDirection(pos, Direction.DOWN)));
             }
         }
 
