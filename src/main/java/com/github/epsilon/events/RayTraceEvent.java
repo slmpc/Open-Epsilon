@@ -4,6 +4,7 @@ import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.Event;
 
 public class RayTraceEvent extends Event {
+
     private float yaw;
     private float pitch;
 
@@ -34,4 +35,5 @@ public class RayTraceEvent extends Event {
     public void setPitch(float pitch) {
         this.pitch = pitch;
     }
+
 }

@@ -6,12 +6,10 @@ import com.github.epsilon.utils.rotation.Priority;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Vector2f;
 
@@ -314,28 +312,6 @@ public class RotationManager {
     }
 
     @SubscribeEvent
-    private void onMoveInput(MovementInputUpdateEvent event) {
-        if (active && isMovementFixEnabled() && rotations != null) {
-            Vec2 moveVector = event.getInput().getMoveVector();
-            float forward = moveVector.y;
-            float left = moveVector.x;
-
-            if (forward == 0 && left == 0) {
-                return;
-            }
-
-            float deltaYaw = Mth.wrapDegrees(mc.player.getYRot() - rotations.x);
-            float sin = Mth.sin(deltaYaw * Mth.DEG_TO_RAD);
-            float cos = Mth.cos(deltaYaw * Mth.DEG_TO_RAD);
-
-            float fixedLeft = left * cos - forward * sin;
-            float fixedForward = forward * cos + left * sin;
-
-            event.getInput().moveVector = (new Vec2(fixedLeft, fixedForward));
-        }
-    }
-
-    @SubscribeEvent
     private void onRaytrace(RayTraceEvent event) {
         if (active && rotations != null) {
             event.setYaw(rotations.x);
@@ -344,28 +320,32 @@ public class RotationManager {
     }
 
     @SubscribeEvent
+    private void onKeyboardInput(KeyboardInputEvent event) {
+        MovementFix moveFix = MovementFix.INSTANCE;
+        if (active && moveFix.isEnabled() && rotations != null) {
+            moveFix.fixMovement(event, rotations.x);
+        }
+    }
+
+    @SubscribeEvent
     private void onStrafe(StrafeEvent event) {
-        if (active && isMovementFixEnabled() && rotations != null) {
+        if (active && MovementFix.INSTANCE.isEnabled() && rotations != null) {
             event.setYaw(rotations.x);
         }
     }
 
     @SubscribeEvent
     private void onJump(JumpEvent event) {
-        if (active && isMovementFixEnabled() && rotations != null) {
+        if (active && MovementFix.INSTANCE.isEnabled() && rotations != null) {
             event.setYaw(rotations.x);
         }
     }
 
     @SubscribeEvent
     public void onFallFlying(FallFlyingEvent event) {
-        if (active && isMovementFixEnabled() && rotations != null) {
+        if (active && MovementFix.INSTANCE.isEnabled() && rotations != null) {
             event.setPitch(rotations.y);
         }
-    }
-
-    private boolean isMovementFixEnabled() {
-        return MovementFix.INSTANCE.isEnabled();
     }
 
     @SubscribeEvent

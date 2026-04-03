@@ -1,5 +1,6 @@
 package com.github.epsilon.modules.impl.player;
 
+import com.github.epsilon.events.KeyboardInputEvent;
 import com.github.epsilon.events.PacketEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
@@ -7,9 +8,7 @@ import com.github.epsilon.utils.network.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.world.phys.Vec2;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 public class Stuck extends Module {
@@ -31,8 +30,9 @@ public class Stuck extends Module {
     }
 
     @SubscribeEvent
-    public void onMovementInputUpdate(MovementInputUpdateEvent event) {
-        event.getInput().moveVector = new Vec2(0, 0);
+    public void onKeyboardInput(KeyboardInputEvent event) {
+        event.setLeft(0);
+        event.setForward(0);
     }
 
     @SubscribeEvent

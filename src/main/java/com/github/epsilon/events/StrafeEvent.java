@@ -3,6 +3,7 @@ package com.github.epsilon.events;
 import net.neoforged.bus.api.Event;
 
 public class StrafeEvent extends Event {
+
     private float yaw;
 
     public StrafeEvent(float yaw) {
@@ -16,4 +17,5 @@ public class StrafeEvent extends Event {
     public void setYaw(float yaw) {
         this.yaw = yaw;
     }
+
 }

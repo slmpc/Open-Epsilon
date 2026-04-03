@@ -1,5 +1,6 @@
 package com.github.epsilon.modules.impl.combat;
 
+import com.github.epsilon.events.KeyboardInputEvent;
 import com.github.epsilon.events.PacketEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
@@ -17,11 +18,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -239,17 +238,18 @@ public class Velocity extends Module {
     }
 
     @SubscribeEvent
-    public void onMoveInput(MovementInputUpdateEvent event) {
+    public void onKeyboardInput(KeyboardInputEvent event) {
         if (mode.is(Mode.NoXZ)) {
             if (stage == VelocityStage.DELAY && velocity != null && mc.hitResult instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof Player player && !AntiBot.INSTANCE.isBot(player)) {
-                event.getInput().moveVector = new Vec2(1, 0);
+                event.setLeft(1);
+                event.setForward(0);
                 stage = VelocityStage.ATTACK;
                 this.target = player;
             }
         }
         if (jump) {
             if (mc.player.onGround() && MoveUtils.isMoving()) {
-                event.getInput().makeJump();
+                mc.player.input.makeJump();
             }
             jump = false;
         }

@@ -66,8 +66,8 @@ public class RotationUtils {
     public static Vector2f calculate(Vec3 from, Vec3 to) {
         final Vec3 diff = to.subtract(from);
         final double distance = Math.hypot(diff.x, diff.z);
-        final float yaw = (float) (Mth.atan2(diff.z, diff.x) * MathUtils.TO_DEGREES) - 90.0F;
-        final float pitch = (float) (-(Mth.atan2(diff.y, distance) * MathUtils.TO_DEGREES));
+        final float yaw = (float) Math.toDegrees(Mth.atan2(diff.z, diff.x)) - 90.0F;
+        final float pitch = (float) Math.toDegrees(-(Mth.atan2(diff.y, distance)));
         return new Vector2f(yaw, pitch);
     }
 
