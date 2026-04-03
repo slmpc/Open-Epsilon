@@ -200,39 +200,37 @@ public class CrystalAura extends Module {
     }
 
     private void doBreakCrystal(EndCrystal crystal) {
-        boolean swapped = false;
         if (antiWeak.getValue() && mc.player.hasEffect(MobEffects.WEAKNESS)) {
             FindItemResult sword = InvUtils.findInHotbar(Items.DIAMOND_SWORD, Items.NETHERITE_SWORD, Items.IRON_SWORD, Items.STONE_SWORD);
             if (sword.found()) {
                 switch (antiWeakSwapMode.getValue()) {
                     case Swap -> InvUtils.swap(sword.slot(), false);
-                    case Silent -> swapped = InvUtils.swap(sword.slot(), true);
+                    case Silent -> InvUtils.swap(sword.slot(), true);
                     default -> {
                     }
                 }
             }
         }
 
-        final boolean silentSwapped = swapped;
         final int requestPriority = Priority.High.priority;
         final int crystalId = crystal.getId();
         final Vector2f rotation = RotationUtils.calculate(crystal);
 
         RotationManager.INSTANCE.applyRotation(rotation, breakRotationSpeed.getValue(), requestPriority, record -> {
             if (!isEnabled() || nullCheck()) {
-                if (silentSwapped) InvUtils.swapBack();
+                InvUtils.swapBack();
                 return;
             }
             if (record.selectedPriorityValue() != requestPriority) return;
 
             Entity current = mc.level.getEntity(crystalId);
             if (!(current instanceof EndCrystal currentCrystal) || !currentCrystal.isAlive()) {
-                if (silentSwapped) InvUtils.swapBack();
+                InvUtils.swapBack();
                 return;
             }
 
             if (!RaytraceUtils.facingEnemy(currentCrystal, breakRange.getValue(), record.currentRotation())) {
-                if (silentSwapped) InvUtils.swapBack();
+                InvUtils.swapBack();
                 return;
             }
 
@@ -244,7 +242,7 @@ public class CrystalAura extends Module {
             float selfDmg = DamageUtils.selfCrystalDamage(crystalPosition, armorForSelf.getValue() ? armorMode.getValue() : DamageUtils.ArmorEnchantmentMode.None);
             updateRenderTarget(currentCrystal.blockPosition().below(), tgtDmg, selfDmg);
 
-            if (silentSwapped) InvUtils.swapBack();
+            InvUtils.swapBack();
         });
     }
 
@@ -396,18 +394,17 @@ public class CrystalAura extends Module {
     }
 
     private void doPlaceCrystal(PlaceCandidate candidate, FindItemResult crystalItem) {
-        boolean swapped = false;
         InteractionHand hand = crystalItem.getHand();
         if (crystalItem.slot() != mc.player.getInventory().getSelectedSlot() && crystalItem.slot() != 40) {
             switch (placeSwapMode.getValue()) {
                 case Swap -> InvUtils.swap(crystalItem.slot(), false);
-                case Silent -> swapped = InvUtils.swap(crystalItem.slot(), true);
+                case Silent -> InvUtils.swap(crystalItem.slot(), true);
                 default -> {
                 }
             }
             hand = InteractionHand.MAIN_HAND;
         }
-        final boolean silentSwapped = swapped;
+
         final InteractionHand placeHand = hand;
         final int requestPriority = Priority.High.priority;
         final Vector2f rotation = candidate.targetRotation;
@@ -418,7 +415,7 @@ public class CrystalAura extends Module {
         );
         RotationManager.INSTANCE.applyRotation(rotation, placeRotationSpeed.getValue(), requestPriority, record -> {
             if (!isEnabled() || nullCheck()) {
-                if (silentSwapped) InvUtils.swapBack();
+                InvUtils.swapBack();
                 return;
             }
             if (record.selectedPriorityValue() != requestPriority) return;
@@ -426,7 +423,7 @@ public class CrystalAura extends Module {
                     ? candidate.wallBypassAllowed && isAimingAtBlock(record.currentRotation(), candidate.targetRotation)
                     : RaytraceUtils.overBlock(record.currentRotation(), Direction.UP, candidate.supportPos, false);
             if (!canPlace) {
-                if (silentSwapped) InvUtils.swapBack();
+                InvUtils.swapBack();
                 return;
             }
 
@@ -437,7 +434,8 @@ public class CrystalAura extends Module {
                 updateRenderTarget(candidate.supportPos, candidate.targetDmg, candidate.selfDmg);
                 placeTimer.reset();
             }
-            if (silentSwapped) InvUtils.swapBack();
+
+            InvUtils.swapBack();
         });
     }
 

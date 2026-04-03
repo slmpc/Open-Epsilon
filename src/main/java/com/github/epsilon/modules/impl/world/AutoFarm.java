@@ -409,9 +409,11 @@ public class AutoFarm extends Module {
 
         if (result.slot() != 40 && result.slot() != mc.player.getInventory().getSelectedSlot()) {
             if (result.slot() <= 8) {
-                swapped = InvUtils.swap(result.slot(), true);
+                InvUtils.swap(result.slot(), true);
+                swapped = true;
             } else {
-                invSwapped = InvUtils.invSwap(result.slot());
+                InvUtils.invSwap(result.slot());
+                invSwapped = true;
             }
 
             if (!swapped && !invSwapped) {
@@ -442,13 +444,11 @@ public class AutoFarm extends Module {
 
         if (result.slot() != 40 && result.slot() != mc.player.getInventory().getSelectedSlot()) {
             if (result.slot() <= 8) {
-                swapped = InvUtils.swap(result.slot(), true);
+                InvUtils.swap(result.slot(), true);
+                swapped = true;
             } else {
-                invSwapped = InvUtils.invSwap(result.slot());
-            }
-
-            if (!swapped && !invSwapped) {
-                return;
+                InvUtils.invSwap(result.slot());
+                invSwapped = true;
             }
         }
 

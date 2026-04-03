@@ -275,8 +275,8 @@ public class Scaffold extends Module {
                 InvUtils.swap(item.slot(), should);
                 shouldSwapBack = should;
             }
-            case Silent -> swapped = InvUtils.swap(item.slot(), true);
-            case InvSwitch -> invSwapped = InvUtils.invSwap(item.slot());
+            case Silent -> InvUtils.swap(item.slot(), true);
+            case InvSwitch -> InvUtils.invSwap(item.slot());
             default -> {
             }
         }
@@ -297,18 +297,8 @@ public class Scaffold extends Module {
             }
 
             switch (swapMode.getValue()) {
-                case SwapMode.Silent -> {
-                    if (swapped) {
-                        InvUtils.swapBack();
-                    }
-                }
-                case SwapMode.InvSwitch -> {
-                    if (invSwapped) {
-                        InvUtils.invSwapBack();
-                    }
-                }
-                default -> {
-                }
+                case Silent -> InvUtils.swapBack();
+                case InvSwitch -> InvUtils.invSwapBack();
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.github.epsilon.utils.player;
 
+import com.github.epsilon.managers.SyncManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Item;
@@ -11,8 +12,8 @@ public class InvUtils {
 
     private static final Minecraft mc = Minecraft.getInstance();
 
-    public static int previousSlot = -1;
     public static int[] invSlots;
+    public static int previousSlot = -1;
 
     public static boolean testInMainHand(Predicate<ItemStack> predicate) {
         return predicate.test(mc.player.getMainHandItem());
@@ -70,10 +71,11 @@ public class InvUtils {
         return new FindItemResult(slot, count, maxCount);
     }
 
-    public static boolean swap(int slot, boolean saveSwap) {
-        if (mc.player.getInventory().getSelectedSlot() == slot) { // TODO: 我觉得这里应该不会跟服务端同步，或许开个AlwaysListening监听一下数据包？
-            return true;
+    public static void swap(int slot, boolean saveSwap) {
+        if (mc.player.getInventory().getSelectedSlot() == slot && SyncManager.serverSlot == slot) {
+            return;
         }
+
         if (saveSwap && previousSlot == -1) {
             previousSlot = mc.player.getInventory().getSelectedSlot();
         } else if (!saveSwap) {
@@ -81,7 +83,6 @@ public class InvUtils {
         }
         mc.player.getInventory().setSelectedSlot(slot);
         mc.gameMode.ensureHasSentCarriedItem();
-        return true;
     }
 
     public static void swapBack() {
@@ -90,18 +91,14 @@ public class InvUtils {
         previousSlot = -1;
     }
 
-    public static boolean invSwap(int slot) {
-        if (slot >= 0) {
-            int containerSlot = slot;
-            if (slot < 9) containerSlot += 36;
-            else if (slot == 40) containerSlot = 45;
+    public static void invSwap(int slot) {
+        int containerSlot = slot;
+        if (slot < 9) containerSlot += 36;
+        else if (slot == 40) containerSlot = 45;
 
-            int selectedSlot = mc.player.getInventory().getSelectedSlot();
-            mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, containerSlot, selectedSlot, ContainerInput.SWAP, mc.player);
-            invSlots = new int[]{containerSlot, selectedSlot};
-            return true;
-        }
-        return false;
+        int selectedSlot = mc.player.getInventory().getSelectedSlot();
+        mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, containerSlot, selectedSlot, ContainerInput.SWAP, mc.player);
+        invSlots = new int[]{containerSlot, selectedSlot};
     }
 
     public static void invSwapBack() {

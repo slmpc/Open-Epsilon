@@ -221,7 +221,6 @@ public class PacketMine extends Module {
             runnable.run();
             return;
         }
-
         delayedActions.add(new DelayedAction(System.currentTimeMillis() + delayMs, runnable));
     }
 
@@ -294,18 +293,21 @@ public class PacketMine extends Module {
             }
         }
 
-        if (mc.player.hasEffect(MobEffects.HASTE))
+        if (mc.player.hasEffect(MobEffects.HASTE)) {
             digSpeed *= 1 + (Objects.requireNonNull(mc.player.getEffect(MobEffects.HASTE)).getAmplifier() + 1) * 0.2F;
+        }
 
-        if (mc.player.hasEffect(MobEffects.MINING_FATIGUE))
+        if (mc.player.hasEffect(MobEffects.MINING_FATIGUE)) {
             digSpeed *= (float) Math.pow(0.3f, Objects.requireNonNull(mc.player.getEffect(MobEffects.MINING_FATIGUE)).getAmplifier() + 1);
+        }
 
-
-        if (mc.player.isEyeInFluid(FluidTags.WATER))
+        if (mc.player.isEyeInFluid(FluidTags.WATER)) {
             digSpeed *= (float) mc.player.getAttributeValue(Attributes.SUBMERGED_MINING_SPEED);
+        }
 
-        if (!mc.player.onGround()/* && ModuleManager.freeCam.isDisabled()*/)
+        if (!mc.player.onGround()/* && ModuleManager.freeCam.isDisabled()*/) {
             digSpeed /= 5;
+        }
 
         return digSpeed < 0.0f ? 0.0f : digSpeed * factor.getValue().floatValue();
     }
@@ -411,14 +413,18 @@ public class PacketMine extends Module {
                 if (mode.getValue() == Mode.Instant || doubleMine.getValue()) {
                     mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, dir));
                 } else {
-                    if (stop.getValue())
+                    if (stop.getValue()) {
                         mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, dir));
-                    if (abort.getValue())
+                    }
+                    if (abort.getValue()) {
                         mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, pos, dir));
-                    if (start.getValue())
+                    }
+                    if (start.getValue()) {
                         mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, dir));
-                    if (stop2.getValue())
+                    }
+                    if (stop2.getValue()) {
                         mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, dir));
+                    }
                 }
 
                 if (clientRemove.getValue()) {
@@ -443,6 +449,7 @@ public class PacketMine extends Module {
         }
 
         private void switchTo(int slot, int from) {
+            // 我真急哭了这个会卡背包
             if (switchMode.getValue() == SwitchMode.Alternative || slot >= 9) {
                 if (from == -1) {
                     mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, slot < 9 ? slot + 36 : slot, mc.player.getInventory().getSelectedSlot(), ContainerInput.SWAP, mc.player);
@@ -451,6 +458,7 @@ public class PacketMine extends Module {
                 }
                 mc.getConnection().send(new ServerboundContainerClosePacket(mc.player.containerMenu.containerId));
             } else if (switchMode.is(SwitchMode.Silent)) {
+                // 2b2t.site 亲测稳定可用
                 mc.getConnection().send(new ServerboundSetCarriedItemPacket(slot));
             } else {
                 InvUtils.swap(slot, false);

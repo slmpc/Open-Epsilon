@@ -5,12 +5,12 @@
   "client": [
     "client.MixinMinecraft",
     "debug.MixinGlDebug",
+    "level.MixinBlockCollisions",
     "level.MixinClientLevel",
     "level.MixinEntity",
     "level.MixinFlowingFluid",
     "level.MixinLivingEntity",
     "level.MixinLocalPlayer",
-    "level.MixinBlockCollisions",
     "level.MixinMobEffectFogEnvironment",
     "level.MixinMultiPlayerGameMode",
     "level.MixinPlayer",
@@ -25,6 +25,7 @@
     "render.MixinParticleManager",
     "render.MixinScreenEffectRenderer",
     "render.MixinTitleScreen",
+    "render.MixinWindow"
   ],
   "injectors": {
     "defaultRequire": 1

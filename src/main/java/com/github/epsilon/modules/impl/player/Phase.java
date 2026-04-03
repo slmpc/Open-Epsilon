@@ -220,12 +220,10 @@ public class Phase extends Module {
     }
 
     private void doUsePearl(int slot) {
-        boolean swapped;
-
         if (swapMode.is(SwapMode.Silent)) {
-            swapped = InvUtils.swap(slot, true);
+            InvUtils.swap(slot, true);
         } else {
-            swapped = InvUtils.invSwap(slot);
+            InvUtils.invSwap(slot);
         }
 
         mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
@@ -236,12 +234,11 @@ public class Phase extends Module {
             mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
         }
 
-        if (swapped) {
-            if (swapMode.is(SwapMode.Silent)) {
-                InvUtils.swapBack();
-            } else {
-                InvUtils.invSwapBack();
-            }
+
+        if (swapMode.is(SwapMode.Silent)) {
+            InvUtils.swapBack();
+        } else {
+            InvUtils.invSwapBack();
         }
 
         if (autoDisable.getValue()) {

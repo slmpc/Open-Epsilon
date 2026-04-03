@@ -3,7 +3,6 @@ package com.github.epsilon;
 import com.github.epsilon.assets.i18n.I18NFileGenerator;
 import com.github.epsilon.managers.ConfigManager;
 import com.github.epsilon.managers.ModuleManager;
-import com.github.epsilon.managers.SyncManager;
 import com.github.epsilon.managers.TargetManager;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -34,7 +33,6 @@ public class Epsilon {
         ModuleManager.INSTANCE.initModules();
         TargetManager.INSTANCE.clearSharedTarget();
         ConfigManager.INSTANCE.initConfig();
-        SyncManager.INSTANCE.initSync();
 
         // 生成空的 i18n 文件
         I18NFileGenerator.generate("epsilon-config/empty-i18n.json");
