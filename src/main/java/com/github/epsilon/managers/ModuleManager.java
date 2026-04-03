@@ -51,6 +51,7 @@ public class ModuleManager {
                 NoRotate.INSTANCE,
                 NoSlow.INSTANCE,
                 Phase.INSTANCE,
+                PacketEat.INSTANCE,
                 SafeWalk.INSTANCE,
                 Scaffold.INSTANCE,
                 Stuck.INSTANCE,
