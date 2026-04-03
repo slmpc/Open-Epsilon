@@ -2,6 +2,7 @@ package com.github.epsilon.mixins.level;
 
 import com.github.epsilon.events.RayTraceEvent;
 import com.github.epsilon.events.StrafeEvent;
+import com.github.epsilon.modules.impl.combat.AimAssist;
 import com.github.epsilon.modules.impl.combat.Velocity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
@@ -47,6 +49,26 @@ public abstract class MixinEntity {
                 args.set(2, 0d);
             }
         }
+    }
+
+    @ModifyVariable(method = "turn", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private double turnHook0(double value) {
+        if ((Entity) (Object) this == Minecraft.getInstance().player && shouldBlockMouse()) {
+            return 0d;
+        }
+        return value;
+    }
+
+    @ModifyVariable(method = "turn", at = @At("HEAD"), ordinal = 1, argsOnly = true)
+    private double turnHook1(double value) {
+        if ((Entity) (Object) this == Minecraft.getInstance().player && shouldBlockMouse()) {
+            return 0d;
+        }
+        return value;
+    }
+
+    private boolean shouldBlockMouse() {
+        return AimAssist.INSTANCE.shouldBlockMouse();
     }
 
 }
