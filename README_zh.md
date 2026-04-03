@@ -1,6 +1,6 @@
-# Lumin Client (Epsilon Rewrite)
+# Epsilon Rewrite
 
-基于 NeoForge 26.1 构建的现代化 Minecraft 辅助客户端，拥有先进的渲染系统和模块化架构。
+基于 NeoForge 26.1.1 构建的现代化 Minecraft 辅助客户端，拥有先进的渲染系统和模块化架构。
 
 ## 🚀 核心特性
 
@@ -14,7 +14,7 @@
 
 - **Java 25**
 - **NeoForge 26.1.0.7-beta**
-- **Minecraft 26.1**
+- **Minecraft 26.1.1**
 - **Gradle** 构建系统
 - **Mixin** 字节码操作框架
 
