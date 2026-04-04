@@ -68,6 +68,7 @@ public class ModuleManager {
                 Stuck.INSTANCE,
                 UseCooldown.INSTANCE,
                 VClip.INSTANCE,
+                Blink.INSTANCE,
 
                 // Render
                 CameraClip.INSTANCE,
