@@ -2,6 +2,7 @@ package com.github.epsilon.modules;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 
 public abstract class HudModule extends Module {
 
@@ -101,8 +102,8 @@ public abstract class HudModule extends Module {
     private void applyRenderPosition(float renderX, float renderY, boolean updateAnchors) {
         int screenWidth = getScreenWidth();
         int screenHeight = getScreenHeight();
-        float clampedX = clamp(renderX, 0.0f, Math.max(0.0f, screenWidth - width));
-        float clampedY = clamp(renderY, 0.0f, Math.max(0.0f, screenHeight - height));
+        float clampedX = Mth.clamp(renderX, 0.0f, Math.max(0.0f, screenWidth - width));
+        float clampedY = Mth.clamp(renderY, 0.0f, Math.max(0.0f, screenHeight - height));
 
         if (updateAnchors) {
             horizontalAnchor = getHorizontalAnchorFor(clampedX, screenWidth);
@@ -185,11 +186,6 @@ public abstract class HudModule extends Module {
         return Minecraft.getInstance().getWindow().getGuiScaledHeight();
     }
 
-    private static float clamp(float value, float min, float max) {
-        if (value < min) return min;
-        return Math.min(value, max);
-    }
-
-    abstract public void render(DeltaTracker deltaTracker);
+    public abstract void render(DeltaTracker deltaTracker);
 
 }
