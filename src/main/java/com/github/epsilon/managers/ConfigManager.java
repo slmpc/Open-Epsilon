@@ -1,6 +1,7 @@
 package com.github.epsilon.managers;
 
 import com.github.epsilon.Epsilon;
+import com.github.epsilon.modules.HudModule;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.Setting;
 import com.github.epsilon.settings.impl.*;
@@ -95,6 +96,21 @@ public class ConfigManager {
                 }
             }
 
+            if (module instanceof HudModule hud) {
+                if (moduleObj.has("hudX") && moduleObj.get("hudX").isJsonPrimitive()) {
+                    try {
+                        hud.x = moduleObj.get("hudX").getAsFloat();
+                    } catch (Exception ignored) {
+                    }
+                }
+                if (moduleObj.has("hudY") && moduleObj.get("hudY").isJsonPrimitive()) {
+                    try {
+                        hud.y = moduleObj.get("hudY").getAsFloat();
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+
             JsonObject settingsObj = getObject(moduleObj, "settings");
             if (settingsObj != null) {
                 for (Setting<?> setting : module.getSettings()) {
@@ -172,6 +188,11 @@ public class ConfigManager {
             moduleObj.addProperty("enabled", module.isEnabled());
             moduleObj.addProperty("keyBind", module.getKeyBind());
             moduleObj.addProperty("bindMode", module.getBindMode().name());
+
+            if (module instanceof HudModule hud) {
+                moduleObj.addProperty("hudX", hud.x);
+                moduleObj.addProperty("hudY", hud.y);
+            }
 
             JsonObject settingsObj = new JsonObject();
             for (Setting<?> setting : module.getSettings()) {

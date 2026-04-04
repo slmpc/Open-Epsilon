@@ -11,28 +11,27 @@ public final class SettingViewFactory {
     }
 
     public static SettingRow<?> create(Setting<?> setting) {
-        if (setting instanceof KeybindSetting keybindSetting) {
-            return new KeybindSettingRow(keybindSetting);
-        }
-        if (setting instanceof BoolSetting boolSetting) {
-            return new BoolSettingRow(boolSetting);
-        }
-        if (setting instanceof EnumSetting<?> enumSetting) {
-            return new EnumSettingRow(enumSetting);
-        }
-        if (setting instanceof IntSetting intSetting) {
-            return new IntSettingRow(intSetting);
-        }
-        if (setting instanceof DoubleSetting doubleSetting) {
-            return new DoubleSettingRow(doubleSetting);
-        }
-        if (setting instanceof ColorSetting colorSetting) {
-            return new ColorSettingRow(colorSetting);
-        }
-        if (setting instanceof StringSetting stringSetting) {
-            return new StringSettingRow(stringSetting);
-        }
-        return null;
+
+        return switch (setting) {
+            case KeybindSetting keybindSetting -> new KeybindSettingRow(keybindSetting);
+
+            case BoolSetting boolSetting -> new BoolSettingRow(boolSetting);
+
+            case EnumSetting<?> enumSetting -> new EnumSettingRow(enumSetting);
+
+            case IntSetting intSetting -> new IntSettingRow(intSetting);
+
+            case DoubleSetting doubleSetting -> new DoubleSettingRow(doubleSetting);
+
+            case ColorSetting colorSetting -> new ColorSettingRow(colorSetting);
+
+            case StringSetting stringSetting -> new StringSettingRow(stringSetting);
+
+            case ButtonSetting buttonSetting -> new ButtonSettingRow(buttonSetting);
+
+            case null, default -> null;
+        };
+
     }
 
 }

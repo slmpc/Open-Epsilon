@@ -1,10 +1,12 @@
 package com.github.epsilon.modules.impl;
 
-import com.github.epsilon.gui.panel.PanelScreen;
+import com.github.epsilon.gui.hudeditor.HudEditorScreen;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
+import com.github.epsilon.settings.impl.ButtonSetting;
 import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.settings.impl.KeybindSetting;
+import org.lwjgl.glfw.GLFW;
 
 public class ClientSetting extends Module {
 
@@ -31,49 +33,17 @@ public class ClientSetting extends Module {
 
     public static final ClientSetting INSTANCE = new ClientSetting();
 
-    public final KeybindSetting guiKeybind = addKeybindSetting(new KeybindSetting("Gui Keybind", this, -1) {
-        @Override
-        public void setValue(Integer value) {
-            super.setValue(value);
-            syncKeyBind(value != null ? value : -1);
-        }
+    public final KeybindSetting guiKeybind = keybindSetting("Gui Keybind", GLFW.GLFW_KEY_RIGHT_SHIFT);
+
+    public final BoolSetting closeOnOutside = boolSetting("Close Gui On Outside", false);
+
+    private final ButtonSetting openHudEditor = buttonSetting("Open Hud Editor", () -> {
+        mc.setScreen(HudEditorScreen.INSTANCE);
     });
 
-    private final BoolSetting backgroundBlur = boolSetting("BackgroundBlur", true);
+    private final BoolSetting backgroundBlur = boolSetting("BackgroundBlur", false);
     public final EnumSetting<ThemeMode> themeMode = enumSetting("ThemeMode", ThemeMode.Dark);
     public final EnumSetting<ThemePreset> themePreset = enumSetting("ThemePreset", ThemePreset.TonalSpot);
-
-    @Override
-    public void setKeyBind(int keyBind) {
-        super.setKeyBind(keyBind);
-        if (guiKeybind != null && guiKeybind.getValue() != keyBind) {
-            guiKeybind.setValueDirect(keyBind);
-        }
-    }
-
-    private void syncKeyBind(int keyBind) {
-        if (getKeyBind() != keyBind) {
-            super.setKeyBind(keyBind);
-        }
-    }
-
-    private KeybindSetting addKeybindSetting(KeybindSetting setting) {
-        settings.add(setting);
-        return setting;
-    }
-
-    @Override
-    protected void onEnable() {
-        if (nullCheck()) return;
-        mc.setScreen(PanelScreen.INSTANCE);
-    }
-
-    @Override
-    protected void onDisable() {
-        if (mc.screen instanceof PanelScreen) {
-            mc.setScreen(null);
-        }
-    }
 
     public boolean shouldBlur() {
         return backgroundBlur.getValue();

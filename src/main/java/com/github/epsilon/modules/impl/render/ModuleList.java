@@ -1,18 +1,17 @@
 package com.github.epsilon.modules.impl.render;
 
-import com.github.epsilon.graphics.renderers.ShadowRenderer;
+import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.TextRenderer;
 import com.github.epsilon.graphics.text.StaticFontLoader;
 import com.github.epsilon.managers.ModuleManager;
-import com.github.epsilon.managers.RenderManager;
 import com.github.epsilon.modules.Category;
+import com.github.epsilon.modules.HudModule;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
 import com.github.epsilon.settings.impl.ColorSetting;
 import com.github.epsilon.settings.impl.DoubleSetting;
 import com.google.common.base.Suppliers;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.minecraft.client.DeltaTracker;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -21,12 +20,12 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class ModuleList extends Module {
+public class ModuleList extends HudModule {
 
     public static final ModuleList INSTANCE = new ModuleList();
 
     private ModuleList() {
-        super("ModuleList", Category.RENDER);
+        super("ModuleList", Category.RENDER, 0f, 0f, 50f, 50f);
     }
 
     private final DoubleSetting scale = doubleSetting("Scale", 1.0, 0.5, 2.0, 0.1);
@@ -34,10 +33,10 @@ public class ModuleList extends Module {
     private final BoolSetting showCategory = boolSetting("ShowCategory", false);
     private final BoolSetting showIcon = boolSetting("ShowIcon", true);
     private final Supplier<TextRenderer> textRendererSupplier = Suppliers.memoize(TextRenderer::new);
-    private final Supplier<ShadowRenderer> shadowRendererSupplier = Suppliers.memoize(ShadowRenderer::new);
+    private final Supplier<RoundRectRenderer> roundRectRendererSupplier = Suppliers.memoize(RoundRectRenderer::new);
 
-    @SubscribeEvent
-    private void onRenderGui(RenderGuiEvent.Post event) {
+    @Override
+    public void render(DeltaTracker delta) {
         if (nullCheck()) return;
 
         List<Module> enabledModules = ModuleManager.INSTANCE.getModules().stream()
@@ -49,16 +48,14 @@ public class ModuleList extends Module {
         enabledModules.sort(Comparator.comparingInt(m -> -getTextWidth(m)));
 
         TextRenderer textRenderer = textRendererSupplier.get();
-        ShadowRenderer shadowRenderer = shadowRendererSupplier.get();
+        RoundRectRenderer roundRectRenderer = roundRectRendererSupplier.get();
 
-        float screenWidth = mc.getWindow().getGuiScaledWidth();
         float moduleScale = scale.getValue().floatValue();
 
         List<ItemInfo> items = new ArrayList<>();
 
         for (Module module : enabledModules) {
-//            String text = "中文".equals(language.getValue()) ? module.getCnName() : module.getDescription();
-            String text = module.getName();
+            String text = module.getTranslatedName();
             if (showCategory.getValue() && module.category != null) {
                 text += " [" + module.category.getName() + "]";
             }
@@ -72,27 +69,32 @@ public class ModuleList extends Module {
             items.add(new ItemInfo(module, text, boxWidth, boxHeight, totalWidth));
         }
 
-        float currentY = 4.0f * moduleScale;
+        float maxTotalWidth = 0;
+        float totalHeight = 0;
+        for (ItemInfo item : items) {
+            if (item.totalWidth() > maxTotalWidth) maxTotalWidth = item.totalWidth();
+            totalHeight += item.boxHeight() + 2.0f * moduleScale;
+        }
+        this.width = maxTotalWidth + 4.0f * moduleScale;
+        this.height = totalHeight;
+
+        float currentY = this.y;
 
         for (ItemInfo item : items) {
-            float totalX = screenWidth - item.totalWidth() - 4.0f * moduleScale;
+            float totalX = this.x + this.width - item.totalWidth();
             float boxY = currentY;
 
             float textBoxX = totalX;
             float iconBoxX = totalX + item.boxWidth() + 2.0f * moduleScale;
 
-            shadowRenderer.addShadow(textBoxX, boxY, item.boxWidth(), item.boxHeight(), 6.0f * moduleScale, 10.0f * moduleScale, shadowColor.getValue());
+            roundRectRenderer.addRoundRect(textBoxX, boxY, item.boxWidth(), item.boxHeight(), 6.0f * moduleScale, shadowColor.getValue());
 
             float textX = textBoxX + 4.0f * moduleScale - 1.5f;
             float textY = boxY + (item.boxHeight() - textRenderer.getHeight(moduleScale)) / 5.0f;
-//            if ("中文".equals(language.getValue())) {
             textRenderer.addText(item.text(), textX + 1, textY, moduleScale, new Color(255, 255, 255, 126));
-//            } else {
-//                textRenderer.addGlowingText(item.text(), textX + 0.7f, textY - 0.5f, moduleScale, new Color(255, 255, 255, 126), glowRadius.getValue().floatValue(), glowIntensity.getValue().intValue());
-//            }
 
             if (showIcon.getValue() && item.module().category != null) {
-                shadowRenderer.addShadow(iconBoxX, boxY, item.boxHeight(), item.boxHeight(), 6.0f * moduleScale, 10.0f * moduleScale, shadowColor.getValue());
+                roundRectRenderer.addRoundRect(iconBoxX, boxY, item.boxHeight(), item.boxHeight(), 6.0f * moduleScale, shadowColor.getValue());
 
                 String iconChar = item.module().category.icon;
                 float iconScale = moduleScale * 0.8f;
@@ -106,15 +108,13 @@ public class ModuleList extends Module {
             currentY += item.boxHeight() + 2.0f * moduleScale;
         }
 
-        RenderManager.INSTANCE.applyRenderAfterFrame(() -> {
-            shadowRenderer.drawAndClear();
-            textRenderer.drawAndClear();
-        });
+        roundRectRenderer.drawAndClear();
+        textRenderer.drawAndClear();
     }
 
     private int getTextWidth(Module module) {
         TextRenderer textRenderer = textRendererSupplier.get();
-        String text = module.getName();
+        String text = module.getTranslatedName();
         if (showCategory.getValue() && module.category != null) {
             text += " [" + module.category.getName() + "]";
         }

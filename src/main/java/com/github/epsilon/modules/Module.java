@@ -83,7 +83,7 @@ public class Module {
         }
     }
 
-    private <T extends Setting<?>> T addSetting(T setting) {
+    protected <T extends Setting<?>> T addSetting(T setting) {
         settings.add(setting);
         return setting;
     }
@@ -186,6 +186,14 @@ public class Module {
 
     protected KeybindSetting keybindSetting(String name, int defaultValue) {
         return addSetting(new KeybindSetting(name, this, defaultValue));
+    }
+
+    protected ButtonSetting buttonSetting(String name, Runnable func) {
+        return addSetting(new ButtonSetting(name, this, func));
+    }
+
+    protected ButtonSetting buttonSetting(String name, Runnable func, Setting.Dependency dependency) {
+        return addSetting(new ButtonSetting(name, this, func, dependency));
     }
 
 }

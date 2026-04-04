@@ -110,6 +110,8 @@
 
   "epsilon.modules.clientsetting": "Client Setting",
   "epsilon.modules.clientsetting.gui keybind": "Gui Keybind",
+  "epsilon.modules.clientsetting.close gui on outside": "Close Gui On Outside",
+  "epsilon.modules.clientsetting.open hud editor": "Open HUD Editor",
   "epsilon.modules.clientsetting.backgroundblur": "Background Blur",
   "epsilon.modules.clientsetting.thememode": "Theme Mode",
   "epsilon.modules.clientsetting.thememode.dark": "Dark",

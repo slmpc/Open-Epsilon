@@ -179,7 +179,7 @@ public class PanelScreen extends Screen {
 
         PanelLayout.Layout layout = PanelLayout.compute(width, height, categoryRailPanel.getAnimatedWidth());
         if (!layout.panel().contains(mouseX, mouseY)) {
-            onClose();
+            if (ClientSetting.INSTANCE.closeOnOutside.getValue()) minecraft.setScreen(null);
             return true;
         }
         if (!state.isClientSettingMode()) {
@@ -258,7 +258,6 @@ public class PanelScreen extends Screen {
 
     @Override
     public void onClose() {
-        ClientSetting.INSTANCE.setEnabled(false);
         super.onClose();
     }
 

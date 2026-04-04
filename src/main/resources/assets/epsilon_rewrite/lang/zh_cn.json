@@ -107,9 +107,11 @@
   "epsilon.modules.breakcooldown.cooldown": "冷却时间",
 
   "epsilon.modules.cameraclip": "相机穿透",
-
+  
   "epsilon.modules.clientsetting": "客户端设置",
-  "epsilon.modules.clientsetting.gui keybind": "GUI按键绑定",
+  "epsilon.modules.clientsetting.gui keybind": "GUI 按键绑定",
+  "epsilon.modules.clientsetting.close gui on space": "点击空白关闭 GUI",
+  "epsilon.modules.clientsetting.open hud editor": "打开 HUD 编辑器",
   "epsilon.modules.clientsetting.backgroundblur": "背景模糊",
   "epsilon.modules.clientsetting.thememode": "主题模式",
   "epsilon.modules.clientsetting.thememode.dark": "深色",

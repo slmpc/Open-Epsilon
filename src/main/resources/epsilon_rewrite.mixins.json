@@ -23,7 +23,6 @@
     "render.MixinLivingEntityRenderer",
     "render.MixinParticleManager",
     "render.MixinScreenEffectRenderer",
-    "render.MixinTitleScreen",
     "render.MixinWindow"
   ],
   "injectors": {
