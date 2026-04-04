@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 
@@ -28,7 +29,7 @@ public class HudEditorScreen extends Screen {
     private double dragOffsetX, dragOffsetY;
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 
         RenderManager.INSTANCE.applyRenderAfterFrame(delta -> {
             ModuleManager.INSTANCE.getModules().forEach(module -> {
@@ -69,7 +70,7 @@ public class HudEditorScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double mouseX, double mouseY) {
+    public boolean mouseDragged(@NonNull MouseButtonEvent event, double mouseX, double mouseY) {
         if (dragging != null && event.button() == 0) {
             dragging.x = (float) (event.x() - dragOffsetX);
             dragging.y = (float) (event.y() - dragOffsetY);
@@ -79,7 +80,7 @@ public class HudEditorScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent event) {
         if (dragging != null && event.button() == 0) {
             dragging = null;
             ConfigManager.INSTANCE.saveNow();
@@ -97,6 +98,10 @@ public class HudEditorScreen extends Screen {
     public void onClose() {
         super.onClose();
         minecraft.setScreen(PanelScreen.INSTANCE);
+    }
+
+    @Override
+    public void extractBackground(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
     }
 
 }

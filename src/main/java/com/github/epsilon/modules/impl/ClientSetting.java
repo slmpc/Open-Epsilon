@@ -42,6 +42,7 @@ public class ClientSetting extends Module {
     });
 
     private final BoolSetting backgroundBlur = boolSetting("BackgroundBlur", false);
+
     public final EnumSetting<ThemeMode> themeMode = enumSetting("ThemeMode", ThemeMode.Dark);
     public final EnumSetting<ThemePreset> themePreset = enumSetting("ThemePreset", ThemePreset.TonalSpot);
 

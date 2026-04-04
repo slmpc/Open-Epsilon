@@ -56,6 +56,13 @@ public class PanelScreen extends Screen {
     }
 
     @Override
+    public void extractBackground(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        if (ClientSetting.INSTANCE.shouldBlur()) {
+            super.extractBackground(graphics, mouseX, mouseY, a);
+        }
+    }
+
+    @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
         String currentCategory = state.getSelectedCategory().name();
         String currentModule = state.getSelectedModule() == null ? "" : state.getSelectedModule().getName();
