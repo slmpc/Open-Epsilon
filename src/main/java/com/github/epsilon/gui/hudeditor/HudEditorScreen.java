@@ -1,12 +1,15 @@
 package com.github.epsilon.gui.hudeditor;
 
 import com.github.epsilon.graphics.renderers.RectRenderer;
+import com.github.epsilon.gui.panel.MD3Theme;
 import com.github.epsilon.gui.panel.PanelScreen;
 import com.github.epsilon.managers.ConfigManager;
 import com.github.epsilon.managers.RenderManager;
 import com.github.epsilon.modules.HudModule;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
@@ -17,6 +20,7 @@ import java.util.List;
 public class HudEditorScreen extends Screen {
 
     private static final Color BOX_COLOR = new Color(0, 0, 0, 100);
+    private static final Color SELECTED_COLOR = new Color(188, 224, 255, 56);
     private static final Color HOVER_COLOR = new Color(255, 255, 255, 70);
     private static final Color DRAGGING_COLOR = new Color(120, 190, 255, 80);
 
@@ -24,8 +28,10 @@ public class HudEditorScreen extends Screen {
 
     private final RectRenderer rectRenderer = new RectRenderer();
     private final HudEditorOverlayRenderer overlayRenderer = new HudEditorOverlayRenderer();
+    private final HudEditorInspector inspector = new HudEditorInspector();
 
     private HudModule dragging;
+    private HudModule selected;
     private double dragOffsetX;
     private double dragOffsetY;
     private Float snapPreviewX;
@@ -37,21 +43,28 @@ public class HudEditorScreen extends Screen {
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        MD3Theme.syncFromSettings();
+
         RenderManager.INSTANCE.applyRenderAfterFrame(delta -> {
             int screenWidth = minecraft.getWindow().getGuiScaledWidth();
             int screenHeight = minecraft.getWindow().getGuiScaledHeight();
             List<HudModule> hudModules = HudEditorModules.collectHudModules(delta);
+            syncSelected(hudModules);
+
             HudModule hovered = HudEditorModules.findTopmost(hudModules, mouseX, mouseY);
             HudModule focus = dragging != null ? dragging : hovered;
             boolean draggingFocus = focus != null && focus == dragging;
 
             if (focus != null) {
                 overlayRenderer.addThirdGuides(focus, draggingFocus, screenWidth, screenHeight);
-                overlayRenderer.drawAndClear();
+                overlayRenderer.flushRenderer();
             }
 
             for (HudModule hudModule : hudModules) {
                 rectRenderer.addRect(hudModule.x, hudModule.y, hudModule.width, hudModule.height, BOX_COLOR);
+                if (hudModule == selected) {
+                    rectRenderer.addRect(hudModule.x, hudModule.y, hudModule.width, hudModule.height, SELECTED_COLOR);
+                }
                 if (hudModule == hovered) {
                     rectRenderer.addRect(hudModule.x, hudModule.y, hudModule.width, hudModule.height, HOVER_COLOR);
                 }
@@ -71,18 +84,28 @@ public class HudEditorScreen extends Screen {
             }
 
             overlayRenderer.addSnapPreview(snapPreviewX, snapPreviewY, screenWidth, screenHeight);
-            overlayRenderer.drawAndClear();
+            overlayRenderer.flushRenderer();
+            inspector.queueRender(graphics, selected, screenWidth, screenHeight, mouseX, mouseY, a, graphics.guiHeight());
         });
+
+        inspector.renderPopups(graphics, mouseX, mouseY, a);
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
+        if (inspector.mouseClicked(event, isDoubleClick)) {
+            return true;
+        }
+
         if (event.button() == 0) {
             double mx = event.x();
             double my = event.y();
             List<HudModule> hudModules = HudEditorModules.collectHudModules(null);
+            syncSelected(hudModules);
             HudModule hovered = HudEditorModules.findTopmost(hudModules, mx, my);
             if (hovered != null) {
+                inspector.clearFocus();
+                selected = hovered;
                 dragging = hovered;
                 dragOffsetX = mx - hovered.x;
                 dragOffsetY = my - hovered.y;
@@ -96,6 +119,10 @@ public class HudEditorScreen extends Screen {
 
     @Override
     public boolean mouseDragged(@NonNull MouseButtonEvent event, double mouseX, double mouseY) {
+        if (inspector.mouseDragged(event, mouseX, mouseY)) {
+            return true;
+        }
+
         if (dragging != null && event.button() == 0) {
             int screenWidth = minecraft.getWindow().getGuiScaledWidth();
             int screenHeight = minecraft.getWindow().getGuiScaledHeight();
@@ -117,6 +144,11 @@ public class HudEditorScreen extends Screen {
 
     @Override
     public boolean mouseReleased(@NonNull MouseButtonEvent event) {
+        if (inspector.mouseReleased(event)) {
+            ConfigManager.INSTANCE.saveNow();
+            return true;
+        }
+
         if (dragging != null && event.button() == 0) {
             dragging = null;
             clearSnapPreview();
@@ -125,6 +157,30 @@ public class HudEditorScreen extends Screen {
         }
 
         return super.mouseReleased(event);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (inspector.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (inspector.keyPressed(event)) {
+            return true;
+        }
+        return super.keyPressed(event);
+    }
+
+    @Override
+    public boolean charTyped(CharacterEvent event) {
+        if (inspector.charTyped(event)) {
+            return true;
+        }
+        return super.charTyped(event);
     }
 
     @Override
@@ -149,4 +205,15 @@ public class HudEditorScreen extends Screen {
         snapPreviewX = null;
         snapPreviewY = null;
     }
+
+    private void syncSelected(List<HudModule> hudModules) {
+        if (hudModules.isEmpty()) {
+            selected = null;
+            return;
+        }
+        if (selected == null || !hudModules.contains(selected)) {
+            selected = hudModules.get(hudModules.size() - 1);
+        }
+    }
+
 }

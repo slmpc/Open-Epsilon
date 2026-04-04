@@ -20,6 +20,7 @@ public class HudEditorOverlayRenderer {
     private static final Color ANCHOR_MARKER_OUTLINE = new Color(5, 8, 12, 190);
     private static final Color ANCHOR_MARKER_COLOR = new Color(236, 241, 247, 230);
     private static final Color DRAG_ANCHOR_MARKER_COLOR = new Color(170, 220, 255, 235);
+
     private static final float GUIDE_LABEL_SCALE = 0.72f;
     private static final float GUIDE_THICKNESS = 1.0f;
     private static final float ANCHOR_MARKER_OUTER_SIZE = 7.0f;
@@ -31,7 +32,7 @@ public class HudEditorOverlayRenderer {
     private final RectRenderer rectRenderer = new RectRenderer();
     private final TextRenderer textRenderer = new TextRenderer();
 
-    void addThirdGuides(HudModule focus, boolean draggingFocus, int screenWidth, int screenHeight) {
+    public void addThirdGuides(HudModule focus, boolean draggingFocus, int screenWidth, int screenHeight) {
         float splitX1 = screenWidth / 3.0f;
         float splitX2 = splitX1 * 2.0f;
         float splitY1 = screenHeight / 3.0f;
@@ -57,7 +58,7 @@ public class HudEditorOverlayRenderer {
         rectRenderer.addRect(0.0f, splitY2, screenWidth, GUIDE_THICKNESS, lineColor);
     }
 
-    void addAnchorOverlay(HudModule focus, boolean draggingFocus, int screenWidth, int screenHeight) {
+    public void addAnchorOverlay(HudModule focus, boolean draggingFocus, int screenWidth, int screenHeight) {
         float anchorX = HudLayoutHelper.getAnchorPointX(focus.getHorizontalAnchor(), focus.x, focus.width);
         float anchorY = HudLayoutHelper.getAnchorPointY(focus.getVerticalAnchor(), focus.y, focus.height);
 
@@ -82,7 +83,7 @@ public class HudEditorOverlayRenderer {
         textRenderer.addText(label, labelX + LABEL_PADDING_X, labelY + LABEL_PADDING_Y - 1.0f, GUIDE_LABEL_SCALE, ANCHOR_LABEL_TEXT);
     }
 
-    void addSnapPreview(Float snapPreviewX, Float snapPreviewY, int screenWidth, int screenHeight) {
+    public void addSnapPreview(Float snapPreviewX, Float snapPreviewY, int screenWidth, int screenHeight) {
         if (snapPreviewX != null) {
             float x = Mth.clamp(snapPreviewX, 0.0f, screenWidth - GUIDE_THICKNESS);
             rectRenderer.addRect(x, 0.0f, GUIDE_THICKNESS, screenHeight, SNAP_PREVIEW_COLOR);
@@ -94,7 +95,7 @@ public class HudEditorOverlayRenderer {
         }
     }
 
-    void drawAndClear() {
+    public void flushRenderer() {
         rectRenderer.drawAndClear();
         textRenderer.drawAndClear();
     }
