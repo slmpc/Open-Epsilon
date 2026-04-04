@@ -1,14 +1,11 @@
 package com.github.epsilon.mixins.level;
 
 import com.github.epsilon.events.MotionEvent;
-import com.github.epsilon.events.MoveEvent;
 import com.github.epsilon.events.SlowdownEvent;
 import com.github.epsilon.modules.impl.combat.Velocity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -70,18 +67,6 @@ public abstract class MixinLocalPlayer extends AbstractClientPlayer {
     @Redirect(method = "sendPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;onGround()Z"))
     private boolean redirectOnGround(LocalPlayer instance) {
         return lumin$motionEvent.isOnGround();
-    }
-
-    @Inject(method = "move", at = @At(value = "HEAD"), cancellable = true)
-    private void hookMove(MoverType moverType, Vec3 delta, CallbackInfo ci) {
-        MoveEvent moveEvent = NeoForge.EVENT_BUS.post(new MoveEvent(moverType, delta));
-        if (moveEvent.isCanceled()) {
-            ci.cancel();
-            double d = getX();
-            double e = getZ();
-            super.move(moverType, moveEvent.getDelta());
-            updateAutoJump((float) (getX() - d), (float) (getZ() - e));
-        }
     }
 
     @Inject(method = "moveTowardsClosestSpace", at = @At("HEAD"), cancellable = true)

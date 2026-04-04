@@ -143,8 +143,9 @@ public class CategoryRailPanel {
             boolean hovered = itemRect.contains(mouseX, mouseY);
             boolean selected = !state.isClientSettingMode() && state.getSelectedCategory() == category;
 
-            Color background = selected ? MD3Theme.withAlpha(MD3Theme.SECONDARY_CONTAINER, 0) : hovered ? MD3Theme.SURFACE_CONTAINER : MD3Theme.withAlpha(MD3Theme.SURFACE_CONTAINER, 0);
-            Color iconColor = selected ? MD3Theme.ON_SECONDARY_CONTAINER : hovered ? MD3Theme.TEXT_PRIMARY : MD3Theme.TEXT_SECONDARY;
+            Color background = selected ? MD3Theme.withAlpha(MD3Theme.SECONDARY_CONTAINER, 0) :
+                    (hovered ? MD3Theme.SURFACE_CONTAINER : MD3Theme.withAlpha(MD3Theme.SURFACE_CONTAINER, 0));
+            Color iconColor = selected ? MD3Theme.ON_SECONDARY_CONTAINER : (hovered ? MD3Theme.TEXT_PRIMARY : MD3Theme.TEXT_SECONDARY);
             Color labelColor = selected ? MD3Theme.ON_SECONDARY_CONTAINER : MD3Theme.TEXT_PRIMARY;
             Color countColor = selected ? MD3Theme.ON_SECONDARY_CONTAINER : MD3Theme.TEXT_SECONDARY;
             float iconHeight = clippedTextRenderer.getHeight(itemIconScale, StaticFontLoader.ICONS);
@@ -179,8 +180,8 @@ public class CategoryRailPanel {
         boolean settingsSelected = state.isClientSettingMode();
         settingsHoverAnimation.run(settingsHovered ? 1.0f : 0.0f);
 
-        Color settingsBg = settingsSelected ? MD3Theme.withAlpha(MD3Theme.SECONDARY_CONTAINER, 0) : settingsHovered ? MD3Theme.SURFACE_CONTAINER : MD3Theme.withAlpha(MD3Theme.SURFACE_CONTAINER, 0);
-        Color settingsIconColor = settingsSelected ? MD3Theme.ON_SECONDARY_CONTAINER : settingsHovered ? MD3Theme.TEXT_PRIMARY : MD3Theme.TEXT_SECONDARY;
+        Color settingsBg = settingsSelected ? MD3Theme.withAlpha(MD3Theme.SECONDARY_CONTAINER, 0) : (settingsHovered ? MD3Theme.SURFACE_CONTAINER : MD3Theme.withAlpha(MD3Theme.SURFACE_CONTAINER, 0));
+        Color settingsIconColor = settingsSelected ? MD3Theme.ON_SECONDARY_CONTAINER : (settingsHovered ? MD3Theme.TEXT_PRIMARY : MD3Theme.TEXT_SECONDARY);
         Color settingsLabelColor = settingsSelected ? MD3Theme.ON_SECONDARY_CONTAINER : MD3Theme.TEXT_PRIMARY;
         roundRectRenderer.addRoundRect(settingsRect.x(), settingsRect.y(), settingsRect.width(), settingsRect.height(), MD3Theme.CARD_RADIUS, settingsBg);
         float settingsIconWidth = clippedTextRenderer.getWidth(SETTINGS_ICON, itemIconScale, StaticFontLoader.ICONS);

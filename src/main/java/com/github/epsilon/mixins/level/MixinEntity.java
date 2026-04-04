@@ -1,6 +1,6 @@
 package com.github.epsilon.mixins.level;
 
-import com.github.epsilon.events.RayTraceEvent;
+import com.github.epsilon.events.RaytraceEvent;
 import com.github.epsilon.events.StrafeEvent;
 import com.github.epsilon.modules.impl.combat.AimAssist;
 import com.github.epsilon.modules.impl.combat.Velocity;
@@ -25,7 +25,7 @@ public abstract class MixinEntity {
     @Redirect(method = "getViewVector", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;calculateViewVector(FF)Lnet/minecraft/world/phys/Vec3;"))
     private Vec3 redirectGetViewYRot(Entity instance, float xRot, float yRot) {
         if (instance == Minecraft.getInstance().player) {
-            RayTraceEvent event = NeoForge.EVENT_BUS.post(new RayTraceEvent(instance, yRot, xRot));
+            RaytraceEvent event = NeoForge.EVENT_BUS.post(new RaytraceEvent(instance, yRot, xRot));
             return this.calculateViewVector(event.getPitch(), event.getYaw());
         }
         return this.calculateViewVector(xRot, yRot);

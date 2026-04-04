@@ -33,6 +33,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * 需要重写
+ * Need to rewrite
+ */
 public class AutoFarm extends Module {
 
     public static final AutoFarm INSTANCE = new AutoFarm();

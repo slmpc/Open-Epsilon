@@ -1,7 +1,6 @@
 package com.github.epsilon.modules.impl.player;
 
 import com.github.epsilon.events.MotionEvent;
-import com.github.epsilon.events.StrafeEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
@@ -106,6 +105,7 @@ public class Scaffold extends Module {
     private int yLevel;
     private int airTicks;
 
+    private boolean hasJump;
     private boolean shouldSwapBack;
 
     private BlockInfo blockInfo;
@@ -116,11 +116,16 @@ public class Scaffold extends Module {
     protected void onEnable() {
         blockInfo = null;
         shouldSwapBack = false;
+        hasJump = false;
     }
 
     @Override
     protected void onDisable() {
         blockInfo = null;
+        if (hasJump) {
+            mc.options.keyJump.setDown(false);
+            hasJump = false;
+        }
         if (shouldSwapBack) {
             InvUtils.swapBack();
         }
@@ -134,8 +139,14 @@ public class Scaffold extends Module {
     }
 
     @SubscribeEvent
-    private void onTick(ClientTickEvent.Pre event) {
+    private void onTickPre(ClientTickEvent.Pre event) {
         if (nullCheck()) return;
+
+        hasJump = false;
+        if (mc.player.onGround() && MoveUtils.isMoving() && mode.is(Mode.TellyBridge) && !mc.options.keyJump.isDown()) {
+            mc.options.keyJump.setDown(true); // 只能模拟跳跃键按下，mc.player.jumpFromGround() 不能在这时候调用
+            hasJump = true;
+        }
 
         updateBlockInfo();
 
@@ -164,10 +175,10 @@ public class Scaffold extends Module {
     }
 
     @SubscribeEvent
-    private void onStrafe(StrafeEvent event) {
-        if (nullCheck()) return;
-        if (mc.player.onGround() && MoveUtils.isMoving() && mode.is("TellyBridge") && !mc.options.keyJump.isDown()) {
-            mc.player.jumpFromGround();
+    private void onTickPost(ClientTickEvent.Post event) {
+        if (hasJump) {
+            mc.options.keyJump.setDown(false);
+            hasJump = false;
         }
     }
 
@@ -265,9 +276,6 @@ public class Scaffold extends Module {
         if (currentBlockInfo == null) return;
         if (!onAir()) return;
         if (!BlockUtils.canPlaceAt(currentBlockInfo.blockPos)) return;
-
-        boolean swapped = false;
-        boolean invSwapped = false;
 
         switch (swapMode.getValue()) {
             case Normal -> {

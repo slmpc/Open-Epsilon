@@ -27,7 +27,7 @@ public class AutoSprint extends Module {
         mc.player.setSprinting(
                 mc.player.getFoodData().getFoodLevel() > 6
                         && !mc.player.horizontalCollision
-                        && mc.player.input.getMoveVector().y > 0
+                        && mc.player.input.hasForwardImpulse()
                         && (!mc.player.isUsingItem() || !stopWhileUsing.getValue())
                         && (!pauseWhileAura.getValue() || !KillAura.INSTANCE.isEnabled() || KillAura.INSTANCE.target == null));
     }

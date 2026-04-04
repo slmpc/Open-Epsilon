@@ -18,7 +18,7 @@ public class MixinKeyboardInput {
     }
 
     @ModifyExpressionValue(method = "tick", at = @At(value = "NEW", target = "(ZZZZZZZ)Lnet/minecraft/world/entity/player/Input;"))
-    private Input redirectVec2(Input original) {
+    private Input redirectKeyPresses(Input original) {
         float left = calculateImpulse(original.left(), original.right());
         float forward = calculateImpulse(original.forward(), original.backward());
         KeyboardInputEvent event = NeoForge.EVENT_BUS.post(new KeyboardInputEvent(left, forward));
