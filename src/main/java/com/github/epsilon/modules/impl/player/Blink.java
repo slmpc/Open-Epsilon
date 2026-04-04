@@ -7,8 +7,6 @@ import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
 import com.github.epsilon.settings.impl.DoubleSetting;
 import com.github.epsilon.utils.network.PacketUtils;
-import com.github.epsilon.utils.player.ChatUtils;
-import com.github.epsilon.utils.render.Render3DUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.screens.RecoverWorldDataScreen;
 import net.minecraft.client.player.RemotePlayer;
@@ -17,8 +15,6 @@ import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
@@ -29,16 +25,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Blink extends Module {
     public static final Blink INSTANCE = new Blink();
 
-    public Blink(){
+    public Blink() {
         super("Blink", Category.PLAYER);
         setEnabled(false);
     }
 
-    private final DoubleSetting tick = doubleSetting("Tick",30,5,200,1);
-    private final BoolSetting SlowRelease = boolSetting("SlowRelease",true);
-    private final BoolSetting slowMove = boolSetting("Slow Move",false);
-    private final DoubleSetting slowMoveTick = doubleSetting("Slow Move Tick",5,2,5,1, slowMove::getValue);
-    private final BoolSetting fakePlayer = boolSetting("FakePlayer",false);
+    private final DoubleSetting tick = doubleSetting("Tick", 30, 5, 200, 1);
+    private final BoolSetting SlowRelease = boolSetting("SlowRelease", true);
+    private final BoolSetting slowMove = boolSetting("Slow Move", false);
+    private final DoubleSetting slowMoveTick = doubleSetting("Slow Move Tick", 5, 2, 5, 1, slowMove::getValue);
+    private final BoolSetting fakePlayer = boolSetting("FakePlayer", false);
 
     private final ConcurrentLinkedQueue<Packet<?>> packets = new ConcurrentLinkedQueue<>();
     public RemotePlayer localPlayer;
@@ -50,7 +46,7 @@ public class Blink extends Module {
     private double lastLerpX, lastLerpY, lastLerpZ;
 
     @SubscribeEvent
-    public void onHigherPacketSend(PacketEvent.Send e){
+    public void onHigherPacketSend(PacketEvent.Send e) {
         if (nullCheck()) return;
         Packet<?> packet = e.getPacket();
         if (packet instanceof ServerboundHelloPacket || packet instanceof ClientIntentionPacket) return;
@@ -59,7 +55,7 @@ public class Blink extends Module {
     }
 
     @Override
-    public void onEnable(){
+    public void onEnable() {
         if (nullCheck()) return;
         serverX = prevServerX = mc.player.getX();
         serverY = prevServerY = mc.player.getY();
@@ -81,7 +77,7 @@ public class Blink extends Module {
     }
 
     @Override
-    public void onDisable(){
+    public void onDisable() {
         if (nullCheck()) return;
         if (fakePlayer.getValue()) {
             mc.level.removeEntity(localPlayer.getId(), Entity.RemovalReason.DISCARDED);
@@ -108,7 +104,7 @@ public class Blink extends Module {
         }
     }
 
-    private int getBlinkTicks(){
+    private int getBlinkTicks() {
         return Math.toIntExact(this.packets.stream().filter(packet -> packet instanceof ServerboundMovePlayerPacket).count());
     }
 
@@ -117,22 +113,23 @@ public class Blink extends Module {
             Packet<?> poll = this.packets.poll();
             PacketUtils.sendSilently(poll);
             if (poll instanceof ServerboundMovePlayerPacket) {
-                handlePlayerMove((ServerboundMovePlayerPacket)poll);
+                handlePlayerMove((ServerboundMovePlayerPacket) poll);
                 break;
             }
         }
     }
 
-    private void releaseAll(){
-        if (!packets.isEmpty()){
-            for (Packet packet : packets){
+    private void releaseAll() {
+        if (!packets.isEmpty()) {
+            for (Packet packet : packets) {
                 PacketUtils.sendSilently(packet);
-                if (packet instanceof ServerboundMovePlayerPacket serverboundMovePlayerPacket){
+                if (packet instanceof ServerboundMovePlayerPacket serverboundMovePlayerPacket) {
                     handlePlayerMove(serverboundMovePlayerPacket);
                 }
             }
         }
     }
+
     @SubscribeEvent
     public void onRender(RenderLevelStageEvent.AfterLevel event) {
         if (nullCheck()) return;
@@ -161,23 +158,23 @@ public class Blink extends Module {
 
 
     @SubscribeEvent
-    public void onMotion(MotionEvent event){
-        if (mc.screen instanceof RecoverWorldDataScreen && this.isEnabled()){
+    public void onMotion(MotionEvent event) {
+        if (mc.screen instanceof RecoverWorldDataScreen && this.isEnabled()) {
             this.setEnabled(false);
         }
         if (nullCheck()) return;
 
-        if (SlowRelease.getValue()){
-            if (getBlinkTicks() > tick.getValue()){
+        if (SlowRelease.getValue()) {
+            if (getBlinkTicks() > tick.getValue()) {
                 releaseTick();
             }
         } else {
-            if (getBlinkTicks() > tick.getValue()){
+            if (getBlinkTicks() > tick.getValue()) {
                 releaseAll();
             }
         }
-        if (slowMove.getValue()){
-            if (mc.player.tickCount % slowMoveTick.getValue().intValue() == 0){
+        if (slowMove.getValue()) {
+            if (mc.player.tickCount % slowMoveTick.getValue().intValue() == 0) {
                 releaseTick();
             }
         }

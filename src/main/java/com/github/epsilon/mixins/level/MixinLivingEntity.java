@@ -2,7 +2,7 @@ package com.github.epsilon.mixins.level;
 
 import com.github.epsilon.events.FallFlyingEvent;
 import com.github.epsilon.events.JumpEvent;
-import com.github.epsilon.events.MoveMathEvent;
+import com.github.epsilon.events.TravelEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.impl.player.JumpCooldown;
 import net.minecraft.client.Minecraft;
@@ -59,12 +59,14 @@ public abstract class MixinLivingEntity {
             this.noJumpDelay = value;
         }
     }
-    @Inject(method = "travel",at = @At("HEAD"),cancellable = true)
-    public void move(Vec3 vec3, CallbackInfo ci){
-        if ((LivingEntity) (Object) this  == Minecraft.getInstance().player){
-            MoveMathEvent e = new MoveMathEvent();
-            NeoForge.EVENT_BUS.post(e);
-            if (e.isCanceled()) ci.cancel();
+
+    @Inject(method = "travel", at = @At("HEAD"), cancellable = true)
+    public void move(Vec3 vec3, CallbackInfo ci) {
+        if ((LivingEntity) (Object) this == Minecraft.getInstance().player) {
+            if (NeoForge.EVENT_BUS.post(new TravelEvent()).isCanceled()) {
+                ci.cancel();
+            }
         }
     }
+
 }

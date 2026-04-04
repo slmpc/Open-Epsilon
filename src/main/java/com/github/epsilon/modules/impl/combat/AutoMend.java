@@ -3,9 +3,13 @@ package com.github.epsilon.modules.impl.combat;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
+import com.github.epsilon.settings.impl.BoolSetting;
+import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.utils.player.FindItemResult;
 import com.github.epsilon.utils.player.InvUtils;
 import com.github.epsilon.utils.rotation.Priority;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -19,6 +23,28 @@ public class AutoMend extends Module {
         super("AutoMend", Category.COMBAT);
     }
 
+    private enum SwitchMode {
+        Normal,
+        Silent
+    }
+
+    private final EnumSetting<SwitchMode> switchMode = enumSetting("SwitchMode", SwitchMode.Normal);
+    private final BoolSetting swingHand = boolSetting("SwingHand", false);
+
+    private boolean shouldSwapBack;
+
+    @Override
+    protected void onEnable() {
+        shouldSwapBack = false;
+    }
+
+    @Override
+    protected void onDisable() {
+        if (shouldSwapBack) {
+            InvUtils.swapBack();
+        }
+    }
+
     @SubscribeEvent
     private void onClientTick(ClientTickEvent.Pre event) {
         if (nullCheck()) return;
@@ -26,10 +52,22 @@ public class AutoMend extends Module {
         FindItemResult result = InvUtils.findInHotbar(Items.EXPERIENCE_BOTTLE);
         if (!result.found()) return;
 
-        RotationManager.INSTANCE.applyRotation(new Vector2f(mc.player.getYRot(), 90), 10, Priority.High, rotationApplyRecord -> {
+        RotationManager.INSTANCE.applyRotation(new Vector2f(mc.player.getYRot(), 90), 10, Priority.High, _ -> {
             InvUtils.swap(result.slot(), true);
-            mc.gameMode.useItem(mc.player, result.getHand());
-            InvUtils.swapBack();
+
+            InteractionHand hand = result.getHand();
+            mc.gameMode.useItem(mc.player, hand);
+            if (swingHand.getValue()) {
+                mc.player.swing(hand);
+            } else {
+                mc.getConnection().send(new ServerboundSwingPacket(hand));
+            }
+
+            if (switchMode.is(SwitchMode.Silent)) {
+                InvUtils.swapBack();
+            } else {
+                shouldSwapBack = true;
+            }
         });
     }
 

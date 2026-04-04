@@ -83,6 +83,7 @@ public class InvUtils {
         }
 
         mc.player.getInventory().setSelectedSlot(slot);
+        mc.gameMode.ensureHasSentCarriedItem();
     }
 
     public static void swapBack() {

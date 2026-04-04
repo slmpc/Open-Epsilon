@@ -1,19 +1,19 @@
 package com.github.epsilon.mixins.level;
 
 import com.github.epsilon.events.AttackBlockEvent;
-import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.events.DestroyBlockEvent;
+import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.impl.player.BreakCooldown;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.prediction.PredictiveAction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.client.multiplayer.MultiPlayerGameMode;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.neoforged.neoforge.common.CommonHooks;
@@ -21,7 +21,10 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.EventHooks;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -35,15 +38,6 @@ public abstract class MixinMultiPlayerGameMode {
     @Shadow
     private int destroyDelay;
 
-    @Unique
-    private float savedYaw;
-
-    @Unique
-    private float savedPitch;
-
-    @Unique
-    private boolean rotationModified;
-
     @Final
     @Shadow
     private Minecraft minecraft;
@@ -56,7 +50,7 @@ public abstract class MixinMultiPlayerGameMode {
 
     /**
      * @author L3MonKe178
-     * @reason 就爱重写，受着呗
+     * @reason Skill issue
      */
     @Overwrite
     public InteractionResult useItem(Player player, InteractionHand hand) {
@@ -65,8 +59,8 @@ public abstract class MixinMultiPlayerGameMode {
         } else {
             ((MultiPlayerGameMode) (Object) this).ensureHasSentCarriedItem();
             MutableObject<InteractionResult> interactionResult = new MutableObject<>();
-            this.startPrediction(this.minecraft.level, (sequence) -> {
-                ServerboundUseItemPacket packet = new ServerboundUseItemPacket(hand, sequence, RotationManager.INSTANCE.getYaw(), RotationManager.INSTANCE.getPitch());
+            this.startPrediction(this.minecraft.level, sequence -> {
+                ServerboundUseItemPacket packet = new ServerboundUseItemPacket(hand, sequence, player == minecraft.player ? RotationManager.INSTANCE.getYaw() : player.getYRot(), player == minecraft.player ? RotationManager.INSTANCE.getPitch() : player.getXRot());
                 ItemStack itemStack = player.getItemInHand(hand);
                 if (player.getCooldowns().isOnCooldown(itemStack)) {
                     interactionResult.setValue(InteractionResult.PASS);
@@ -100,26 +94,6 @@ public abstract class MixinMultiPlayerGameMode {
             return interactionResult.get();
         }
     }
-
-    /*@Inject(method = "useItem", at = @At("HEAD"))
-    private void preUseItem(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (RotationManager.INSTANCE.isActive() && RotationManager.INSTANCE.rotations != null) {
-            savedYaw = player.getYRot();
-            savedPitch = player.getXRot();
-            player.setYRot(RotationManager.INSTANCE.getYaw());
-            player.setXRot(RotationManager.INSTANCE.getPitch());
-            rotationModified = true;
-        }
-    }
-
-    @Inject(method = "useItem", at = @At("RETURN"))
-    private void postUseItem(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (rotationModified) {
-            player.setYRot(savedYaw);
-            player.setXRot(savedPitch);
-            rotationModified = false;
-        }
-    }*/
 
     @Inject(method = "destroyBlock", at = @At("RETURN"), cancellable = true)
     public void hookDestroyBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
