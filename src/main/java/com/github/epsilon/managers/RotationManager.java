@@ -312,7 +312,7 @@ public class RotationManager {
     }
 
     @SubscribeEvent
-    private void onRaytrace(RayTraceEvent event) {
+    private void onRaytrace(RaytraceEvent event) {
         if (active && rotations != null) {
             event.setYaw(rotations.x);
             event.setPitch(rotations.y);

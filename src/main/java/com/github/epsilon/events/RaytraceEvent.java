@@ -3,14 +3,14 @@ package com.github.epsilon.events;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.Event;
 
-public class RayTraceEvent extends Event {
+public class RaytraceEvent extends Event {
 
     private float yaw;
     private float pitch;
 
     private final Entity entity;
 
-    public RayTraceEvent(Entity entity, float yaw, float pitch) {
+    public RaytraceEvent(Entity entity, float yaw, float pitch) {
         this.entity = entity;
         this.yaw = yaw;
         this.pitch = pitch;
