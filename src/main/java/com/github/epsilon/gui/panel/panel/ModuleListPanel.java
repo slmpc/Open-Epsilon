@@ -11,7 +11,8 @@ import com.github.epsilon.gui.panel.PanelLayout;
 import com.github.epsilon.gui.panel.PanelState;
 import com.github.epsilon.gui.panel.adapter.ModuleViewModel;
 import com.github.epsilon.gui.panel.component.ModuleRow;
-import com.github.epsilon.gui.panel.util.PanelScissor;
+import com.github.epsilon.gui.panel.util.PanelContentBuffer;
+import com.github.epsilon.gui.panel.util.PanelContentInvalidationState;
 import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.utils.render.animation.Animation;
@@ -29,11 +30,8 @@ public class ModuleListPanel {
     private final RoundRectRenderer roundRectRenderer;
     private final RectRenderer rectRenderer;
     private final TextRenderer textRenderer;
-    private final RoundRectRenderer contentRoundRectRenderer = new RoundRectRenderer();
-    private final RectRenderer contentRectRenderer = new RectRenderer();
-    private final ShadowRenderer contentShadowRenderer = new ShadowRenderer();
-    private final TextRenderer contentTextRenderer = new TextRenderer();
-    private final RoundRectRenderer scrollBarRenderer = new RoundRectRenderer();
+    private final PanelContentBuffer contentBuffer = new PanelContentBuffer();
+    private final PanelContentInvalidationState contentState = new PanelContentInvalidationState();
     private PanelLayout.Rect bounds;
     private int guiHeight;
     private final List<ModuleRow> rows = new ArrayList<>();
@@ -41,18 +39,11 @@ public class ModuleListPanel {
     private final Map<Module, Animation> selectionAnimations = new HashMap<>();
     private final Map<Module, Animation> toggleAnimations = new HashMap<>();
     private final Map<Module, Animation> toggleHoverAnimations = new HashMap<>();
-    private boolean contentPending;
-    private boolean contentDirty = true;
-    private int lastMouseX = Integer.MIN_VALUE;
-    private int lastMouseY = Integer.MIN_VALUE;
     private float lastModuleScroll = Float.NaN;
     private String lastSearchQuery = "";
     private boolean lastSearchFocused;
     private CategorySnapshot lastCategorySnapshot;
     private String lastSelectedModuleName = "";
-    private int lastGuiHeight = -1;
-    private PanelLayout.Rect lastBounds;
-    private boolean hasActiveContentAnimations;
     private final Animation searchHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private final Animation searchFocusAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private boolean searchFocused;
@@ -87,11 +78,8 @@ public class ModuleListPanel {
 
         if (shouldRebuildContent(bounds, mouseX, mouseY, modules, GuiGraphicsExtractor.guiHeight())) {
             rows.clear();
-            contentRoundRectRenderer.clear();
-            contentRectRenderer.clear();
-            contentShadowRenderer.clear();
-            contentTextRenderer.clear();
-            hasActiveContentAnimations = false;
+            contentBuffer.clear();
+            contentState.beginRebuild();
 
             float y = viewport.y() - state.getModuleScroll();
             for (Module module : modules) {
@@ -105,44 +93,30 @@ public class ModuleListPanel {
                 selectionAnimation.run(state.getSelectedModule() == module ? 1.0f : 0.0f);
                 toggleAnimation.run(module.isEnabled() ? 1.0f : 0.0f);
                 toggleHoverAnimation.run(row.getToggleBounds().contains(mouseX, mouseY) ? 1.0f : 0.0f);
-                hasActiveContentAnimations = hasActiveContentAnimations
-                        || !hoverAnimation.isFinished()
+                contentState.noteAnimation(!hoverAnimation.isFinished()
                         || !selectionAnimation.isFinished()
                         || !toggleAnimation.isFinished()
-                        || !toggleHoverAnimation.isFinished();
-                row.render(contentRoundRectRenderer, contentRectRenderer, contentTextRenderer, hoverAnimation.getValue(), selectionAnimation.getValue(), toggleAnimation.getValue(), toggleHoverAnimation.getValue());
+                        || !toggleHoverAnimation.isFinished());
+                row.render(contentBuffer.roundRectRenderer(), contentBuffer.rectRenderer(), contentBuffer.textRenderer(), hoverAnimation.getValue(), selectionAnimation.getValue(), toggleAnimation.getValue(), toggleHoverAnimation.getValue());
                 y += ModuleRow.HEIGHT + MD3Theme.ROW_GAP;
             }
 
             rememberSnapshot(bounds, mouseX, mouseY, modules, GuiGraphicsExtractor.guiHeight());
-            contentDirty = false;
         }
 
-        PanelScissor.apply(viewport, contentRectRenderer, contentRoundRectRenderer, contentShadowRenderer, contentTextRenderer, guiHeight);
-        scrollBarRenderer.clear();
-        ScrollBarUtil.draw(scrollBarRenderer, viewport, state.getModuleScroll(), maxModuleScroll, contentHeight);
-        contentPending = true;
+        contentBuffer.queueViewport(viewport, guiHeight, state.getModuleScroll(), maxModuleScroll, contentHeight);
     }
 
     public void flushContent() {
-        if (!contentPending) {
-            return;
-        }
-        contentShadowRenderer.draw();
-        contentRoundRectRenderer.draw();
-        contentRectRenderer.draw();
-        contentTextRenderer.draw();
-        PanelScissor.clear(contentRectRenderer, contentRoundRectRenderer, contentShadowRenderer, contentTextRenderer);
-        scrollBarRenderer.drawAndClear();
-        contentPending = false;
+        contentBuffer.flush();
     }
 
     public void markDirty() {
-        contentDirty = true;
+        contentState.markDirty();
     }
 
     public boolean hasActiveAnimations() {
-        return hasActiveContentAnimations;
+        return contentState.hasActiveAnimations();
     }
 
     public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
@@ -244,19 +218,7 @@ public class ModuleListPanel {
     }
 
     private boolean shouldRebuildContent(PanelLayout.Rect bounds, int mouseX, int mouseY, List<Module> modules, int currentGuiHeight) {
-        if (contentDirty) {
-            return true;
-        }
-        if (hasActiveContentAnimations) {
-            return true;
-        }
-        if (lastBounds == null || !sameRect(lastBounds, bounds)) {
-            return true;
-        }
-        if (lastGuiHeight != currentGuiHeight) {
-            return true;
-        }
-        if (lastMouseX != mouseX || lastMouseY != mouseY) {
+        if (contentState.needsRebuild(bounds, mouseX, mouseY, currentGuiHeight)) {
             return true;
         }
         if (Float.compare(lastModuleScroll, state.getModuleScroll()) != 0) {
@@ -273,22 +235,12 @@ public class ModuleListPanel {
     }
 
     private void rememberSnapshot(PanelLayout.Rect bounds, int mouseX, int mouseY, List<Module> modules, int currentGuiHeight) {
-        lastBounds = bounds;
-        lastMouseX = mouseX;
-        lastMouseY = mouseY;
+        contentState.rememberSnapshot(bounds, mouseX, mouseY, currentGuiHeight);
         lastModuleScroll = state.getModuleScroll();
         lastSearchQuery = state.getSearchQuery();
         lastSearchFocused = searchFocused;
         lastCategorySnapshot = CategorySnapshot.of(state.getSelectedCategory().name(), modules);
         lastSelectedModuleName = state.getSelectedModule() == null ? "" : state.getSelectedModule().getName();
-        lastGuiHeight = currentGuiHeight;
-    }
-
-    private boolean sameRect(PanelLayout.Rect a, PanelLayout.Rect b) {
-        return Float.compare(a.x(), b.x()) == 0
-                && Float.compare(a.y(), b.y()) == 0
-                && Float.compare(a.width(), b.width()) == 0
-                && Float.compare(a.height(), b.height()) == 0;
     }
 
     private record CategorySnapshot(String categoryName, List<String> moduleIds) {

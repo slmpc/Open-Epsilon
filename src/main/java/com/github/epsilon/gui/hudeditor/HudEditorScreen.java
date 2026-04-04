@@ -49,10 +49,10 @@ public class HudEditorScreen extends Screen {
             int screenWidth = minecraft.getWindow().getGuiScaledWidth();
             int screenHeight = minecraft.getWindow().getGuiScaledHeight();
             List<HudModule> hudModules = HudEditorModules.collectHudModules(delta);
-            syncSelected(hudModules);
+            syncSelectionState(hudModules);
 
             HudModule hovered = HudEditorModules.findTopmost(hudModules, mouseX, mouseY);
-            HudModule focus = dragging != null ? dragging : hovered;
+            HudModule focus = dragging != null ? dragging : selected != null ? selected : hovered;
             boolean draggingFocus = focus != null && focus == dragging;
 
             if (focus != null) {
@@ -101,7 +101,7 @@ public class HudEditorScreen extends Screen {
             double mx = event.x();
             double my = event.y();
             List<HudModule> hudModules = HudEditorModules.collectHudModules(null);
-            syncSelected(hudModules);
+            syncSelectionState(hudModules);
             HudModule hovered = HudEditorModules.findTopmost(hudModules, mx, my);
             if (hovered != null) {
                 inspector.clearFocus();
@@ -112,6 +112,9 @@ public class HudEditorScreen extends Screen {
                 clearSnapPreview();
                 return true;
             }
+
+            clearSelection();
+            return true;
         }
 
         return super.mouseClicked(event, isDoubleClick);
@@ -169,6 +172,23 @@ public class HudEditorScreen extends Screen {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
+        if (event.key() == 256) {
+            if (inspector.keyPressed(event)) {
+                return true;
+            }
+            if (dragging != null) {
+                dragging = null;
+                clearSnapPreview();
+                ConfigManager.INSTANCE.saveNow();
+                return true;
+            }
+            if (selected != null) {
+                clearSelection();
+                return true;
+            }
+            onClose();
+            return true;
+        }
         if (inspector.keyPressed(event)) {
             return true;
         }
@@ -206,13 +226,18 @@ public class HudEditorScreen extends Screen {
         snapPreviewY = null;
     }
 
-    private void syncSelected(List<HudModule> hudModules) {
-        if (hudModules.isEmpty()) {
-            selected = null;
-            return;
+    private void clearSelection() {
+        selected = null;
+        inspector.clearFocus();
+    }
+
+    private void syncSelectionState(List<HudModule> hudModules) {
+        if (dragging != null && !hudModules.contains(dragging)) {
+            dragging = null;
+            clearSnapPreview();
         }
-        if (selected == null || !hudModules.contains(selected)) {
-            selected = hudModules.get(hudModules.size() - 1);
+        if (selected != null && !hudModules.contains(selected)) {
+            clearSelection();
         }
     }
 

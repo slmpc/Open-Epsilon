@@ -9,7 +9,7 @@ import com.github.epsilon.gui.panel.MD3Theme;
 import com.github.epsilon.gui.panel.PanelLayout;
 import com.github.epsilon.gui.panel.adapter.SettingListController;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
-import com.github.epsilon.gui.panel.util.PanelScissor;
+import com.github.epsilon.gui.panel.util.PanelContentBuffer;
 import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.modules.HudModule;
 import com.github.epsilon.settings.Setting;
@@ -36,11 +36,7 @@ final class HudEditorInspector {
     private final RectRenderer rectRenderer = new RectRenderer();
     private final ShadowRenderer shadowRenderer = new ShadowRenderer();
     private final TextRenderer textRenderer = new TextRenderer();
-    private final RoundRectRenderer contentRoundRectRenderer = new RoundRectRenderer();
-    private final RectRenderer contentRectRenderer = new RectRenderer();
-    private final ShadowRenderer contentShadowRenderer = new ShadowRenderer();
-    private final TextRenderer contentTextRenderer = new TextRenderer();
-    private final RoundRectRenderer scrollBarRenderer = new RoundRectRenderer();
+    private final PanelContentBuffer contentBuffer = new PanelContentBuffer();
     private final PanelPopupHost popupHost = new PanelPopupHost();
     private final SettingListController settingList = new SettingListController(popupHost);
 
@@ -103,24 +99,13 @@ final class HudEditorInspector {
 
         settingList.layoutRows(settings, viewport, scroll, rowWidth, (setting, row, rowBounds) -> {
             float hover = rowBounds.contains(effectiveMouseX, effectiveMouseY) ? 1.0f : 0.0f;
-            row.render(graphics, contentRoundRectRenderer, contentRectRenderer, contentTextRenderer, rowBounds, hover, effectiveMouseX, effectiveMouseY, partialTick);
+            row.render(graphics, contentBuffer.roundRectRenderer(), contentBuffer.rectRenderer(), contentBuffer.textRenderer(), rowBounds, hover, effectiveMouseX, effectiveMouseY, partialTick);
         });
 
         flushChrome();
 
-        PanelScissor.apply(viewport, contentRectRenderer, contentRoundRectRenderer, contentShadowRenderer, contentTextRenderer, guiHeight);
-        contentShadowRenderer.draw();
-        contentRoundRectRenderer.draw();
-        contentRectRenderer.draw();
-        contentTextRenderer.draw();
-        PanelScissor.clear(contentRectRenderer, contentRoundRectRenderer, contentShadowRenderer, contentTextRenderer);
-        contentShadowRenderer.clear();
-        contentRoundRectRenderer.clear();
-        contentRectRenderer.clear();
-        contentTextRenderer.clear();
-
-        ScrollBarUtil.draw(scrollBarRenderer, viewport, scroll, maxScroll, contentHeight);
-        scrollBarRenderer.drawAndClear();
+        contentBuffer.queueViewport(viewport, guiHeight, scroll, maxScroll, contentHeight);
+        contentBuffer.flushAndClear();
     }
 
     void renderPopups(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
@@ -202,12 +187,11 @@ final class HudEditorInspector {
 
     private void clearContentState() {
         viewport = null;
+        scroll = 0.0f;
         maxScroll = 0.0f;
+        selectedModuleName = "";
+        popupHost.close();
         settingList.clearAll();
-        contentShadowRenderer.clear();
-        contentRoundRectRenderer.clear();
-        contentRectRenderer.clear();
-        contentTextRenderer.clear();
-        scrollBarRenderer.clear();
+        contentBuffer.clear();
     }
 }
