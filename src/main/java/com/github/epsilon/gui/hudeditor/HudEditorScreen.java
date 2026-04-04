@@ -99,4 +99,8 @@ public class HudEditorScreen extends Screen {
         minecraft.setScreen(PanelScreen.INSTANCE);
     }
 
+    @Override
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    }
+
 }
