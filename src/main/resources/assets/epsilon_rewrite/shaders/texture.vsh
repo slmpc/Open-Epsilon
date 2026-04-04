@@ -5,7 +5,7 @@
 
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec4 Color;
-layout(location = 2) in vec2 Uv0;
+layout(location = 2) in vec2 UV0;
 layout(location = 3) in vec4 InnerRect;
 layout(location = 4) in vec4 Radius;
 
@@ -20,7 +20,7 @@ void main() {
 
     f_Position = Position.xy;
     f_Color = Color;
-    f_TexCoord = Uv0;
+    f_TexCoord = UV0;
 
     f_InnerRect = InnerRect;
     f_Radius = Radius;
