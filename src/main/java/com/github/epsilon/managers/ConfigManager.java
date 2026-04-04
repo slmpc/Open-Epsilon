@@ -97,54 +97,17 @@ public class ConfigManager {
             }
 
             if (module instanceof HudModule hud) {
-                if (moduleObj.has("hudHorizontalAnchor") || moduleObj.has("hudVerticalAnchor") || moduleObj.has("hudOffsetX") || moduleObj.has("hudOffsetY")) {
-                    HudModule.HorizontalAnchor horizontalAnchor = HudModule.HorizontalAnchor.LEFT;
-                    HudModule.VerticalAnchor verticalAnchor = HudModule.VerticalAnchor.TOP;
-                    float anchorOffsetX = 0.0f;
-                    float anchorOffsetY = 0.0f;
-
-                    if (moduleObj.has("hudHorizontalAnchor") && moduleObj.get("hudHorizontalAnchor").isJsonPrimitive()) {
-                        try {
-                            horizontalAnchor = HudModule.HorizontalAnchor.valueOf(moduleObj.get("hudHorizontalAnchor").getAsString());
-                        } catch (Exception ignored) {
-                        }
+                if (moduleObj.has("hudX") && moduleObj.get("hudX").isJsonPrimitive()) {
+                    try {
+                        hud.x = moduleObj.get("hudX").getAsFloat();
+                    } catch (Exception ignored) {
                     }
-                    if (moduleObj.has("hudVerticalAnchor") && moduleObj.get("hudVerticalAnchor").isJsonPrimitive()) {
-                        try {
-                            verticalAnchor = HudModule.VerticalAnchor.valueOf(moduleObj.get("hudVerticalAnchor").getAsString());
-                        } catch (Exception ignored) {
-                        }
+                }
+                if (moduleObj.has("hudY") && moduleObj.get("hudY").isJsonPrimitive()) {
+                    try {
+                        hud.y = moduleObj.get("hudY").getAsFloat();
+                    } catch (Exception ignored) {
                     }
-                    if (moduleObj.has("hudOffsetX") && moduleObj.get("hudOffsetX").isJsonPrimitive()) {
-                        try {
-                            anchorOffsetX = moduleObj.get("hudOffsetX").getAsFloat();
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    if (moduleObj.has("hudOffsetY") && moduleObj.get("hudOffsetY").isJsonPrimitive()) {
-                        try {
-                            anchorOffsetY = moduleObj.get("hudOffsetY").getAsFloat();
-                        } catch (Exception ignored) {
-                        }
-                    }
-
-                    hud.setAnchorState(horizontalAnchor, verticalAnchor, anchorOffsetX, anchorOffsetY);
-                } else {
-                    float hudX = hud.x;
-                    float hudY = hud.y;
-                    if (moduleObj.has("hudX") && moduleObj.get("hudX").isJsonPrimitive()) {
-                        try {
-                            hudX = moduleObj.get("hudX").getAsFloat();
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    if (moduleObj.has("hudY") && moduleObj.get("hudY").isJsonPrimitive()) {
-                        try {
-                            hudY = moduleObj.get("hudY").getAsFloat();
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    hud.moveTo(hudX, hudY);
                 }
             }
 
@@ -229,10 +192,6 @@ public class ConfigManager {
             if (module instanceof HudModule hud) {
                 moduleObj.addProperty("hudX", hud.x);
                 moduleObj.addProperty("hudY", hud.y);
-                moduleObj.addProperty("hudHorizontalAnchor", hud.getHorizontalAnchor().name());
-                moduleObj.addProperty("hudVerticalAnchor", hud.getVerticalAnchor().name());
-                moduleObj.addProperty("hudOffsetX", hud.getAnchorOffsetX());
-                moduleObj.addProperty("hudOffsetY", hud.getAnchorOffsetY());
             }
 
             JsonObject settingsObj = new JsonObject();
