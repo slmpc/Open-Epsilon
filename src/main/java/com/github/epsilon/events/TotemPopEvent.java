@@ -13,7 +13,7 @@ public class TotemPopEvent extends Event {
         this.pops = pops;
     }
 
-    public Player getEntity() {
+    public Player getPlayer() {
         return this.player;
     }
 
