@@ -13,7 +13,6 @@ import com.github.epsilon.gui.panel.panel.ModuleListPanel;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
 import com.github.epsilon.managers.RenderManager;
 import com.github.epsilon.modules.impl.ClientSetting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
