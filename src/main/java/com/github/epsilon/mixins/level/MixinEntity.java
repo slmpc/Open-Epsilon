@@ -9,7 +9,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -17,18 +16,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Entity.class)
-public abstract class MixinEntity {
-
-    @Shadow
-    public abstract Vec3 calculateViewVector(float xRot, float yRot);
+public class MixinEntity {
 
     @Redirect(method = "getViewVector", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;calculateViewVector(FF)Lnet/minecraft/world/phys/Vec3;"))
     private Vec3 redirectGetViewYRot(Entity instance, float xRot, float yRot) {
         if (instance == Minecraft.getInstance().player) {
             RaytraceEvent event = NeoForge.EVENT_BUS.post(new RaytraceEvent(instance, yRot, xRot));
-            return this.calculateViewVector(event.getPitch(), event.getYaw());
+            return instance.calculateViewVector(event.getPitch(), event.getYaw());
         }
-        return this.calculateViewVector(xRot, yRot);
+        return instance.calculateViewVector(xRot, yRot);
     }
 
     @Redirect(method = "moveRelative", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getYRot()F"))
@@ -44,9 +40,9 @@ public abstract class MixinEntity {
     private void pushAwayFromHook(Args args) {
         if ((Entity) (Object) this == Minecraft.getInstance().player) {
             if (Velocity.INSTANCE.isEnabled() && Velocity.INSTANCE.entityPush.getValue()) {
-                args.set(0, 0d);
-                args.set(1, 0d);
-                args.set(2, 0d);
+                args.set(0, 0.0);
+                args.set(1, 0.0);
+                args.set(2, 0.0);
             }
         }
     }
