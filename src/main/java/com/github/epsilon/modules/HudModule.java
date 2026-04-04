@@ -23,6 +23,6 @@ public abstract class HudModule extends Module {
         this.height = height;
     }
 
-    abstract public void render(DeltaTracker deltaTracker);
+    public abstract void render(DeltaTracker deltaTracker);
 
 }

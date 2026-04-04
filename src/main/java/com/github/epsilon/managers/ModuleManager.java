@@ -2,7 +2,6 @@ package com.github.epsilon.managers;
 
 import com.github.epsilon.gui.panel.PanelScreen;
 import com.github.epsilon.modules.HudModule;
-import com.github.epsilon.modules.impl.render.ModuleList;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.modules.impl.ClientSetting;
 import com.github.epsilon.modules.impl.combat.*;

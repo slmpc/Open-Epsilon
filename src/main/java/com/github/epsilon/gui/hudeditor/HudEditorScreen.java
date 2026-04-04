@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 
@@ -28,7 +29,7 @@ public class HudEditorScreen extends Screen {
     private double dragOffsetX, dragOffsetY;
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 
         RenderManager.INSTANCE.applyRenderAfterFrame(delta -> {
             ModuleManager.INSTANCE.getModules().forEach(module -> {
