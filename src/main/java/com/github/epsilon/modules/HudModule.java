@@ -106,76 +106,24 @@ public abstract class HudModule extends Module {
         float clampedY = Mth.clamp(renderY, 0.0f, Math.max(0.0f, screenHeight - height));
 
         if (updateAnchors) {
-            horizontalAnchor = getHorizontalAnchorFor(clampedX, screenWidth);
-            verticalAnchor = getVerticalAnchorFor(clampedY, screenHeight);
+            horizontalAnchor = HudLayoutHelper.resolveHorizontalAnchor(clampedX, width, screenWidth);
+            verticalAnchor = HudLayoutHelper.resolveVerticalAnchor(clampedY, height, screenHeight);
         }
 
         this.x = clampedX;
         this.y = clampedY;
-        this.anchorX = toAnchorX(clampedX, screenWidth);
-        this.anchorY = toAnchorY(clampedY, screenHeight);
+        this.anchorX = HudLayoutHelper.toAnchorX(horizontalAnchor, clampedX, width, screenWidth);
+        this.anchorY = HudLayoutHelper.toAnchorY(verticalAnchor, clampedY, height, screenHeight);
     }
 
     private float getAnchoredRenderX() {
         int screenWidth = getScreenWidth();
-        return switch (horizontalAnchor) {
-            case Left -> anchorX;
-            case Center -> screenWidth / 2.0f - width / 2.0f + anchorX;
-            case Right -> screenWidth - width + anchorX;
-        };
+        return HudLayoutHelper.getRenderX(horizontalAnchor, anchorX, width, screenWidth);
     }
 
     private float getAnchoredRenderY() {
         int screenHeight = getScreenHeight();
-        return switch (verticalAnchor) {
-            case Top -> anchorY;
-            case Center -> screenHeight / 2.0f - height / 2.0f + anchorY;
-            case Bottom -> screenHeight - height + anchorY;
-        };
-    }
-
-    private float toAnchorX(float renderX, int screenWidth) {
-        return switch (horizontalAnchor) {
-            case Left -> renderX;
-            case Center -> renderX + width / 2.0f - screenWidth / 2.0f;
-            case Right -> renderX + width - screenWidth;
-        };
-    }
-
-    private float toAnchorY(float renderY, int screenHeight) {
-        return switch (verticalAnchor) {
-            case Top -> renderY;
-            case Center -> renderY + height / 2.0f - screenHeight / 2.0f;
-            case Bottom -> renderY + height - screenHeight;
-        };
-    }
-
-    private HorizontalAnchor getHorizontalAnchorFor(float renderX, int screenWidth) {
-        float splitLeft = screenWidth / 3.0f;
-        float splitRight = splitLeft * 2.0f;
-
-        boolean left = renderX <= splitLeft;
-        boolean right = renderX + width >= splitRight;
-
-        if ((left && right) || (!left && !right)) {
-            return HorizontalAnchor.Center;
-        }
-
-        return left ? HorizontalAnchor.Left : HorizontalAnchor.Right;
-    }
-
-    private VerticalAnchor getVerticalAnchorFor(float renderY, int screenHeight) {
-        float splitTop = screenHeight / 3.0f;
-        float splitBottom = splitTop * 2.0f;
-
-        boolean top = renderY <= splitTop;
-        boolean bottom = renderY + height >= splitBottom;
-
-        if ((top && bottom) || (!top && !bottom)) {
-            return VerticalAnchor.Center;
-        }
-
-        return top ? VerticalAnchor.Top : VerticalAnchor.Bottom;
+        return HudLayoutHelper.getRenderY(verticalAnchor, anchorY, height, screenHeight);
     }
 
     private static int getScreenWidth() {
