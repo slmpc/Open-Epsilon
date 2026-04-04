@@ -12,8 +12,6 @@ import com.github.epsilon.utils.render.animation.Easing;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 
-import java.awt.*;
-
 public class ButtonSettingRow extends SettingRow<ButtonSetting> {
 
     private final Animation hoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 160L);
