@@ -35,7 +35,7 @@ public class ClientSetting extends Module {
 
     public final KeybindSetting guiKeybind = keybindSetting("Gui Keybind", GLFW.GLFW_KEY_RIGHT_SHIFT);
 
-    public final BoolSetting closeOnSpace = boolSetting("Close Gui On Space", false);
+    public final BoolSetting closeOnOutside = boolSetting("Close Gui On Outside", false);
 
     private final ButtonSetting openHudEditor = buttonSetting("Open Hud Editor", () -> {
         mc.setScreen(HudEditorScreen.INSTANCE);
