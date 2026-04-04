@@ -6,6 +6,7 @@ import com.github.epsilon.managers.ConfigManager;
 import com.github.epsilon.managers.ModuleManager;
 import com.github.epsilon.managers.RenderManager;
 import com.github.epsilon.modules.HudModule;
+import com.github.epsilon.modules.Module;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -52,10 +53,8 @@ public class HudEditorScreen extends Screen {
         if (event.button() == 0) {
             double mx = event.x();
             double my = event.y();
-            // Iterate in reverse so top-most (last rendered) is picked first
             var modules = ModuleManager.INSTANCE.getModules();
-            for (int i = modules.size() - 1; i >= 0; i--) {
-                var module = modules.get(i);
+            for (Module module : modules) {
                 if (module instanceof HudModule hud) {
                     if (mx >= hud.x && mx <= hud.x + hud.width && my >= hud.y && my <= hud.y + hud.height) {
                         dragging = hud;
