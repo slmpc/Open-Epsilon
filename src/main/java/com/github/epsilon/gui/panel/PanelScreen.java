@@ -224,7 +224,7 @@ public class PanelScreen extends Screen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (inputRouter.routeMouseReleased(event, popupHost, moduleDetailPanel, clientSettingPanel, state.isClientSettingMode())) {
+        if (inputRouter.routeMouseReleased(event, popupHost, moduleDetailPanel, moduleListPanel, clientSettingPanel, state.isClientSettingMode())) {
             dirtyState.markAllDirty();
             return true;
         }
@@ -233,7 +233,7 @@ public class PanelScreen extends Screen {
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double mouseX, double mouseY) {
-        if (inputRouter.routeMouseDragged(event, mouseX, mouseY, popupHost, moduleDetailPanel, clientSettingPanel, state.isClientSettingMode())) {
+        if (inputRouter.routeMouseDragged(event, mouseX, mouseY, popupHost, moduleDetailPanel, moduleListPanel, clientSettingPanel, state.isClientSettingMode())) {
             dirtyState.markAllDirty();
             return true;
         }

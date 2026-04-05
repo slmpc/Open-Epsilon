@@ -148,9 +148,25 @@ public class PanelState {
         detailScroll = clampScroll(detailScroll + (float) amount, maxDetailScroll);
     }
 
+    public float getMaxModuleScroll() {
+        return maxModuleScroll;
+    }
+
+    public void setModuleScroll(float scroll) {
+        this.moduleScroll = clampScroll(scroll, maxModuleScroll);
+    }
+
     public void setMaxModuleScroll(float maxModuleScroll) {
         this.maxModuleScroll = Math.max(0.0f, maxModuleScroll);
         moduleScroll = clampScroll(moduleScroll, this.maxModuleScroll);
+    }
+
+    public float getMaxDetailScroll() {
+        return maxDetailScroll;
+    }
+
+    public void setDetailScroll(float scroll) {
+        this.detailScroll = clampScroll(scroll, maxDetailScroll);
     }
 
     public void setMaxDetailScroll(float maxDetailScroll) {
@@ -218,6 +234,14 @@ public class PanelState {
         clientSettingScroll = clampScroll(clientSettingScroll + (float) amount, maxClientSettingScroll);
     }
 
+    public float getMaxClientSettingScroll() {
+        return maxClientSettingScroll;
+    }
+
+    public void setClientSettingScroll(float scroll) {
+        this.clientSettingScroll = clampScroll(scroll, maxClientSettingScroll);
+    }
+
     public void setMaxClientSettingScroll(float maxClientSettingScroll) {
         this.maxClientSettingScroll = Math.max(0.0f, maxClientSettingScroll);
         clientSettingScroll = clampScroll(clientSettingScroll, this.maxClientSettingScroll);
@@ -241,6 +265,14 @@ public class PanelState {
 
     public void scrollFriend(double amount) {
         friendScroll = clampScroll(friendScroll + (float) amount, maxFriendScroll);
+    }
+
+    public float getMaxFriendScroll() {
+        return maxFriendScroll;
+    }
+
+    public void setFriendScroll(float scroll) {
+        this.friendScroll = clampScroll(scroll, maxFriendScroll);
     }
 
     public void setMaxFriendScroll(float maxFriendScroll) {

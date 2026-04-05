@@ -15,6 +15,7 @@ import com.github.epsilon.gui.panel.component.setting.KeybindSettingRow;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
 import com.github.epsilon.gui.panel.util.PanelContentBuffer;
 import com.github.epsilon.gui.panel.util.PanelContentInvalidationState;
+import com.github.epsilon.gui.panel.util.ScrollBarDragState;
 import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.managers.ConfigManager;
 import com.github.epsilon.managers.FriendManager;
@@ -71,6 +72,10 @@ public class ClientSettingPanel {
     private final Animation friendInputHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private final Animation friendInputFocusAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private PanelState.ClientSettingTab lastTab = PanelState.ClientSettingTab.GENERAL;
+
+    // Scrollbar drag state
+    private final ScrollBarDragState generalScrollBarDrag = new ScrollBarDragState();
+    private final ScrollBarDragState friendScrollBarDrag = new ScrollBarDragState();
 
     // Friend list row layout cache
     private final List<FriendRowEntry> friendRowEntries = new ArrayList<>();
@@ -423,6 +428,17 @@ public class ClientSettingPanel {
     }
 
     private boolean handleGeneralClick(MouseButtonEvent event, boolean isDoubleClick) {
+        // Scrollbar drag
+        PanelLayout.Rect viewport = getGeneralViewport();
+        float maxScroll = state.getMaxClientSettingScroll();
+        if (generalScrollBarDrag.mouseClicked(event.x(), event.y(), viewport, state.getClientSettingScroll(), maxScroll)) {
+            float newScroll = generalScrollBarDrag.mouseDragged(event.y(), viewport, maxScroll);
+            if (newScroll >= 0) {
+                state.setClientSettingScroll(newScroll);
+            }
+            markDirty();
+            return true;
+        }
         if (settingListController.mouseClicked(event, isDoubleClick, bounds, (row, rowBounds, clickEvent, doubleClick) -> {
             if (row instanceof KeybindSettingRow keybindRow && row.mouseClicked(rowBounds, clickEvent, doubleClick)) {
                 state.setListeningKeybindSetting(keybindRow.getSetting());
@@ -437,8 +453,24 @@ public class ClientSettingPanel {
     }
 
     private boolean handleFriendClick(MouseButtonEvent event, boolean isDoubleClick) {
-        // Check friend input field click
+        // Scrollbar drag
         PanelLayout.Rect fullViewport = getFriendFullViewport();
+        PanelLayout.Rect listViewport = new PanelLayout.Rect(
+                fullViewport.x(), fullViewport.y(),
+                fullViewport.width(),
+                fullViewport.height() - FRIEND_INPUT_HEIGHT - FRIEND_INPUT_BOTTOM_MARGIN * 2
+        );
+        float maxScroll = state.getMaxFriendScroll();
+        if (friendScrollBarDrag.mouseClicked(event.x(), event.y(), listViewport, state.getFriendScroll(), maxScroll)) {
+            float newScroll = friendScrollBarDrag.mouseDragged(event.y(), listViewport, maxScroll);
+            if (newScroll >= 0) {
+                state.setFriendScroll(newScroll);
+            }
+            markFriendDirty();
+            return true;
+        }
+
+        // Check friend input field click
         PanelLayout.Rect inputBounds = getFriendInputBounds(fullViewport);
         if (inputBounds.contains(event.x(), event.y())) {
             friendInputFocused = true;
@@ -468,8 +500,17 @@ public class ClientSettingPanel {
 
     public boolean mouseReleased(MouseButtonEvent event) {
         if (state.getClientSettingTab() == PanelState.ClientSettingTab.GENERAL) {
+            if (generalScrollBarDrag.mouseReleased()) {
+                markDirty();
+                return true;
+            }
             if (settingListController.mouseReleased(event)) {
                 markDirty();
+                return true;
+            }
+        } else {
+            if (friendScrollBarDrag.mouseReleased()) {
+                markFriendDirty();
                 return true;
             }
         }
@@ -478,8 +519,32 @@ public class ClientSettingPanel {
 
     public boolean mouseDragged(MouseButtonEvent event, double mouseX, double mouseY) {
         if (state.getClientSettingTab() == PanelState.ClientSettingTab.GENERAL) {
+            if (generalScrollBarDrag.isDragging()) {
+                PanelLayout.Rect viewport = getGeneralViewport();
+                float newScroll = generalScrollBarDrag.mouseDragged(event.y(), viewport, state.getMaxClientSettingScroll());
+                if (newScroll >= 0) {
+                    state.setClientSettingScroll(newScroll);
+                }
+                markDirty();
+                return true;
+            }
             if (settingListController.mouseDragged(event, mouseX, mouseY)) {
                 markDirty();
+                return true;
+            }
+        } else {
+            if (friendScrollBarDrag.isDragging()) {
+                PanelLayout.Rect fullViewport = getFriendFullViewport();
+                PanelLayout.Rect listViewport = new PanelLayout.Rect(
+                        fullViewport.x(), fullViewport.y(),
+                        fullViewport.width(),
+                        fullViewport.height() - FRIEND_INPUT_HEIGHT - FRIEND_INPUT_BOTTOM_MARGIN * 2
+                );
+                float newScroll = friendScrollBarDrag.mouseDragged(event.y(), listViewport, state.getMaxFriendScroll());
+                if (newScroll >= 0) {
+                    state.setFriendScroll(newScroll);
+                }
+                markFriendDirty();
                 return true;
             }
         }

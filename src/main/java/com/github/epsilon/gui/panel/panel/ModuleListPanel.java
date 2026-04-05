@@ -14,6 +14,7 @@ import com.github.epsilon.gui.panel.adapter.ModuleViewModel;
 import com.github.epsilon.gui.panel.component.ModuleRow;
 import com.github.epsilon.gui.panel.util.PanelContentBuffer;
 import com.github.epsilon.gui.panel.util.PanelContentInvalidationState;
+import com.github.epsilon.gui.panel.util.ScrollBarDragState;
 import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.utils.render.animation.Animation;
@@ -47,6 +48,7 @@ public class ModuleListPanel {
     private String lastSelectedModuleName = "";
     private final Animation searchHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private final Animation searchFocusAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
+    private final ScrollBarDragState scrollBarDrag = new ScrollBarDragState();
     private boolean searchFocused;
     private int searchCursorIndex;
 
@@ -124,6 +126,17 @@ public class ModuleListPanel {
         if (bounds == null || event.button() != 0) {
             return false;
         }
+        // Scrollbar drag
+        PanelLayout.Rect viewport = getViewport();
+        float maxScroll = state.getMaxModuleScroll();
+        if (scrollBarDrag.mouseClicked(event.x(), event.y(), viewport, state.getModuleScroll(), maxScroll)) {
+            float newScroll = scrollBarDrag.mouseDragged(event.y(), viewport, maxScroll);
+            if (newScroll >= 0) {
+                state.setModuleScroll(newScroll);
+            }
+            markDirty();
+            return true;
+        }
         PanelLayout.Rect searchBounds = getSearchBounds();
         if (searchBounds.contains(event.x(), event.y())) {
             searchFocused = true;
@@ -139,6 +152,27 @@ public class ModuleListPanel {
                 row.getModule().module().toggle();
             } else {
                 state.setSelectedModule(row.getModule().module());
+            }
+            markDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (scrollBarDrag.mouseReleased()) {
+            markDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean mouseDragged(MouseButtonEvent event, double mouseX, double mouseY) {
+        if (scrollBarDrag.isDragging()) {
+            PanelLayout.Rect viewport = getViewport();
+            float newScroll = scrollBarDrag.mouseDragged(event.y(), viewport, state.getMaxModuleScroll());
+            if (newScroll >= 0) {
+                state.setModuleScroll(newScroll);
             }
             markDirty();
             return true;

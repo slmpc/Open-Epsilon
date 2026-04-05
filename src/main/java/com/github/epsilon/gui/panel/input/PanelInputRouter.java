@@ -43,24 +43,30 @@ public class PanelInputRouter {
         return detailPanel.keyPressed(event);
     }
 
-    public boolean routeMouseReleased(MouseButtonEvent event, PanelPopupHost popupHost, ModuleDetailPanel detailPanel, ClientSettingPanel clientSettingPanel, boolean clientSettingMode) {
+    public boolean routeMouseReleased(MouseButtonEvent event, PanelPopupHost popupHost, ModuleDetailPanel detailPanel, ModuleListPanel moduleListPanel, ClientSettingPanel clientSettingPanel, boolean clientSettingMode) {
         if (popupHost.getActivePopup() != null) {
             return popupHost.mouseReleased(event);
         }
         if (clientSettingMode) {
             return clientSettingPanel.mouseReleased(event);
         }
-        return detailPanel.mouseReleased(event);
+        if (detailPanel.mouseReleased(event)) {
+            return true;
+        }
+        return moduleListPanel.mouseReleased(event);
     }
 
-    public boolean routeMouseDragged(MouseButtonEvent event, double mouseX, double mouseY, PanelPopupHost popupHost, ModuleDetailPanel detailPanel, ClientSettingPanel clientSettingPanel, boolean clientSettingMode) {
+    public boolean routeMouseDragged(MouseButtonEvent event, double mouseX, double mouseY, PanelPopupHost popupHost, ModuleDetailPanel detailPanel, ModuleListPanel moduleListPanel, ClientSettingPanel clientSettingPanel, boolean clientSettingMode) {
         if (popupHost.getActivePopup() != null) {
             return popupHost.mouseDragged(event, mouseX, mouseY);
         }
         if (clientSettingMode) {
             return clientSettingPanel.mouseDragged(event, mouseX, mouseY);
         }
-        return detailPanel.mouseDragged(event, mouseX, mouseY);
+        if (detailPanel.mouseDragged(event, mouseX, mouseY)) {
+            return true;
+        }
+        return moduleListPanel.mouseDragged(event, mouseX, mouseY);
     }
 
     public boolean routeCharTyped(CharacterEvent event, PanelPopupHost popupHost, ModuleDetailPanel detailPanel, ModuleListPanel moduleListPanel, ClientSettingPanel clientSettingPanel, boolean clientSettingMode) {

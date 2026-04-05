@@ -106,8 +106,8 @@ public class EnumSelectPopup implements PanelPopupHost.Popup {
             Color baseBackground = MD3Theme.withAlpha(MD3Theme.SURFACE_CONTAINER_HIGHEST, 0);
             Color hoverBackground = MD3Theme.lerp(MD3Theme.SURFACE_CONTAINER_HIGH, MD3Theme.SURFACE_CONTAINER_HIGHEST, 0.55f);
             Color selectedBackground = MD3Theme.SECONDARY_CONTAINER;
-            Color background = selected ? selectedBackground : hovered ? hoverBackground : baseBackground;
-            Color textColor = selected ? MD3Theme.ON_SECONDARY_CONTAINER : hovered ? MD3Theme.withAlpha(MD3Theme.TEXT_PRIMARY, 255) : MD3Theme.TEXT_SECONDARY;
+            Color background = selected ? selectedBackground : (hovered ? hoverBackground : baseBackground);
+            Color textColor = selected ? MD3Theme.ON_SECONDARY_CONTAINER : (hovered ? MD3Theme.withAlpha(MD3Theme.TEXT_PRIMARY, 255) : MD3Theme.TEXT_SECONDARY);
             itemRoundRectRenderer.addRoundRect(itemBounds.x(), itemY, itemBounds.width(), itemBounds.height(), 8.0f, MD3Theme.withAlpha(background, alpha));
             if (selected) {
                 itemTextRenderer.addText("V", itemBounds.x() + 8.0f, itemY + 6.5f, 0.72f, MD3Theme.withAlpha(MD3Theme.ON_SECONDARY_CONTAINER, alpha), StaticFontLoader.ICONS);

@@ -10,6 +10,7 @@ import com.github.epsilon.gui.panel.PanelLayout;
 import com.github.epsilon.gui.panel.adapter.SettingListController;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
 import com.github.epsilon.gui.panel.util.PanelContentBuffer;
+import com.github.epsilon.gui.panel.util.ScrollBarDragState;
 import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.modules.HudModule;
 import com.github.epsilon.settings.Setting;
@@ -46,6 +47,7 @@ final class HudEditorInspector {
     private float scroll;
     private float maxScroll;
     private String selectedModuleName = "";
+    private final ScrollBarDragState scrollBarDrag = new ScrollBarDragState();
 
     void queueRender(GuiGraphicsExtractor graphics, HudModule selectedModule, int screenWidth, int screenHeight, int mouseX, int mouseY, float partialTick, int guiHeight) {
         this.selectedModule = selectedModule;
@@ -124,11 +126,25 @@ final class HudEditorInspector {
             return true;
         }
 
+        // Scrollbar drag
+        if (viewport != null && maxScroll > 0) {
+            if (scrollBarDrag.mouseClicked(event.x(), event.y(), viewport, scroll, maxScroll)) {
+                float newScroll = scrollBarDrag.mouseDragged(event.y(), viewport, maxScroll);
+                if (newScroll >= 0) {
+                    scroll = Mth.clamp(newScroll, 0.0f, maxScroll);
+                }
+                return true;
+            }
+        }
+
         settingList.mouseClicked(event, isDoubleClick, bounds);
         return true;
     }
 
     boolean mouseReleased(MouseButtonEvent event) {
+        if (scrollBarDrag.mouseReleased()) {
+            return true;
+        }
         if (settingList.getPopupHost().mouseReleased(event)) {
             return true;
         }
@@ -136,6 +152,13 @@ final class HudEditorInspector {
     }
 
     boolean mouseDragged(MouseButtonEvent event, double mouseX, double mouseY) {
+        if (scrollBarDrag.isDragging() && viewport != null) {
+            float newScroll = scrollBarDrag.mouseDragged(mouseY, viewport, maxScroll);
+            if (newScroll >= 0) {
+                scroll = Mth.clamp(newScroll, 0.0f, maxScroll);
+            }
+            return true;
+        }
         if (settingList.getPopupHost().mouseDragged(event, mouseX, mouseY)) {
             return true;
         }
@@ -190,6 +213,7 @@ final class HudEditorInspector {
         scroll = 0.0f;
         maxScroll = 0.0f;
         selectedModuleName = "";
+        scrollBarDrag.reset();
         popupHost.close();
         settingList.clearAll();
         contentBuffer.clear();

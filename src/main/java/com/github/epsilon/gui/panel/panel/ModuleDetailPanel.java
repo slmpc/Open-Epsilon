@@ -14,6 +14,7 @@ import com.github.epsilon.gui.panel.adapter.SettingListController;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
 import com.github.epsilon.gui.panel.util.PanelContentBuffer;
 import com.github.epsilon.gui.panel.util.PanelContentInvalidationState;
+import com.github.epsilon.gui.panel.util.ScrollBarDragState;
 import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.Setting;
@@ -45,6 +46,7 @@ public class ModuleDetailPanel {
     private float lastDetailScroll = Float.NaN;
     private String lastModuleKey = "";
     private List<String> lastVisibleSettings = List.of();
+    private final ScrollBarDragState scrollBarDrag = new ScrollBarDragState();
     private final Animation bindModeAnimation = new Animation(Easing.EASE_OUT_CUBIC, 180L);
     private final Animation bindModeHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private final Animation keybindHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
@@ -127,6 +129,18 @@ public class ModuleDetailPanel {
             return false;
         }
 
+        // Scrollbar drag
+        PanelLayout.Rect viewport = getViewport();
+        float maxScroll = state.getMaxDetailScroll();
+        if (scrollBarDrag.mouseClicked(event.x(), event.y(), viewport, state.getDetailScroll(), maxScroll)) {
+            float newScroll = scrollBarDrag.mouseDragged(event.y(), viewport, maxScroll);
+            if (newScroll >= 0) {
+                state.setDetailScroll(newScroll);
+            }
+            markDirty();
+            return true;
+        }
+
         PanelLayout.Rect keybindBounds = getKeybindBounds();
         if (keybindBounds.contains(event.x(), event.y())) {
             state.setListeningKeyBindModule(module);
@@ -153,6 +167,10 @@ public class ModuleDetailPanel {
     }
 
     public boolean mouseReleased(MouseButtonEvent event) {
+        if (scrollBarDrag.mouseReleased()) {
+            markDirty();
+            return true;
+        }
         if (settingListController.mouseReleased(event)) {
             markDirty();
             return true;
@@ -161,6 +179,15 @@ public class ModuleDetailPanel {
     }
 
     public boolean mouseDragged(MouseButtonEvent event, double mouseX, double mouseY) {
+        if (scrollBarDrag.isDragging()) {
+            PanelLayout.Rect viewport = getViewport();
+            float newScroll = scrollBarDrag.mouseDragged(event.y(), viewport, state.getMaxDetailScroll());
+            if (newScroll >= 0) {
+                state.setDetailScroll(newScroll);
+            }
+            markDirty();
+            return true;
+        }
         if (settingListController.mouseDragged(event, mouseX, mouseY)) {
             markDirty();
             return true;
