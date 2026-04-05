@@ -48,6 +48,7 @@ public class ModuleManager {
                 CrystalAura.INSTANCE,
                 KillAura.INSTANCE,
                 PacketMine.INSTANCE,
+                TriggerBot.INSTANCE,
                 Velocity.INSTANCE,
 
                 // Player
