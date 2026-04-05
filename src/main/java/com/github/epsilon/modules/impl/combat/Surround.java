@@ -17,10 +17,12 @@ import com.github.epsilon.utils.world.BlockUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,7 +33,10 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.joml.Vector2f;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Surround extends Module {
 
@@ -41,12 +46,8 @@ public class Surround extends Module {
         super("Surround", Category.COMBAT);
     }
 
-    private static final List<BlockPos> OFFSETS = List.of(
-            new BlockPos(0, 0, -1),
-            new BlockPos(1, 0, 0),
-            new BlockPos(0, 0, 1),
-            new BlockPos(-1, 0, 0)
-    );
+    private static final int EXTEND_DEPTH = 2;
+    private static final int NEIGHBOR_ATTEMPTS = 2;
 
     private enum SwapMode {
         Normal,
@@ -101,8 +102,7 @@ public class Surround extends Module {
 
         if (!placeTimer.passedMillise(placeDelay.getValue())) return;
 
-        for (BlockPos offset : OFFSETS) {
-            BlockPos targetPos = anchorPos.offset(offset);
+        for (BlockPos targetPos : collectTargetPositions(anchorPos)) {
             if (!mc.level.getBlockState(targetPos).canBeReplaced()) continue;
 
             if (attackCrystal.getValue()) {
@@ -111,13 +111,13 @@ public class Surround extends Module {
 
             if (!BlockUtils.canPlaceAt(targetPos)) continue;
 
-            PlaceTarget placeTarget = updatePlaceTarget(targetPos);
-            if (placeTarget == null) continue;
+            List<PlaceTarget> placeSequence = findPlaceSequence(targetPos, NEIGHBOR_ATTEMPTS, targetPos, 0);
+            if (placeSequence == null || placeSequence.isEmpty()) continue;
 
             FindItemResult result = swapMode.is(SwapMode.InvSwitch) ? InvUtils.find(this::item) : InvUtils.findInHotbar(this::item);
             if (!result.found()) return;
 
-            tryPlace(placeTarget, result);
+            tryPlace(placeSequence.getFirst(), result);
 
             return;
         }
@@ -140,6 +140,50 @@ public class Surround extends Module {
         return false;
     }
 
+    private List<BlockPos> collectTargetPositions(BlockPos origin) {
+        LinkedHashSet<BlockPos> targets = new LinkedHashSet<>();
+
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos targetPos = origin.relative(direction);
+            if (!mc.level.getBlockState(targetPos).canBeReplaced()) continue;
+
+            if (hasBlockingPlayer(targetPos)) {
+                collectExtendedTargets(targetPos, origin, targets, EXTEND_DEPTH);
+            } else {
+                targets.add(targetPos);
+            }
+        }
+
+        return new ArrayList<>(targets);
+    }
+
+    private void collectExtendedTargets(BlockPos targetPos, BlockPos origin, Set<BlockPos> targets, int depth) {
+        if (depth <= 0) return;
+
+        for (Direction direction : Direction.values()) {
+            if (direction == Direction.UP) continue;
+            BlockPos extendedPos = targetPos.relative(direction);
+            if (extendedPos.equals(origin)) continue;
+            if (!mc.level.getBlockState(extendedPos).canBeReplaced()) continue;
+
+            if (hasBlockingPlayer(extendedPos)) {
+                collectExtendedTargets(extendedPos, origin, targets, depth - 1);
+            } else {
+                targets.add(extendedPos);
+            }
+        }
+    }
+
+    private boolean hasBlockingPlayer(BlockPos pos) {
+        for (Entity entity : mc.level.getEntities(null, new AABB(pos))) {
+            if (!(entity instanceof Player player) || player == mc.player) continue;
+            if (entity.isAlive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void fuckCrystal(BlockPos targetPos) {
         for (Entity entity : mc.level.getEntities(null, new AABB(targetPos))) {
             if (!(entity instanceof EndCrystal crystal) || !crystal.isAlive()) continue;
@@ -149,22 +193,81 @@ public class Surround extends Module {
         }
     }
 
-    private PlaceTarget updatePlaceTarget(BlockPos targetPos) {
-        for (Direction side : Direction.values()) {
-            BlockPos neighborPos = targetPos.relative(side);
-            if (mc.level.getBlockState(neighborPos).canBeReplaced()) continue;
+    private List<PlaceTarget> findPlaceSequence(BlockPos targetPos, int attempts, BlockPos origin, int lastDist) {
+        if (hasBlockingPlayer(targetPos)) {
+            for (BlockPos extendedPos : getExtendedTargets(targetPos, origin)) {
+                if (origin.distManhattan(extendedPos) <= lastDist) continue;
 
-            Direction hitSide = side.getOpposite();
-            Vec3 hitVec = new Vec3(
-                    neighborPos.getX() + 0.5 + hitSide.getStepX() * 0.5,
-                    neighborPos.getY() + 0.5 + hitSide.getStepY() * 0.5,
-                    neighborPos.getZ() + 0.5 + hitSide.getStepZ() * 0.5
-            );
-            Vector2f rotationVec = RotationUtils.calculate(neighborPos, hitSide);
-            return new PlaceTarget(targetPos, neighborPos, hitSide, hitVec, rotationVec);
+                List<PlaceTarget> extendedSequence = findPlaceSequence(extendedPos, attempts, origin, lastDist + 1);
+                if (extendedSequence != null && !extendedSequence.isEmpty()) {
+                    return extendedSequence;
+                }
+            }
+
+            return null;
+        }
+
+        for (Direction side : Direction.values()) {
+            PlaceTarget directTarget = buildPlaceTarget(targetPos, side, true, origin, lastDist);
+            if (directTarget != null) {
+                return new ArrayList<>(List.of(directTarget));
+            }
+        }
+
+        if (attempts <= 1) {
+            return null;
+        }
+
+        for (Direction side : Direction.values()) {
+            PlaceTarget helperTarget = buildPlaceTarget(targetPos, side, false, origin, lastDist);
+            if (helperTarget == null) continue;
+
+            List<PlaceTarget> sequence = findPlaceSequence(targetPos.relative(side), attempts - 1, origin, lastDist + 1);
+            if (sequence == null) continue;
+
+            sequence.add(helperTarget);
+            return sequence;
         }
 
         return null;
+    }
+
+    private List<BlockPos> getExtendedTargets(BlockPos targetPos, BlockPos origin) {
+        ArrayList<BlockPos> targets = new ArrayList<>();
+
+        for (Direction direction : Direction.values()) {
+            if (direction == Direction.UP) continue;
+
+            BlockPos extendedPos = targetPos.relative(direction);
+            if (extendedPos.equals(origin)) continue;
+            if (!mc.level.getBlockState(extendedPos).canBeReplaced()) continue;
+
+            targets.add(extendedPos);
+        }
+
+        return targets;
+    }
+
+    private PlaceTarget buildPlaceTarget(BlockPos targetPos, Direction side, boolean requireSolidNeighbor, BlockPos origin, int lastDist) {
+        BlockPos neighborPos = targetPos.relative(side);
+        int distToOrigin = origin.distManhattan(neighborPos);
+        if (distToOrigin <= lastDist) return null;
+        if (!mc.level.getBlockState(targetPos).canBeReplaced()) return null;
+        if (!BlockUtils.canPlaceAt(targetPos)) return null;
+        if (requireSolidNeighbor && mc.level.getBlockState(neighborPos).canBeReplaced()) return null;
+
+        Direction hitSide = side.getOpposite();
+        Vec3 hitVec = new Vec3(neighborPos.getX() + 0.5 + hitSide.getStepX() * 0.5, neighborPos.getY() + 0.5 + hitSide.getStepY() * 0.5, neighborPos.getZ() + 0.5 + hitSide.getStepZ() * 0.5);
+
+        if (mc.player.getEyePosition().distanceToSqr(hitVec) > 4.5 * 4.5) return null;
+
+        Vector2f rotationVec = RotationUtils.calculate(neighborPos, hitSide);
+        Vector2f reverseYaw = new Vector2f(Mth.wrapDegrees(mc.player.getYRot() - 180.0f), rotationVec.y);
+        if (RaytraceUtils.overBlock(reverseYaw, neighborPos, hitSide, false)) {
+            rotationVec = reverseYaw;
+        }
+
+        return new PlaceTarget(targetPos, neighborPos, hitSide, hitVec, rotationVec);
     }
 
     private void tryPlace(PlaceTarget placeTarget, FindItemResult item) {
@@ -175,6 +278,7 @@ public class Surround extends Module {
 
         final int requestPriority = Priority.High.priority;
         RotationManager.INSTANCE.applyRotation(placeTarget.rotation(), 10, requestPriority, record -> {
+            if (!isEnabled() || nullCheck()) return;
             if (record.selectedPriorityValue() != requestPriority) return;
 
             boolean b = RaytraceUtils.overBlock(record.currentRotation(), placeTarget.neighborPos(), placeTarget.side(), false);
@@ -191,27 +295,43 @@ public class Surround extends Module {
             return;
         }
 
-        if (swapMode.is(SwapMode.InvSwitch)) {
-            InvUtils.invSwap(item.slot());
-        } else {
-            InvUtils.swap(item.slot(), swapMode.is(SwapMode.Silent));
+        if (attackCrystal.getValue()) {
+            fuckCrystal(placeTarget.targetPos());
+            if (!BlockUtils.canPlaceAt(placeTarget.targetPos())) {
+                return;
+            }
+        }
+
+        InteractionHand hand = item.getHand();
+        boolean shouldSwapBack = false;
+        boolean shouldInvSwapBack = false;
+
+        if (hand == InteractionHand.MAIN_HAND) {
+            if (swapMode.is(SwapMode.InvSwitch)) {
+                InvUtils.invSwap(item.slot());
+                shouldInvSwapBack = true;
+            } else {
+                InvUtils.swap(item.slot(), swapMode.is(SwapMode.Silent));
+                shouldSwapBack = swapMode.is(SwapMode.Silent);
+            }
         }
 
         BlockHitResult hitResult = new BlockHitResult(placeTarget.hitVec(), placeTarget.side(), placeTarget.neighborPos(), false);
-        InteractionResult result = mc.gameMode.useItemOn(mc.player, item.getHand(), hitResult);
+        InteractionResult result = mc.gameMode.useItemOn(mc.player, hand, hitResult);
         if (result.consumesAction()) {
-            mc.getConnection().send(new ServerboundSwingPacket(item.getHand()));
+            mc.getConnection().send(new ServerboundSwingPacket(hand));
             placeTimer.reset();
         }
 
-        if (swapMode.is(SwapMode.Silent)) {
+        if (shouldSwapBack) {
             InvUtils.swapBack();
-        } else if (swapMode.is(SwapMode.InvSwitch)) {
+        } else if (shouldInvSwapBack) {
             InvUtils.invSwapBack();
         }
     }
 
-    private record PlaceTarget(BlockPos targetPos, BlockPos neighborPos, Direction side, Vec3 hitVec, Vector2f rotation) {
+    private record PlaceTarget(BlockPos targetPos, BlockPos neighborPos, Direction side, Vec3 hitVec,
+                               Vector2f rotation) {
     }
 
 }
