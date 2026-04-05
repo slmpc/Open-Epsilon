@@ -100,15 +100,7 @@ public class RaytraceUtils {
         return distance <= rangeSquared && canSeePointFrom(cameraVec, entityHitResult.getLocation()) || distance <= wallsRangeSquared;
     }
 
-    public static boolean overBlock(final Vector2f rotation, final Direction direction, final BlockPos pos) {
-        return overBlock(rotation, direction, pos, false);
-    }
-
-    public static Boolean overBlock(final Vector2f rotation, final BlockPos pos, boolean strict) {
-        return overBlock(rotation, Direction.UP, pos, strict);
-    }
-
-    public static boolean overBlock(final Vector2f rotation, final Direction direction, final BlockPos pos, final boolean strict) {
+    public static boolean overBlock(BlockPos pos, Vector2f rotation, Direction direction, boolean strict) {
         Vec3 cameraPos = mc.player.getEyePosition(1.0F);
         Vec3 rotationVec = Vec3.directionFromRotation(rotation.y, rotation.x);
         Vec3 reachVec = cameraPos.add(rotationVec.scale(4.5));
