@@ -40,41 +40,41 @@ public class AimAssist extends Module {
 
     public EnumSetting<Mode> mode = enumSetting("Mode", Mode.Smooth);
     public DoubleSetting range = doubleSetting("Range", 4.2, 1.0, 8.0, 0.1);
-    public IntSetting aimStrength = intSetting("AimStrength", 30, 1, 100, 1);
-    public IntSetting aimSmooth = intSetting("AimSmooth", 45, 1, 180, 1);
-    public IntSetting aimTime = intSetting("AimTime", 2, 1, 10, 1);
-    public BoolSetting ignoreWalls = boolSetting("IgnoreWalls", true);
-    public IntSetting reactionTime = intSetting("ReactionTime", 80, 1, 500, 1);
-    public BoolSetting ignoreInvisible = boolSetting("IgnoreInvis", false);
-    public BoolSetting ignoreScreen = boolSetting("IgnoreScreen", true);
-    public BoolSetting ignoreInventory = boolSetting("IgnoreInventory", true);
+    public IntSetting aimStrength = intSetting("Aim Strength", 30, 1, 100, 1);
+    public IntSetting aimSmooth = intSetting("Aim Smooth", 45, 1, 180, 1);
+    public IntSetting aimTime = intSetting("Aim Time", 2, 1, 10, 1);
+    public BoolSetting ignoreWalls = boolSetting("Ignore Walls", true);
+    public IntSetting reactionTime = intSetting("Reaction Time", 80, 1, 500, 1);
+    public BoolSetting ignoreInvisible = boolSetting("Ignore Invisible", false);
+    public BoolSetting ignoreScreen = boolSetting("Ignore Screen", true);
+    public BoolSetting ignoreInventory = boolSetting("Ignore Inventory", true);
     public BoolSetting player = boolSetting("Player", true);
     public BoolSetting mob = boolSetting("Mob", true);
     public BoolSetting animal = boolSetting("Animal", true);
     public BoolSetting villager = boolSetting("Villager", true); // 为了在l站测试加的。不然还要再往后拖拖。
     public BoolSetting slime = boolSetting("Slime", true); // 史莱姆嫖娼。
-    public DoubleSetting humanJitter = doubleSetting("HumanJitter", 0.3, 0.0, 2.0, 0.1);
-    public DoubleSetting humanOvershoot = doubleSetting("HumanOvershoot", 0.15, 0.0, 0.5, 0.05);
+    public DoubleSetting humanJitter = doubleSetting("Human Jitter", 0.3, 0.0, 2.0, 0.1);
+    public DoubleSetting humanOvershoot = doubleSetting("Human Overshoot", 0.15, 0.0, 0.5, 0.05);
     public DoubleSetting inertia = doubleSetting("Inertia", 0.85, 0.0, 0.99, 0.01);
-    public BoolSetting lockTarget = boolSetting("LockTarget", false);
-    public BoolSetting lockedEsp = boolSetting("LockedESP", false);
-    public ColorSetting lockedEspColor = colorSetting("LockedESPColor", new Color(255, 0, 0, 150));
-    public BoolSetting closeTargetBoost = boolSetting("CloseTargetBoost", false);
-    public DoubleSetting closeTargetBoostStrength = doubleSetting("BoostStrength", 1.5, 1.0, 3.0, 0.1);
-    public DoubleSetting closeTargetThreshold = doubleSetting("CloseThreshold", 10.0, 1.0, 30.0, 1.0);
+    public BoolSetting lockTarget = boolSetting("Lock Target", false);
+    public BoolSetting lockedEsp = boolSetting("Locked ESP", false);
+    public ColorSetting lockedEspColor = colorSetting("Locked ESP Color", new Color(255, 0, 0, 150));
+    public BoolSetting closeTargetBoost = boolSetting("Close Target Boost", false);
+    public DoubleSetting closeTargetBoostStrength = doubleSetting("Boost Strength", 1.5, 1.0, 3.0, 0.1);
+    public DoubleSetting closeTargetThreshold = doubleSetting("Close Threshold", 10.0, 1.0, 30.0, 1.0);
     public DoubleSetting responsiveness = doubleSetting("Responsiveness", 1.2, 1.0, 2.0, 0.1);
-    public EnumSetting<PriorityMode> targetPriority = enumSetting("TargetPriority", PriorityMode.Distance);
+    public EnumSetting<PriorityMode> targetPriority = enumSetting("Target Priority", PriorityMode.Distance);
     public BoolSetting prediction = boolSetting("Prediction", true);
-    public IntSetting predictionTicks = intSetting("PredictionTicks", 2, 0, 20, 1);
-    public BoolSetting extrapolateVelocity = boolSetting("ExtrapolateVelocity", true);
-    public EnumSetting<AimPart> aimPart = enumSetting("AimPart", AimPart.Torso);
-    public DoubleSetting dvdSpeed = doubleSetting("DVDSpeed", 0.03, 0.005, 0.1, 0.005);
-    public DoubleSetting dvdJitter = doubleSetting("DVDJitter", 0.02, 0.0, 0.1, 0.005);
-    public BoolSetting dvdDebug = boolSetting("DVDDebug", false);
-    public BoolSetting pauseWhileEating = boolSetting("PauseWhileEating", true);
-    public BoolSetting snapCompensation = boolSetting("SnapCompensation", true);
-    public DoubleSetting snapThreshold = doubleSetting("SnapThreshold", 20.0, 5.0, 90.0, 1.0);
-    public DoubleSetting snapStrength = doubleSetting("SnapStrength", 2.5, 1.0, 5.0, 0.1);
+    public IntSetting predictionTicks = intSetting("Prediction Ticks", 2, 0, 20, 1);
+    public BoolSetting extrapolateVelocity = boolSetting("Extrapolate Velocity", true);
+    public EnumSetting<AimPart> aimPart = enumSetting("Aim Part", AimPart.Torso);
+    public DoubleSetting dvdSpeed = doubleSetting("DVD Speed", 0.03, 0.005, 0.1, 0.005);
+    public DoubleSetting dvdJitter = doubleSetting("DVD Jitter", 0.02, 0.0, 0.1, 0.005);
+    public BoolSetting dvdDebug = boolSetting("DVD Debug", false);
+    public BoolSetting pauseWhileEating = boolSetting("Pause While Eating", true);
+    public BoolSetting snapCompensation = boolSetting("Snap Compensation", true);
+    public DoubleSetting snapThreshold = doubleSetting("Snap Threshold", 20.0, 5.0, 90.0, 1.0);
+    public DoubleSetting snapStrength = doubleSetting("Snap Strength", 2.5, 1.0, 5.0, 0.1);
 
     private static class RotationState {
         float yaw, pitch;
@@ -480,7 +480,7 @@ public class AimAssist extends Module {
     private static final float SNAP_DECELERATION_FACTOR = 0.3f;
 
     private AimAssist() {
-        super("AimAssist", Category.COMBAT);
+        super("Aim Assist", Category.COMBAT);
     }
 
     @Override

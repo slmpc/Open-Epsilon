@@ -9,7 +9,7 @@ public class JumpCooldown extends Module {
     public static final JumpCooldown INSTANCE = new JumpCooldown();
 
     private JumpCooldown() {
-        super("JumpCooldown", Category.PLAYER);
+        super("Jump Cooldown", Category.PLAYER);
     }
 
     public final IntSetting cooldown = intSetting("Cooldown", 0, 0, 9, 1);

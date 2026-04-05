@@ -85,22 +85,22 @@ public class Scaffold extends Module {
     }
 
     private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.TellyBridge);
-    private final EnumSetting<SwapMode> swapMode = enumSetting("SwapMode", SwapMode.Normal);
-    private final BoolSetting swapBack = boolSetting("SwapBack", true, () -> swapMode.is(SwapMode.Normal));
-    private final BoolSetting swingHand = boolSetting("SwingHand", true);
-    private final IntSetting tellyTick = intSetting("TellyTick", 0, 0, 8, 1, () -> mode.is(Mode.TellyBridge));
-    private final BoolSetting keepY = boolSetting("KeepY", true, () -> mode.is(Mode.TellyBridge));
-    private final IntSetting rotationSpeed = intSetting("RotationSpeed", 10, 1, 10, 1);
-    private final IntSetting rotationBackSpeed = intSetting("RotationBackSpeed", 10, 0, 10, 1, () -> mode.is(Mode.TellyBridge));
-    private final BoolSetting sideCheck = boolSetting("SideCheck", false);
-    private final BoolSetting safeWalk = boolSetting("SafeWalk", true);
+    private final EnumSetting<SwapMode> swapMode = enumSetting("Swap Mode", SwapMode.Normal);
+    private final BoolSetting swapBack = boolSetting("Swap Back", true, () -> swapMode.is(SwapMode.Normal));
+    private final BoolSetting swingHand = boolSetting("Swing Hand", true);
+    private final IntSetting tellyTick = intSetting("Telly Tick", 0, 0, 8, 1, () -> mode.is(Mode.TellyBridge));
+    private final BoolSetting keepY = boolSetting("Keep Y", true, () -> mode.is(Mode.TellyBridge));
+    private final IntSetting rotationSpeed = intSetting("Rotation Speed", 10, 1, 10, 1);
+    private final IntSetting rotationBackSpeed = intSetting("Rotation Back Speed", 10, 0, 10, 1, () -> mode.is(Mode.TellyBridge));
+    private final BoolSetting sideCheck = boolSetting("Side Check", false);
+    private final BoolSetting safeWalk = boolSetting("Safe Walk", true);
 
     private final BoolSetting render = boolSetting("Render", true);
     private final BoolSetting fade = boolSetting("Fade", false, render::getValue);
-    private final IntSetting fadeTime = intSetting("FadeTime", 500, 0, 3000, 50, () -> render.getValue() && fade.getValue());
+    private final IntSetting fadeTime = intSetting("Fade Time", 500, 0, 3000, 50, () -> render.getValue() && fade.getValue());
     private final BoolSetting shrink = boolSetting("Shrink", true, render::getValue);
-    private final ColorSetting sideColor = colorSetting("SideColor", new Color(255, 183, 197, 100), render::getValue);
-    private final ColorSetting lineColor = colorSetting("LineColor", new Color(255, 105, 180), render::getValue);
+    private final ColorSetting sideColor = colorSetting("Side Color", new Color(255, 183, 197, 100), render::getValue);
+    private final ColorSetting lineColor = colorSetting("Line Color", new Color(255, 105, 180), render::getValue);
 
     private int yLevel;
     private int airTicks;

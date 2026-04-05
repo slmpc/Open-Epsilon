@@ -30,17 +30,17 @@ public class ModuleList extends HudModule {
     private final Map<Module, Float> moduleAlphaMap = new HashMap<>();
 
     private ModuleList() {
-        super("ModuleList", Category.RENDER, 0f, 0f, 50f, 50f);
+        super("Module List", Category.RENDER, 0f, 0f, 50f, 50f);
     }
 
     private final DoubleSetting scale = doubleSetting("Scale", 1.0, 0.5, 2.0, 0.1);
-    private final DoubleSetting textScaleOffset = doubleSetting("TextScaleOffset", -0.2, -0.5, 0.5, 0.05);
-    private final DoubleSetting horizontalPadding = doubleSetting("HorizontalPadding", 4.0, 0.0, 15.0, 1.0);
-    private final DoubleSetting animSpeed = doubleSetting("AnimationSpeed", 10.0, 1.0, 20.0, 0.5);
+    private final DoubleSetting textScaleOffset = doubleSetting("Text Scale Offset", -0.2, -0.5, 0.5, 0.05);
+    private final DoubleSetting horizontalPadding = doubleSetting("Horizontal Padding", 4.0, 0.0, 15.0, 1.0);
+    private final DoubleSetting animSpeed = doubleSetting("Animation Speed", 10.0, 1.0, 20.0, 0.5);
 
-    private final ColorSetting shadowColor = colorSetting("ShadowColor", new Color(20, 20, 20, 120));
-    private final BoolSetting showCategory = boolSetting("ShowCategory", false);
-    private final BoolSetting showIcon = boolSetting("ShowIcon", true);
+    private final ColorSetting shadowColor = colorSetting("Shadow Color", new Color(20, 20, 20, 120));
+    private final BoolSetting showCategory = boolSetting("Show Category", false);
+    private final BoolSetting showIcon = boolSetting("Show Icon", true);
 
     private final Supplier<TextRenderer> textRendererSupplier = Suppliers.memoize(TextRenderer::new);
     private final Supplier<RoundRectRenderer> roundRectRendererSupplier = Suppliers.memoize(RoundRectRenderer::new);

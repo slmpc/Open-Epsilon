@@ -31,10 +31,10 @@ public class Blink extends Module {
     }
 
     private final DoubleSetting tick = doubleSetting("Tick", 30, 5, 200, 1);
-    private final BoolSetting SlowRelease = boolSetting("SlowRelease", true);
+    private final BoolSetting SlowRelease = boolSetting("Slow Release", true);
     private final BoolSetting slowMove = boolSetting("Slow Move", false);
     private final DoubleSetting slowMoveTick = doubleSetting("Slow Move Tick", 5, 2, 5, 1, slowMove::getValue);
-    private final BoolSetting fakePlayer = boolSetting("FakePlayer", false);
+    private final BoolSetting fakePlayer = boolSetting("Fake Player", false);
 
     private final ConcurrentLinkedQueue<Packet<?>> packets = new ConcurrentLinkedQueue<>();
     public RemotePlayer localPlayer;

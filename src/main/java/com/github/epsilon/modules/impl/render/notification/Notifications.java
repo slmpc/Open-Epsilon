@@ -20,8 +20,8 @@ public class Notifications extends HudModule {
     public static final Notifications INSTANCE = new Notifications();
 
     private final DoubleSetting scale = doubleSetting("Scale", 1.0, 0.5, 2.0, 0.1);
-    private final DoubleSetting animSpeed = doubleSetting("AnimationSpeed", 10.0, 1.0, 20.0, 0.5);
-    private final ColorSetting bgColor = colorSetting("BackgroundColor", new Color(20, 20, 20, 150));
+    private final DoubleSetting animSpeed = doubleSetting("Animation Speed", 10.0, 1.0, 20.0, 0.5);
+    private final ColorSetting bgColor = colorSetting("Background Color", new Color(20, 20, 20, 150));
 
     private final Supplier<TextRenderer> textRendererSupplier = Suppliers.memoize(TextRenderer::new);
     private final Supplier<RoundRectRenderer> roundRectRendererSupplier = Suppliers.memoize(RoundRectRenderer::new);

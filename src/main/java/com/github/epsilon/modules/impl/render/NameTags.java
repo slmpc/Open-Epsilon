@@ -35,7 +35,7 @@ public class NameTags extends Module {
     private final Supplier<RectRenderer> rectRendererSupplier = Suppliers.memoize(RectRenderer::new);
 
     private NameTags() {
-        super("NameTags", Category.RENDER);
+        super("Name Tags", Category.RENDER);
     }
 
     @SubscribeEvent

@@ -24,7 +24,7 @@ public class AntiBot extends Module {
     public static final AntiBot INSTANCE = new AntiBot();
 
     private AntiBot() {
-        super("AntiBot", Category.COMBAT);
+        super("Anti Bot", Category.COMBAT);
     }
 
     private static final Map<UUID, Long> uuids = new ConcurrentHashMap<>();

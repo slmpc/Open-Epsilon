@@ -28,7 +28,7 @@ public class ClientSetting extends Module {
     }
 
     private ClientSetting() {
-        super("ClientSetting", null);
+        super("Client Setting", null);
     }
 
     public static final ClientSetting INSTANCE = new ClientSetting();
@@ -37,14 +37,16 @@ public class ClientSetting extends Module {
 
     public final BoolSetting closeOnOutside = boolSetting("Close Gui On Outside", false);
 
+    public final BoolSetting i18nFallback = boolSetting("I18n Fallback", true);
+
     private final ButtonSetting openHudEditor = buttonSetting("Open Hud Editor", () -> {
         mc.setScreen(HudEditorScreen.INSTANCE);
     });
 
-    private final BoolSetting backgroundBlur = boolSetting("BackgroundBlur", false);
+    private final BoolSetting backgroundBlur = boolSetting("Background Blur", false);
 
-    public final EnumSetting<ThemeMode> themeMode = enumSetting("ThemeMode", ThemeMode.Dark);
-    public final EnumSetting<ThemePreset> themePreset = enumSetting("ThemePreset", ThemePreset.TonalSpot);
+    public final EnumSetting<ThemeMode> themeMode = enumSetting("Theme Mode", ThemeMode.Dark);
+    public final EnumSetting<ThemePreset> themePreset = enumSetting("Theme Preset", ThemePreset.TonalSpot);
 
     public boolean shouldBlur() {
         return backgroundBlur.getValue();

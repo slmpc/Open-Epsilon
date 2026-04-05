@@ -10,7 +10,7 @@ public class MovementFix extends Module {
     public static final MovementFix INSTANCE = new MovementFix();
 
     private MovementFix() {
-        super("MovementFix", Category.PLAYER);
+        super("Movement Fix", Category.PLAYER);
     }
 
     public void fixMovement(KeyboardInputEvent event, float yaw) {

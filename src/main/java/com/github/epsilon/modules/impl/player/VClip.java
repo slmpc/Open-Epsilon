@@ -13,7 +13,7 @@ public class VClip extends Module {
     public static final VClip INSTANCE = new VClip();
 
     private VClip() {
-        super("VClip", Category.PLAYER);
+        super("V Clip", Category.PLAYER);
     }
 
     private enum Mode {

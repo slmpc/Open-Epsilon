@@ -20,7 +20,7 @@ public class AutoMend extends Module {
     public static final AutoMend INSTANCE = new AutoMend();
 
     private AutoMend() {
-        super("AutoMend", Category.COMBAT);
+        super("Auto Mend", Category.COMBAT);
     }
 
     private enum SwitchMode {
@@ -28,8 +28,8 @@ public class AutoMend extends Module {
         Silent
     }
 
-    private final EnumSetting<SwitchMode> switchMode = enumSetting("SwitchMode", SwitchMode.Normal);
-    private final BoolSetting swingHand = boolSetting("SwingHand", false);
+    private final EnumSetting<SwitchMode> switchMode = enumSetting("Switch Mode", SwitchMode.Normal);
+    private final BoolSetting swingHand = boolSetting("Swing Hand", false);
 
     private boolean shouldSwapBack;
 

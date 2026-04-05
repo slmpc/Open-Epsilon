@@ -11,7 +11,7 @@ public class SafeWalk extends Module {
     public static final SafeWalk INSTANCE = new SafeWalk();
 
     private SafeWalk() {
-        super("SafeWalk", Category.PLAYER);
+        super("Safe Walk", Category.PLAYER);
     }
 
     public boolean isOnBlockEdge(float sensitivity) {

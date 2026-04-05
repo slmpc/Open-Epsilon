@@ -8,7 +8,7 @@ public class PopChams extends Module {
     public static final PopChams INSTANCE = new PopChams();
 
     private PopChams() {
-        super("PopChams", Category.RENDER);
+        super("Pop Chams", Category.RENDER);
     }
 
 }

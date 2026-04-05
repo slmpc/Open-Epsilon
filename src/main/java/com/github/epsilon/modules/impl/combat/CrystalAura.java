@@ -53,7 +53,7 @@ public class CrystalAura extends Module {
     public static final CrystalAura INSTANCE = new CrystalAura();
 
     private CrystalAura() {
-        super("CrystalAura", Category.COMBAT);
+        super("Crystal Aura", Category.COMBAT);
     }
 
     // General

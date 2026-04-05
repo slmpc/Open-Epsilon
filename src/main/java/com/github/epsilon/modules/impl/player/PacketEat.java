@@ -14,7 +14,7 @@ public class PacketEat extends Module {
     public static final PacketEat INSTANCE = new PacketEat();
 
     private PacketEat() {
-        super("PacketEat", Category.PLAYER);
+        super("Packet Eat", Category.PLAYER);
     }
 
     private ItemStack item;

@@ -8,7 +8,7 @@ public class NoRotate extends Module {
     public static final NoRotate INSTANCE = new NoRotate();
 
     private NoRotate() {
-        super("NoRotate", Category.PLAYER);
+        super("No Rotate", Category.PLAYER);
     }
 
 }

@@ -9,7 +9,7 @@ public class BreakCooldown extends Module {
     public static final BreakCooldown INSTANCE = new BreakCooldown();
 
     private BreakCooldown() {
-        super("BreakCooldown", Category.PLAYER);
+        super("Break Cooldown", Category.PLAYER);
     }
 
     public final IntSetting cooldown = intSetting("Cooldown", 0, 0, 5, 1);

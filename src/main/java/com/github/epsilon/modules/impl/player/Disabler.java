@@ -17,9 +17,9 @@ public class Disabler extends Module {
         super("Disabler", Category.PLAYER);
     }
 
-    private final BoolSetting duplicateRotPlace = boolSetting("DuplicateRotPlace", true);
-    private final BoolSetting aim360 = boolSetting("AimModulo360", false);
-    private final BoolSetting aimDuplicateLook = boolSetting("AimDuplicateLook", false);
+    private final BoolSetting duplicateRotPlace = boolSetting("Duplicate Rotation Place", true);
+    private final BoolSetting aim360 = boolSetting("Aim Modulo 360", false);
+    private final BoolSetting aimDuplicateLook = boolSetting("Aim Duplicate Look", false);
 
     private float playerYaw, lastYaw, lastPitch;
 

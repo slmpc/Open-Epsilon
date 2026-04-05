@@ -51,13 +51,13 @@ public class Velocity extends Module {
     }
 
     private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Cancel);
-    private final BoolSetting serverMotion = boolSetting("ServerMotion", true, () -> mode.is(Mode.Cancel));
+    private final BoolSetting serverMotion = boolSetting("Server Motion", true, () -> mode.is(Mode.Cancel));
     private final BoolSetting explosion = boolSetting("Explosion", true, () -> mode.is(Mode.Cancel));
-    public final BoolSetting waterPush = boolSetting("NoWaterPush", true, () -> mode.is(Mode.Cancel));
-    public final BoolSetting entityPush = boolSetting("NoEntityPush", true, () -> mode.is(Mode.Cancel));
-    public final BoolSetting blockPush = boolSetting("NoBlockPush", true, () -> mode.is(Mode.Cancel));
+    public final BoolSetting waterPush = boolSetting("No Water Push", true, () -> mode.is(Mode.Cancel));
+    public final BoolSetting entityPush = boolSetting("No Entity Push", true, () -> mode.is(Mode.Cancel));
+    public final BoolSetting blockPush = boolSetting("No Block Push", true, () -> mode.is(Mode.Cancel));
     private final IntSetting attacks = intSetting("Attacks", 4, 1, 5, 1, () -> mode.is(Mode.NoXZ));
-    private final DoubleSetting delayTime = doubleSetting("MaxDelayTime", 2500.0, 50.0, 10000.0, 50.0, () -> mode.is(Mode.NoXZ));
+    private final DoubleSetting delayTime = doubleSetting("Max Delay Time", 2500.0, 50.0, 10000.0, 50.0, () -> mode.is(Mode.NoXZ));
 
     private Player target;
 

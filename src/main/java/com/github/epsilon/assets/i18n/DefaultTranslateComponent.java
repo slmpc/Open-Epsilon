@@ -1,6 +1,7 @@
 package com.github.epsilon.assets.i18n;
 
 import com.github.epsilon.assets.holders.TranslateHolder;
+import com.github.epsilon.modules.impl.ClientSetting;
 import net.minecraft.client.resources.language.I18n;
 
 public class DefaultTranslateComponent implements TranslateComponent {
@@ -26,14 +27,51 @@ public class DefaultTranslateComponent implements TranslateComponent {
     @Override
     public String getTranslatedName() {
         if (cachedName == null) {
-            cachedName = I18n.get(fullKey);
+            cachedName = resolveTranslation(fullKey);
         }
         return cachedName;
     }
 
     @Override
     public void refresh() {
-        cachedName = I18n.get(fullKey);
+        cachedName = resolveTranslation(fullKey);
+    }
+
+    private static String resolveTranslation(String key) {
+        if (I18n.exists(key)) {
+            return I18n.get(key);
+        }
+
+        return ClientSetting.INSTANCE.i18nFallback.getValue() ? formatKey(key) : key;
+    }
+
+    private static String formatKey(String key) {
+        if (key == null || key.isEmpty()) {
+            return "";
+        }
+
+        String lastPart = key;
+        int lastDotIndex = key.lastIndexOf('.');
+        if (lastDotIndex != -1) {
+            lastPart = key.substring(lastDotIndex + 1);
+        }
+
+        StringBuilder result = new StringBuilder();
+        String[] words = lastPart.split(" ");
+
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (!word.isEmpty()) {
+                result.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1));
+
+                if (i < words.length - 1) {
+                    result.append(" ");
+                }
+            }
+        }
+
+        return result.toString();
     }
 
     @Override

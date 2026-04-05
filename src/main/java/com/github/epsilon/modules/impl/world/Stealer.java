@@ -32,9 +32,9 @@ public class Stealer extends Module {
         super("Stealer", Category.WORLD);
     }
 
-    private final BoolSetting pickEnderChest = boolSetting("EnderChest", false);
-    private final IntSetting minDelay = intSetting("MinDelay", 90, 0, 500, 5);
-    private final IntSetting maxDelay = intSetting("MaxDelay", 110, 0, 500, 5);
+    private final BoolSetting pickEnderChest = boolSetting("Ender Chest", false);
+    private final IntSetting minDelay = intSetting("Min Delay", 90, 0, 500, 5);
+    private final IntSetting maxDelay = intSetting("Max Delay", 110, 0, 500, 5);
 
     private Screen lastTickScreen;
     private final TimerUtils timer = new TimerUtils();

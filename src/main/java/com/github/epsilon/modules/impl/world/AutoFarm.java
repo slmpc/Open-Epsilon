@@ -42,27 +42,27 @@ public class AutoFarm extends Module {
     public static final AutoFarm INSTANCE = new AutoFarm();
 
     private final DoubleSetting range = doubleSetting("Range", 4.0, 1.0, 6.0, 0.5);
-    private final BoolSetting autoHarvest = boolSetting("AutoHarvest", true);
-    private final BoolSetting autoPlant = boolSetting("AutoPlant", true);
-    private final BoolSetting useBonemeal = boolSetting("UseBonemeal", false);
+    private final BoolSetting autoHarvest = boolSetting("Auto Harvest", true);
+    private final BoolSetting autoPlant = boolSetting("Auto Plant", true);
+    private final BoolSetting useBonemeal = boolSetting("Use Bonemeal", false);
     private final BoolSetting rotate = boolSetting("Rotate", true);
-    private final IntSetting rotationSpeed = intSetting("RotationSpeed", 10, 1, 10, 1, rotate::getValue);
-    private final DoubleSetting harvestDelay = doubleSetting("HarvestDelay", 0.15, 0.0, 2.0, 0.05);
+    private final IntSetting rotationSpeed = intSetting("Rotation Speed", 10, 1, 10, 1, rotate::getValue);
+    private final DoubleSetting harvestDelay = doubleSetting("Harvest Delay", 0.15, 0.0, 2.0, 0.05);
     private final BoolSetting wheat = boolSetting("Wheat", true);
     private final BoolSetting carrots = boolSetting("Carrots", true);
     private final BoolSetting potatoes = boolSetting("Potatoes", true);
     private final BoolSetting beetroot = boolSetting("Beetroot", true);
-    private final BoolSetting sugarCane = boolSetting("SugarCane", true);
+    private final BoolSetting sugarCane = boolSetting("Sugar Cane", true);
     private final BoolSetting trees = boolSetting("Trees", false);
-    private final BoolSetting setTreePos = boolSetting("SetTreePos", false, trees::getValue);
-    private final BoolSetting clearTreePos = boolSetting("ClearTreePos", false, trees::getValue);
+    private final BoolSetting setTreePos = boolSetting("Set Tree Pos", false, trees::getValue);
+    private final BoolSetting clearTreePos = boolSetting("Clear Tree Pos", false, trees::getValue);
 
     private final TimerUtils actionTimer = new TimerUtils();
     private final TimerUtils harvestTimer = new TimerUtils();
     private BlockPos treePos;
 
     private AutoFarm() {
-        super("AutoFarm", Category.WORLD);
+        super("Auto Farm", Category.WORLD);
     }
 
     @Override

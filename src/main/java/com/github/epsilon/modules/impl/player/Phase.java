@@ -50,15 +50,15 @@ public class Phase extends Module {
     }
 
     private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Vanilla);
-    private final EnumSetting<SwapMode> swapMode = enumSetting("SwapMode", SwapMode.InvSwitch);
-    private final BoolSetting pauseOnPhase = boolSetting("PauseOnPhase", false, () -> mode.is(Mode.Pearl));
-    private final BoolSetting swingHand = boolSetting("SwingHand", true, () -> mode.is(Mode.Pearl));
+    private final EnumSetting<SwapMode> swapMode = enumSetting("Swap Mode", SwapMode.InvSwitch);
+    private final BoolSetting pauseOnPhase = boolSetting("Pause On Phase", false, () -> mode.is(Mode.Pearl));
+    private final BoolSetting swingHand = boolSetting("Swing Hand", true, () -> mode.is(Mode.Pearl));
     private final BoolSetting silent = boolSetting("Silent", false, () -> mode.is(Mode.Sunrise));
-    private final BoolSetting waitBreak = boolSetting("WaitBreak", true, () -> mode.is(Mode.Sunrise));
-    private final BoolSetting onlyOnGround = boolSetting("OnlyOnGround", false, () -> mode.is(Mode.Pearl));
-    private final BoolSetting autoDisable = boolSetting("AutoDisable", false, () -> mode.is(Mode.Pearl));
-    private final IntSetting afterBreak = intSetting("BreakTimeout", 4, 1, 20, 1, () -> mode.is(Mode.Sunrise) && waitBreak.getValue());
-    private final IntSetting afterPearl = intSetting("PearlTimeout", 0, 0, 60, 1, () -> mode.is(Mode.Pearl));
+    private final BoolSetting waitBreak = boolSetting("Wait Break", true, () -> mode.is(Mode.Sunrise));
+    private final BoolSetting onlyOnGround = boolSetting("Only On Ground", false, () -> mode.is(Mode.Pearl));
+    private final BoolSetting autoDisable = boolSetting("Auto Disable", false, () -> mode.is(Mode.Pearl));
+    private final IntSetting afterBreak = intSetting("Break Timeout", 4, 1, 20, 1, () -> mode.is(Mode.Sunrise) && waitBreak.getValue());
+    private final IntSetting afterPearl = intSetting("Pearl Timeout", 0, 0, 60, 1, () -> mode.is(Mode.Pearl));
     private final DoubleSetting pitch = doubleSetting("Pitch", 80.0, 0.0, 90.0, 1.0, () -> mode.is(Mode.Pearl));
     private final BoolSetting strict = boolSetting("Strict", false, () -> mode.is(Mode.ForceMine));
 

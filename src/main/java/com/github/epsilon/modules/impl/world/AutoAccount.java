@@ -30,7 +30,7 @@ public class AutoAccount extends Module {
     public static final AutoAccount INSTANCE = new AutoAccount();
 
     private AutoAccount() {
-        super("AutoAccount", Category.WORLD);
+        super("Auto Account", Category.WORLD);
     }
 
     private final TimerUtils timer = new TimerUtils();

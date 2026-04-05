@@ -13,13 +13,13 @@ public class AutoSprint extends Module {
     public static final AutoSprint INSTANCE = new AutoSprint();
 
     private AutoSprint() {
-        super("AutoSprint", Category.PLAYER);
+        super("Auto Sprint", Category.PLAYER);
     }
 
-    public final BoolSetting keepSprint = boolSetting("KeepSprint", true);
+    public final BoolSetting keepSprint = boolSetting("Keep Sprint", true);
     public final DoubleSetting motion = doubleSetting("Motion", 1.0, 0.0, 1.0, 0.1, keepSprint::getValue);
-    private final BoolSetting stopWhileUsing = boolSetting("StopWhileUsing", false);
-    private final BoolSetting pauseWhileAura = boolSetting("PauseWhileAura", false);
+    private final BoolSetting stopWhileUsing = boolSetting("Stop While Using", false);
+    private final BoolSetting pauseWhileAura = boolSetting("Pause While Aura", false);
 
     @SubscribeEvent
     private void onClientTick(ClientTickEvent.Pre event) {

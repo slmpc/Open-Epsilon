@@ -20,7 +20,7 @@ public class AutoTotem extends Module {
     private final BoolSetting checkGapple = boolSetting("Check Gapple", true);
 
     private AutoTotem() {
-        super("AutoTotem", Category.COMBAT);
+        super("Auto Totem", Category.COMBAT);
     }
 
     @SubscribeEvent

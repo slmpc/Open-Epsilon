@@ -10,7 +10,7 @@ public class CameraClip extends Module {
     public static final CameraClip INSTANCE = new CameraClip();
 
     private CameraClip() {
-        super("CameraClip", Category.RENDER);
+        super("Camera Clip", Category.RENDER);
     }
 
     public final DoubleSetting distance = doubleSetting("Distance", 3.5, 1.0, 20.0, 0.5);

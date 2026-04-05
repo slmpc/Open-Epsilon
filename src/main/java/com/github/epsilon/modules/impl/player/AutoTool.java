@@ -22,13 +22,13 @@ public class AutoTool extends Module {
     public static final AutoTool INSTANCE = new AutoTool();
 
     private AutoTool() {
-        super("AutoTool", Category.PLAYER);
+        super("Auto Tool", Category.PLAYER);
     }
 
-    private final BoolSetting swapBack = boolSetting("SwapBack", true);
-    private final BoolSetting saveItem = boolSetting("SaveItem", true);
+    private final BoolSetting swapBack = boolSetting("Swap Back", true);
+    private final BoolSetting saveItem = boolSetting("Save Item", true);
     private final BoolSetting silent = boolSetting("Silent", false);
-    private final BoolSetting echestSilk = boolSetting("EchestSilk", true);
+    private final BoolSetting echestSilk = boolSetting("Ender Chest Silk Touch", true);
 
     public static int itemIndex;
     private boolean swap;

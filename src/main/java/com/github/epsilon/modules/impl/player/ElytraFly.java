@@ -8,7 +8,7 @@ public class ElytraFly extends Module {
     public static final ElytraFly INSTANCE = new ElytraFly();
 
     private ElytraFly() {
-        super("ElytraFly", Category.PLAYER);
+        super("Elytra Fly", Category.PLAYER);
     }
 
 }

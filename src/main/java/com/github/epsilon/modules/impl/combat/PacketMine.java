@@ -44,7 +44,7 @@ public class PacketMine extends Module {
     public static final PacketMine INSTANCE = new PacketMine();
 
     private PacketMine() {
-        super("PacketMine", Category.COMBAT);
+        super("Packet Mine", Category.COMBAT);
     }
 
     public enum Mode {
@@ -72,35 +72,35 @@ public class PacketMine extends Module {
 
     // General
     public final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Packet);
-    public final BoolSetting doubleMine = boolSetting("DoubleMine", false);
-    private final EnumSetting<StartMode> startMode = enumSetting("StartMode", StartMode.StartAbort, () -> mode.is(Mode.Packet) && !doubleMine.getValue());
-    private final EnumSetting<SwitchMode> switchMode = enumSetting("SwitchMode", SwitchMode.Alternative, () -> mode.getValue() != Mode.Damage);
-    private final IntSetting swapDelay = intSetting("SwapDelay", 50, 0, 1000, 1, () -> mode.getValue() != Mode.Damage);
+    public final BoolSetting doubleMine = boolSetting("Double Mine", false);
+    private final EnumSetting<StartMode> startMode = enumSetting("Start Mode", StartMode.StartAbort, () -> mode.is(Mode.Packet) && !doubleMine.getValue());
+    private final EnumSetting<SwitchMode> switchMode = enumSetting("Switch Mode", SwitchMode.Alternative, () -> mode.getValue() != Mode.Damage);
+    private final IntSetting swapDelay = intSetting("Swap Delay", 50, 0, 1000, 1, () -> mode.getValue() != Mode.Damage);
     private final DoubleSetting factor = doubleSetting("Factor", 1.0, 0.5, 2.0, 0.1, () -> mode.getValue() != Mode.Damage);
     private final DoubleSetting speed = doubleSetting("Speed", 0.5, 0.0, 1.0, 0.1, () -> mode.is(Mode.Damage));
     public final DoubleSetting range = doubleSetting("Range", 4.2, 3.0, 10.0, 0.1, () -> mode.getValue() != Mode.Damage);
     private final BoolSetting rotate = boolSetting("Rotate", false, () -> mode.getValue() != Mode.Damage);
-    private final BoolSetting placeCrystal = boolSetting("PlaceCrystal", true);
-    private final BoolSetting resetOnSwitch = boolSetting("ResetOnSwitch", true, () -> mode.getValue() != Mode.Damage);
-    private final IntSetting breakAttempts = intSetting("BreakAttempts", 10, 1, 50, 1, () -> mode.is(Mode.Packet));
-    private final BoolSetting pauseEat = boolSetting("PauseOnEat", false);
-    private final BoolSetting clientRemove = boolSetting("ClientRemove", true);
+    private final BoolSetting placeCrystal = boolSetting("Place Crystal", true);
+    private final BoolSetting resetOnSwitch = boolSetting("Reset On Switch", true, () -> mode.getValue() != Mode.Damage);
+    private final IntSetting breakAttempts = intSetting("Break Attempts", 10, 1, 50, 1, () -> mode.is(Mode.Packet));
+    private final BoolSetting pauseEat = boolSetting("Pause On Eat", false);
+    private final BoolSetting clientRemove = boolSetting("Client Remove", true);
 
     // Packet
     private final BoolSetting stop = boolSetting("Stop", true, () -> mode.is(Mode.Packet) && !doubleMine.getValue());
     private final BoolSetting abort = boolSetting("Abort", true, () -> mode.is(Mode.Packet) && !doubleMine.getValue());
     private final BoolSetting start = boolSetting("Start", true, () -> mode.is(Mode.Packet) && !doubleMine.getValue());
-    private final BoolSetting stop2 = boolSetting("Stop2", true, () -> mode.is(Mode.Packet) && !doubleMine.getValue());
+    private final BoolSetting stop2 = boolSetting("Stop 2", true, () -> mode.is(Mode.Packet) && !doubleMine.getValue());
 
     // Render
     private final BoolSetting render = boolSetting("Render", false, () -> mode.getValue() != Mode.Damage);
     private final BoolSetting smooth = boolSetting("Smooth", true, () -> mode.getValue() != Mode.Damage && render.getValue());
-    private final EnumSetting<RenderMode> renderMode = enumSetting("RenderMode", RenderMode.Shrink, () -> mode.getValue() != Mode.Damage && render.getValue());
-    private final ColorSetting startLineColor = colorSetting("StartLineColor", new Color(255, 0, 0, 200), () -> mode.getValue() != Mode.Damage && render.getValue());
-    private final ColorSetting endLineColor = colorSetting("EndLineColor", new Color(47, 255, 0, 200), () -> mode.getValue() != Mode.Damage && render.getValue());
-    private final IntSetting lineWidth = intSetting("LineWidth", 2, 1, 10, 1, () -> mode.getValue() != Mode.Damage && render.getValue());
-    private final ColorSetting startFillColor = colorSetting("StartFillColor", new Color(255, 0, 0, 120), () -> mode.getValue() != Mode.Damage && render.getValue());
-    private final ColorSetting endFillColor = colorSetting("EndFillColor", new Color(47, 255, 0, 120), () -> mode.getValue() != Mode.Damage && render.getValue());
+    private final EnumSetting<RenderMode> renderMode = enumSetting("Render Mode", RenderMode.Shrink, () -> mode.getValue() != Mode.Damage && render.getValue());
+    private final ColorSetting startLineColor = colorSetting("Start Line Color", new Color(255, 0, 0, 200), () -> mode.getValue() != Mode.Damage && render.getValue());
+    private final ColorSetting endLineColor = colorSetting("End Line Color", new Color(47, 255, 0, 200), () -> mode.getValue() != Mode.Damage && render.getValue());
+    private final IntSetting lineWidth = intSetting("Line Width", 2, 1, 10, 1, () -> mode.getValue() != Mode.Damage && render.getValue());
+    private final ColorSetting startFillColor = colorSetting("Start Fill Color", new Color(255, 0, 0, 120), () -> mode.getValue() != Mode.Damage && render.getValue());
+    private final ColorSetting endFillColor = colorSetting("End Fill Color", new Color(47, 255, 0, 120), () -> mode.getValue() != Mode.Damage && render.getValue());
 
     public ArrayList<MineAction> actions = new ArrayList<>();
     private final List<DelayedAction> delayedActions = new ArrayList<>();

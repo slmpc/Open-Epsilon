@@ -36,7 +36,7 @@ public class InvManager extends Module {
     public static final InvManager INSTANCE = new InvManager();
 
     private InvManager() {
-        super("InvManager", Category.PLAYER);
+        super("Inv Manager", Category.PLAYER);
     }
 
     public enum OffhandItemMode {

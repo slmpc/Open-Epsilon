@@ -9,7 +9,7 @@ public class UseCooldown extends Module {
     public static final UseCooldown INSTANCE = new UseCooldown();
 
     private UseCooldown() {
-        super("UseCooldown", Category.PLAYER);
+        super("Use Cooldown", Category.PLAYER);
     }
 
     public final IntSetting cooldown = intSetting("Cooldown", 0, 0, 4, 1);

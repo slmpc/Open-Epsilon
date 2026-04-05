@@ -20,11 +20,11 @@ public class FakePlayer extends Module {
     public static final FakePlayer INSTANCE = new FakePlayer();
 
     private FakePlayer() {
-        super("FakePlayer", Category.WORLD);
+        super("Fake Player", Category.WORLD);
     }
 
     private final StringSetting name = stringSetting("Name", "BC_zxy");
-    private final BoolSetting copyInventory = boolSetting("CopyInventory", true);
+    private final BoolSetting copyInventory = boolSetting("Copy Inventory", true);
     private final BoolSetting record = boolSetting("Record", false);
     private final BoolSetting playback = boolSetting("Playback", false);
 
