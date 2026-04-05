@@ -38,8 +38,8 @@ public class AutoTool extends Module {
     @SubscribeEvent
     public void onClientTick(ClientTickEvent.Pre event) {
         if (nullCheck()) return;
-        if (!(mc.hitResult instanceof BlockHitResult)) return;
-        BlockHitResult result = (BlockHitResult) mc.hitResult;
+        if (!(mc.hitResult instanceof BlockHitResult result)) return;
+
         BlockPos pos = result.getBlockPos();
         if (mc.level.getBlockState(pos).isAir()) {
             return;

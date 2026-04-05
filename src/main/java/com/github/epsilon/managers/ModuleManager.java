@@ -54,6 +54,7 @@ public class ModuleManager {
                 // Player
                 AutoSprint.INSTANCE,
                 AutoTool.INSTANCE,
+                Blink.INSTANCE,
                 BreakCooldown.INSTANCE,
                 Disabler.INSTANCE,
                 ElytraFly.INSTANCE,
@@ -69,7 +70,6 @@ public class ModuleManager {
                 Stuck.INSTANCE,
                 UseCooldown.INSTANCE,
                 VClip.INSTANCE,
-                Blink.INSTANCE,
 
                 // Render
                 CameraClip.INSTANCE,

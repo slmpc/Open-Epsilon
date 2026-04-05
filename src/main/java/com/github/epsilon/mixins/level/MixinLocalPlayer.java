@@ -3,12 +3,12 @@ package com.github.epsilon.mixins.level;
 import com.github.epsilon.events.MotionEvent;
 import com.github.epsilon.events.SlowdownEvent;
 import com.github.epsilon.modules.impl.combat.Velocity;
-import net.minecraft.client.Minecraft;
+import com.mojang.authlib.GameProfile;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,19 +16,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LocalPlayer.class)
-public abstract class MixinLocalPlayer extends AbstractClientPlayer {
-
-    public MixinLocalPlayer() {
-        // Treating this class as ClientPlayerEntity with mc.player info works
-        // Need a better solution
-        super(Minecraft.getInstance().level, Minecraft.getInstance().player.getGameProfile());
-    }
-
-    @Shadow
-    protected abstract void updateAutoJump(float xa, float za);
+public class MixinLocalPlayer extends AbstractClientPlayer {
 
     @Unique
     private MotionEvent lumin$motionEvent;
+
+    public MixinLocalPlayer(ClientLevel level, GameProfile gameProfile) {
+        super(level, gameProfile);
+    }
 
     @Inject(method = "sendPosition", at = @At("HEAD"), cancellable = true)
     private void onPreSendPosition(CallbackInfo ci) {

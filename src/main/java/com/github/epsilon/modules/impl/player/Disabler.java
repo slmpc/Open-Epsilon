@@ -5,6 +5,7 @@ import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.Random;
@@ -17,15 +18,30 @@ public class Disabler extends Module {
         super("Disabler", Category.PLAYER);
     }
 
-    private final BoolSetting duplicateRotPlace = boolSetting("Duplicate Rotation Place", true);
-    private final BoolSetting aim360 = boolSetting("Aim Modulo 360", false);
+
+    private final BoolSetting badPacketsA = boolSetting("Bad Packets A", true);
+    private final BoolSetting duplicateRotPlace = boolSetting("Duplicate Rot Place", false);
+    private final BoolSetting aimModulo360 = boolSetting("Aim Modulo 360", false);
     private final BoolSetting aimDuplicateLook = boolSetting("Aim Duplicate Look", false);
 
+    private int lastSlot = -1;
     private float playerYaw, lastYaw, lastPitch;
 
     @SubscribeEvent
     public void onPacket(PacketEvent.Send event) {
-        if (aim360.getValue()) {
+        if (badPacketsA.getValue()) {
+            if (event.getPacket() instanceof ServerboundSetCarriedItemPacket packet) {
+                int slot = packet.getSlot();
+
+                if (slot == lastSlot && slot != -1) {
+                    event.setCanceled(true);
+                }
+
+                lastSlot = packet.getSlot();
+            }
+        }
+
+        if (aimModulo360.getValue()) {
             if (event.getPacket() instanceof ServerboundMovePlayerPacket packet && packet.hasRotation()) {
                 float yaw = packet.yRot;
                 if (yaw < 360.0f && yaw > -360.0f) {
