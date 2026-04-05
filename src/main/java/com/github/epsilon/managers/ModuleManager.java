@@ -74,6 +74,7 @@ public class ModuleManager {
                 // Render
                 CameraClip.INSTANCE,
                 ESP.INSTANCE,
+                FOV.INSTANCE,
                 Fullbright.INSTANCE,
                 NameTags.INSTANCE,
                 NoRender.INSTANCE,
