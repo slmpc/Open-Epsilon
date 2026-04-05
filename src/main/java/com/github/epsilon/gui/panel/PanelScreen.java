@@ -27,7 +27,6 @@ public class PanelScreen extends Screen {
     private final PanelState state = new PanelState();
     private final PanelDirtyState dirtyState = new PanelDirtyState();
     private final TextRenderer textRenderer = new TextRenderer();
-    private final RectRenderer backgroundRectRenderer = new RectRenderer();
     private final RectRenderer rectRenderer = new RectRenderer();
     private final RoundRectRenderer roundRectRenderer = new RoundRectRenderer();
     private final ShadowRenderer shadowRenderer = new ShadowRenderer();
@@ -52,10 +51,6 @@ public class PanelScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
-    }
-
-    @Override
-    public void extractBackground(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
     }
 
     @Override
@@ -106,7 +101,6 @@ public class PanelScreen extends Screen {
         float railWidth = categoryRailPanel.getAnimatedWidth();
         PanelLayout.Layout layout = PanelLayout.compute(width, height, railWidth);
 
-        drawBackgroundScrim();
         drawChrome(layout);
         categoryRailPanel.render(GuiGraphicsExtractor, layout.rail(), mouseX, mouseY, partialTick);
         if (state.isClientSettingMode()) {
@@ -124,10 +118,6 @@ public class PanelScreen extends Screen {
         RenderManager.INSTANCE.applyRenderAfterFrame(this::flushQueuedRenderers);
 
         popupHost.render(GuiGraphicsExtractor, mouseX, mouseY, partialTick);
-    }
-
-    private void drawBackgroundScrim() {
-        backgroundRectRenderer.addRect(0, 0, width, height, MD3Theme.SCRIM);
     }
 
     private void drawChrome(PanelLayout.Layout layout) {
@@ -148,7 +138,6 @@ public class PanelScreen extends Screen {
     }
 
     private void flushQueuedRenderers() {
-        backgroundRectRenderer.drawAndClear();
         shadowRenderer.drawAndClear();
         roundRectRenderer.drawAndClear();
         rectRenderer.drawAndClear();

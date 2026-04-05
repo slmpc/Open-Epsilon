@@ -7,7 +7,6 @@ import java.awt.*;
 
 public final class MD3Theme {
 
-    public static Color SCRIM = new Color(0, 0, 0, 152);
     public static Color SHADOW = new Color(0, 0, 0, 82);
 
     public static Color SURFACE = new Color(20, 18, 24, 238);
@@ -72,7 +71,6 @@ public final class MD3Theme {
             return;
         }
         ThemePalette palette = ThemePalette.forPreset(preset, mode);
-        SCRIM = palette.scrim();
         SHADOW = palette.shadow();
         SURFACE = palette.surface();
         SURFACE_DIM = palette.surfaceDim();
@@ -124,7 +122,6 @@ public final class MD3Theme {
     }
 
     private record ThemePalette(
-            Color scrim,
             Color shadow,
             Color surface,
             Color surfaceDim,
@@ -199,7 +196,6 @@ public final class MD3Theme {
             Color textSecondaryColor = color("#CAC4D0", 255);
             Color textMutedColor = color("#938F99", 255);
             return new ThemePalette(
-                    new Color(0, 0, 0, 152),
                     new Color(0, 0, 0, 82),
                     surfaceColor,
                     surfaceDimColor,
@@ -244,7 +240,6 @@ public final class MD3Theme {
             Color textSecondaryColor = color("#49454F", 255);
             Color textMutedColor = color("#79747E", 255);
             return new ThemePalette(
-                    new Color(0, 0, 0, 92),
                     new Color(0, 0, 0, 56),
                     surfaceColor,
                     surfaceDimColor,
