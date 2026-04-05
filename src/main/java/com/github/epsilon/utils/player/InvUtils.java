@@ -2,6 +2,7 @@ package com.github.epsilon.utils.player;
 
 import com.github.epsilon.managers.SyncManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -83,7 +84,7 @@ public class InvUtils {
         }
 
         mc.player.getInventory().setSelectedSlot(slot);
-        mc.gameMode.ensureHasSentCarriedItem();
+        mc.getConnection().send(new ServerboundSetCarriedItemPacket(slot));
     }
 
     public static void swapBack() {

@@ -31,7 +31,7 @@ public class VClip extends Module {
         toggle();
 
         switch (mode.getValue()) {
-            case Glitch:
+            case Glitch -> {
                 double posX = mc.player.getX();
                 double posY = Mth.floor(mc.player.getY());
                 double posZ = mc.player.getZ();
@@ -44,17 +44,18 @@ public class VClip extends Module {
                 posY -= halfY * 300.0;
                 mc.player.setPos(posX, posY, posZ);
                 mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(posX, posY, posZ, onGround, false));
-                break;
-            case Teleport:
+            }
+            case Teleport -> {
                 mc.player.setPos(mc.player.getX(), mc.player.getY() + 3.0, mc.player.getZ());
                 mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true, false));
-                break;
-            case Jump:
+            }
+            case Jump -> {
                 mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() + 0.4199999868869781, mc.player.getZ(), false, false));
                 mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() + 0.7531999805212017, mc.player.getZ(), false, false));
                 mc.player.setPos(mc.player.getX(), mc.player.getY() + 1.0, mc.player.getZ());
                 mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true, false));
-                break;
+            }
         }
     }
+
 }
