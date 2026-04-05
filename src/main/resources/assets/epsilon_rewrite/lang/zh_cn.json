@@ -9,6 +9,10 @@
   "epsilon.gui.tab.friend": "好友",
   "epsilon.gui.gameaccount": "游戏账号",
   "epsilon.gui.search": "搜索 ...",
+  "epsilon.gui.inspector":  "HUD 编辑器 设置",
+  "epsilon.gui.inspector.select": "选择一个元素来编辑 ...",
+  "epsilon.gui.friend.empty": "没有好友",
+  "epsilon.gui.friend.input.placeholder": "输入玩家名称 ...",
 
   "epsilon.keybind.hold": "长按",
   "epsilon.keybind.none": "无",

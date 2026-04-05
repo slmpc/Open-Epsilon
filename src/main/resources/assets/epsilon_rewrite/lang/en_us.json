@@ -9,6 +9,10 @@
   "epsilon.gui.tab.friend": "Friends",
   "epsilon.gui.gameaccount": "Account",
   "epsilon.gui.search": "Search ...",
+  "epsilon.gui.inspector":  "HUD Editor Inspector",
+  "epsilon.gui.inspector.select": "Select a HUD element ...",
+  "epsilon.gui.friend.empty": "No friends added yet",
+  "epsilon.gui.friend.input.placeholder": "Add friend name...",
 
   "epsilon.keybind.hold": "Hold",
   "epsilon.keybind.none": "None",

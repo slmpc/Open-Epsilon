@@ -83,6 +83,8 @@ public class ClientSettingPanel {
     private static final TranslateComponent titleComponent = EpsilonTranslateComponent.create("gui", "clientsettings");
     private static final TranslateComponent generalTabComponent = EpsilonTranslateComponent.create("gui", "tab.general");
     private static final TranslateComponent friendTabComponent = EpsilonTranslateComponent.create("gui", "tab.friend");
+    private static final TranslateComponent noFriendsComponent = EpsilonTranslateComponent.create("gui", "friend.empty");
+    private static final TranslateComponent addFriendPlaceholderComponent = EpsilonTranslateComponent.create("gui", "friend.input.placeholder");
 
     private static final float TAB_BAR_HEIGHT = 26.0f;
     private static final float TAB_INDICATOR_HEIGHT = 2.5f;
@@ -276,7 +278,7 @@ public class ClientSettingPanel {
             // Empty state hint
             if (friends.isEmpty()) {
                 float hintScale = 0.58f;
-                String hint = "No friends added yet";
+                String hint = noFriendsComponent.getTranslatedName();
                 float hintWidth = friendContentBuffer.textRenderer().getWidth(hint, hintScale);
                 float hintX = listViewport.x() + (listViewport.width() - hintWidth) / 2.0f;
                 float hintY = listViewport.y() + listViewport.height() / 2.0f - friendContentBuffer.textRenderer().getHeight(hintScale) / 2.0f;
@@ -368,7 +370,7 @@ public class ClientSettingPanel {
         float textX = inputBounds.x() + textInset;
 
         boolean showPlaceholder = friendInputBuffer.isEmpty() && !friendInputFocused;
-        String display = showPlaceholder ? "Add friend name..." : friendInputBuffer;
+        String display = showPlaceholder ? addFriendPlaceholderComponent.getTranslatedName() : friendInputBuffer;
         Color textColor = showPlaceholder ? MD3Theme.TEXT_MUTED : MD3Theme.TEXT_PRIMARY;
         textRenderer.addText(display, textX, textY, textScale, textColor);
 

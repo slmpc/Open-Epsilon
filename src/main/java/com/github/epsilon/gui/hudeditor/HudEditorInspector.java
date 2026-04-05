@@ -1,5 +1,7 @@
 package com.github.epsilon.gui.hudeditor;
 
+import com.github.epsilon.assets.i18n.EpsilonTranslateComponent;
+import com.github.epsilon.assets.i18n.TranslateComponent;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.ShadowRenderer;
@@ -64,6 +66,9 @@ final class HudEditorInspector {
     private int lastScreenHeight;
     private final ScrollBarDragState scrollBarDrag = new ScrollBarDragState();
 
+    private static final TranslateComponent titleComponent = EpsilonTranslateComponent.create("gui", "inspector");
+    private static final TranslateComponent selectComponent = EpsilonTranslateComponent.create("gui", "inspector.select");
+
     void queueRender(GuiGraphicsExtractor graphics, HudModule selectedModule, int screenWidth, int screenHeight, int mouseX, int mouseY, float partialTick, int guiHeight) {
         this.selectedModule = selectedModule;
         this.lastScreenWidth = screenWidth;
@@ -79,7 +84,7 @@ final class HudEditorInspector {
         roundRectRenderer.addRoundRect(bounds.x() + 1.0f, bounds.y() + 1.0f, bounds.width() - 2.0f, bounds.height() - 2.0f, MD3Theme.SECTION_RADIUS - 1.0f, MD3Theme.SURFACE_CONTAINER_LOW);
 
         float titleX = bounds.x() + MD3Theme.PANEL_TITLE_INSET;
-        textRenderer.addText("HUD Inspector", titleX, bounds.y() + HEADER_TOP, TITLE_SCALE, MD3Theme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);
+        textRenderer.addText(titleComponent.getTranslatedName(), titleX, bounds.y() + HEADER_TOP, TITLE_SCALE, MD3Theme.TEXT_PRIMARY, StaticFontLoader.DUCKSANS);
 
         boolean collapseHovered = collapseButtonBounds.contains(mouseX, mouseY);
         roundRectRenderer.addRoundRect(
@@ -100,7 +105,7 @@ final class HudEditorInspector {
         }
 
         if (selectedModule == null) {
-            textRenderer.addText("Select a HUD element", titleX, bounds.y() + HEADER_GAP, SUBTITLE_SCALE, MD3Theme.TEXT_SECONDARY);
+            textRenderer.addText(selectComponent.getTranslatedName(), titleX, bounds.y() + HEADER_GAP, SUBTITLE_SCALE, MD3Theme.TEXT_SECONDARY);
             flushChrome();
             clearContentState(true);
             return;
