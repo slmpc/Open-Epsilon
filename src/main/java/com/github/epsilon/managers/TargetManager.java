@@ -117,18 +117,22 @@ public class TargetManager {
 
         if (request.fov() < 360.0f && !RotationUtils.isInFov(entity, request.fov())) return false;
 
-        if (entity instanceof Player player) {
-            if (FriendManager.INSTANCE.isFriend(player)) return false;
-            if (!request.player()) return false;
-            if (entity.isInvisible() && !request.invisible()) return false;
-        } else if (entity instanceof Villager) {
-            if (!request.villager()) return false;
-        } else if (entity instanceof Animal) {
-            if (!request.animal()) return false;
-        } else if (entity instanceof Monster) {
-            if (!request.mob()) return false;
-        } else {
-            return false;
+        switch (entity) {
+            case Player player -> {
+                if (FriendManager.INSTANCE.isFriend(player)) return false;
+                if (!request.player()) return false;
+                if (entity.isInvisible() && !request.invisible()) return false;
+            }
+            case Villager _ -> {
+                if (!request.villager()) return false;
+            }
+            case Animal _ -> {
+                if (!request.animal()) return false;
+            }
+            case Monster _ -> {
+                if (!request.mob()) return false;
+            }
+            default -> {}
         }
 
         return request.extraFilter().test(entity);

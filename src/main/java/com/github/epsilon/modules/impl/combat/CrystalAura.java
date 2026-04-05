@@ -172,12 +172,14 @@ public class CrystalAura extends Module {
 
         List<BreakCandidate> candidates = new ArrayList<>();
 
+        final var breakRangeSq = breakRange.getValue() * breakRange.getValue();
+
         for (Entity entity : mc.level.entitiesForRendering()) {
             if (!(entity instanceof EndCrystal crystal)) continue;
             if (!crystal.isAlive()) continue;
 
-            double distToPlayer = mc.player.distanceTo(crystal);
-            if (distToPlayer > breakRange.getValue()) continue;
+            double distToPlayerSq = mc.player.distanceToSqr(crystal);
+            if (distToPlayerSq > breakRangeSq) continue;
 
             Vec3 crystalPos = crystal.position();
 
@@ -445,12 +447,8 @@ public class CrystalAura extends Module {
         float hp = mc.player.getHealth() + mc.player.getAbsorptionAmount();
         if (noSuicide.getValue() && hp - selfDmg <= 0.5f) return true;
         float remainingHp = hp - selfDmg;
-        if (noSuicide.getValue() && remainingHp <= lethalMaxSelfDamage.getValue()
-                && selfDmg > lethalMaxSelfDamage.getValue()) {
-            return true;
-        }
-
-        return false;
+        return noSuicide.getValue() && remainingHp <= lethalMaxSelfDamage.getValue()
+                && selfDmg > lethalMaxSelfDamage.getValue();
     }
 
     private Vec3 getPredictedTargetPos(LivingEntity entity) {
