@@ -23,7 +23,6 @@ public class ModuleList extends HudModule {
 
     private static final float ROW_HEIGHT = 16.0f;
     private static final float ROW_SPACING = 2.0f;
-    private static final float MODULE_PADDING = 4.0f;
     private static final float ICON_GAP = 2.0f;
 
     public static final ModuleList INSTANCE = new ModuleList();
@@ -67,7 +66,7 @@ public class ModuleList extends HudModule {
             }
         }
 
-        setBounds(maxTotalWidth + MODULE_PADDING * moduleScale, totalHeight);
+        setBounds(maxTotalWidth, totalHeight);
     }
 
     @Override
@@ -109,7 +108,7 @@ public class ModuleList extends HudModule {
 
             float textX = itemX + hPadding * moduleScale;
             float textY = currentY + (boxHeight - textRenderer.getHeight(renderScale)) / 2.0f;
-            textRenderer.addText(item.text(), textX, textY, renderScale, animatedText);
+            textRenderer.addText(item.text(), textX - 1, textY - 1, renderScale, animatedText);
 
             if (showIcon.getValue() && item.module().category != null) {
                 float iconBoxX = itemX + boxWidth + ICON_GAP * moduleScale;
@@ -120,8 +119,8 @@ public class ModuleList extends HudModule {
                 float iconWidth = textRenderer.getWidth(iconChar, iconScale, StaticFontLoader.ICONS);
                 float iconHeight = textRenderer.getHeight(iconScale, StaticFontLoader.ICONS);
 
-                float iconX = iconBoxX + (boxHeight - iconWidth) / 2.0f;
-                float iconY = currentY + (boxHeight - iconHeight) / 2.0f;
+                float iconX = iconBoxX + (boxHeight - iconWidth) / 2.0f - 1;
+                float iconY = currentY + (boxHeight - iconHeight) / 2.0f - 2;
 
                 textRenderer.addText(iconChar, iconX, iconY, iconScale, new Color(255, 255, 255, (int) (180 * alpha)), StaticFontLoader.ICONS);
             }

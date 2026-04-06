@@ -55,6 +55,10 @@ public class PanelScreen extends Screen {
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
+        if (state.updateScrollAnimations()) {
+            dirtyState.markAllDirty();
+        }
+
         String currentCategory = state.getSelectedCategory().name();
         String currentModule = state.getSelectedModule() == null ? "" : state.getSelectedModule().getName();
         String currentQuery = state.getSearchQuery();
@@ -76,8 +80,8 @@ public class PanelScreen extends Screen {
         if (categoryRailPanel.hasActiveAnimations()
                 || moduleListPanel.hasActiveAnimations()
                 || moduleDetailPanel.hasActiveAnimations()
-                || clientSettingPanel.hasActiveAnimations()) {
-            // Keep rebuilding cached sections while animations are still interpolating.
+                || clientSettingPanel.hasActiveAnimations()
+                || state.hasActiveScrollAnimations()) {
             dirtyState.markAllDirty();
         }
 

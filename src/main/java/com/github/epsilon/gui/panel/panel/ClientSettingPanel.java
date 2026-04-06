@@ -561,7 +561,7 @@ public class ClientSettingPanel {
         if (state.getClientSettingTab() == PanelState.ClientSettingTab.GENERAL) {
             PanelLayout.Rect viewport = getGeneralViewport();
             if (viewport.contains(mouseX, mouseY)) {
-                state.scrollClientSetting(-scrollY * 20.0f);
+                state.scrollClientSetting(scrollY * 20.0f);
                 markDirty();
                 return true;
             }
@@ -573,7 +573,7 @@ public class ClientSettingPanel {
                     fullViewport.height() - FRIEND_INPUT_HEIGHT - FRIEND_INPUT_BOTTOM_MARGIN * 2
             );
             if (listViewport.contains(mouseX, mouseY)) {
-                state.scrollFriend(-scrollY * 20.0f);
+                state.scrollFriend(scrollY * 20.0f);
                 markFriendDirty();
                 return true;
             }

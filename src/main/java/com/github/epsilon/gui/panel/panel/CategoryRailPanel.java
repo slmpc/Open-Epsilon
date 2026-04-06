@@ -152,13 +152,13 @@ public class CategoryRailPanel {
             float iconHeight = clippedTextRenderer.getHeight(itemIconScale, StaticFontLoader.ICONS);
             float labelHeight = clippedTextRenderer.getHeight(itemLabelScale, StaticFontLoader.DUCKSANS);
             float countHeight = clippedTextRenderer.getHeight(itemCountScale);
-            float iconY = itemRect.y() + (itemRect.height() - iconHeight) / 2.0f - 1.0f;
+            float iconY = itemRect.y() + (itemRect.height() - iconHeight) / 2.0f - 2.0f;
             float labelY = itemRect.y() + (itemRect.height() - labelHeight) / 2.0f - 1.0f;
             float countY = itemRect.y() + (itemRect.height() - countHeight) / 2.0f - 1.0f;
 
             roundRectRenderer.addRoundRect(itemRect.x(), itemRect.y(), itemRect.width(), itemRect.height(), MD3Theme.CARD_RADIUS, background);
             float iconWidth = clippedTextRenderer.getWidth(category.icon, itemIconScale, StaticFontLoader.ICONS);
-            float iconX = menuButton.x() + (menuButton.width() - iconWidth) / 2.0f;
+            float iconX = menuButton.x() + (menuButton.width() - iconWidth) / 2.0f + 2f;
             clippedTextRenderer.addText(category.icon, iconX, iconY, itemIconScale, iconColor, StaticFontLoader.ICONS);
 
             if (contentProgress > 0.02f) {
@@ -186,9 +186,9 @@ public class CategoryRailPanel {
         Color settingsLabelColor = settingsSelected ? MD3Theme.ON_SECONDARY_CONTAINER : MD3Theme.TEXT_PRIMARY;
         roundRectRenderer.addRoundRect(settingsRect.x(), settingsRect.y(), settingsRect.width(), settingsRect.height(), MD3Theme.CARD_RADIUS, settingsBg);
         float settingsIconWidth = clippedTextRenderer.getWidth(SETTINGS_ICON, itemIconScale, StaticFontLoader.ICONS);
-        float settingsIconX = menuButton.x() + (menuButton.width() - settingsIconWidth) / 2.0f;
+        float settingsIconX = menuButton.x() + (menuButton.width() - settingsIconWidth) / 2.0f + 2f;
         float settingsIconHeight = clippedTextRenderer.getHeight(itemIconScale, StaticFontLoader.ICONS);
-        float settingsIconY = settingsRect.y() + (settingsRect.height() - settingsIconHeight) / 2.0f - 1.0f;
+        float settingsIconY = settingsRect.y() + (settingsRect.height() - settingsIconHeight) / 2.0f - 2f;
         clippedTextRenderer.addText(SETTINGS_ICON, settingsIconX, settingsIconY, itemIconScale, settingsIconColor, StaticFontLoader.ICONS);
 
         if (contentProgress > 0.02f) {

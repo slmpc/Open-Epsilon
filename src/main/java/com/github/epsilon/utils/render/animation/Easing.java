@@ -77,6 +77,45 @@ public enum Easing {
         return x < 0.5f
                 ? 4.0f * x * x * x * x * x
                 : 1.0f - (float) Math.pow(-2.0f * x + 2.0f, 5) / 2.0f;
+    }),
+    IOS_SCROLL(x -> {
+        float deceleration = 0.998f;
+        return 1.0f - (float) Math.pow(deceleration, x * 100.0f);
+    }),
+    IOS_BOUNCE(x -> {
+        float c4 = 2.0943951023931953f;
+        return x == 0 ? 0 : x == 1 ? 1
+                : (float) Math.pow(2, -10 * x) * (float) Math.sin((x * 10 - 0.075f) * c4) + 1;
+    }),
+    IOS_OVERSHOOT(x -> {
+        return 1.0f + 2.0f * (float) Math.pow(x, 3) - 2.0f * (float) Math.pow(x, 2);
+    }),
+    CRITICAL_DAMPING(x -> {
+        float c = 0.35f;
+        return 1.0f - (1.0f + x / c) * (float) Math.exp(-x / c);
+    }),
+    SPRING_BOUNCE(x -> {
+        float n1 = 7.5625f;
+        float d1 = 2.75f;
+        if (x < 1.0f / d1) {
+            return n1 * x * x;
+        } else if (x < 2.0f / d1) {
+            float t = x - 1.5f / d1;
+            return n1 * t * t + 0.75f;
+        } else if (x < 2.5f / d1) {
+            float t = x - 2.25f / d1;
+            return n1 * t * t + 0.9375f;
+        } else {
+            float t = x - 2.625f / d1;
+            return n1 * t * t + 0.984375f;
+        }
+    }),
+    MOMENTUM_DECEL(x -> {
+        return 1.0f - (float) Math.pow(1.0f - x, 3.0f);
+    }),
+    RUBBER_BAND(x -> {
+        float c = 0.55f;
+        return (float) Math.pow(x, 1.0f + c * x);
     });
 
     private final Function<Float, Float> function;
