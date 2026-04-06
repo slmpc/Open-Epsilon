@@ -183,7 +183,7 @@ public class ModuleListPanel {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         PanelLayout.Rect viewport = getViewport();
         if (bounds != null && viewport.contains(mouseX, mouseY)) {
-            state.scrollModules(-scrollY * 20.0f);
+            state.scrollModules(scrollY * 20.0f);
             markDirty();
             return true;
         }
