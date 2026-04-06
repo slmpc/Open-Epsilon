@@ -163,11 +163,11 @@ public class CrystalAura extends Module {
 
         Vec3 predictedPos = getPredictedTargetPos(target);
 
-        tryBreakCrystal();
+        tryBreakCrystal(predictedPos);
         tryPlaceCrystal(predictedPos);
     }
 
-    private void tryBreakCrystal() {
+    private void tryBreakCrystal(Vec3 predictedTargetPos) {
         if (!breakTimer.passedMillise(breakDelay.getValue())) return;
 
         List<BreakCandidate> candidates = new ArrayList<>();
@@ -181,7 +181,7 @@ public class CrystalAura extends Module {
 
             Vec3 crystalPos = crystal.position();
 
-            float targetDmg = DamageUtils.crystalDamage(target, crystalPos, armorMode.getValue());
+            float targetDmg = DamageUtils.crystalDamage(target, crystalPos, predictedTargetPos, armorMode.getValue());
             float selfDmg = DamageUtils.selfCrystalDamage(crystalPos, armorForSelf.getValue() ? armorMode.getValue() : DamageUtils.ArmorEnchantmentMode.None);
             if (exceedsSelfDamageLimit(selfDmg, breakMaxSelfDmg.getValue())) continue;
             if (targetDmg < breakMinDmg.getValue()) continue;
@@ -195,11 +195,11 @@ public class CrystalAura extends Module {
 
         EndCrystal bestCrystal = selectBestBreakCandidate(candidates);
         if (bestCrystal != null) {
-            doBreakCrystal(bestCrystal);
+            doBreakCrystal(bestCrystal, predictedTargetPos);
         }
     }
 
-    private void doBreakCrystal(EndCrystal crystal) {
+    private void doBreakCrystal(EndCrystal crystal, Vec3 predictedTargetPos) {
         if (antiWeak.getValue() && mc.player.hasEffect(MobEffects.WEAKNESS)) {
             FindItemResult sword = InvUtils.findInHotbar(Items.DIAMOND_SWORD, Items.NETHERITE_SWORD, Items.IRON_SWORD, Items.STONE_SWORD);
             if (sword.found()) {
@@ -238,7 +238,7 @@ public class CrystalAura extends Module {
             doSwing(breakSwing.getValue());
             breakTimer.reset();
             Vec3 crystalPosition = currentCrystal.position();
-            float tgtDmg = DamageUtils.crystalDamage(target, crystalPosition, armorMode.getValue());
+            float tgtDmg = DamageUtils.crystalDamage(target, crystalPosition, predictedTargetPos, armorMode.getValue());
             float selfDmg = DamageUtils.selfCrystalDamage(crystalPosition, armorForSelf.getValue() ? armorMode.getValue() : DamageUtils.ArmorEnchantmentMode.None);
             updateRenderTarget(currentCrystal.blockPosition().below(), tgtDmg, selfDmg);
 
@@ -312,7 +312,7 @@ public class CrystalAura extends Module {
                             supportPos.getZ() + 0.5
                     );
 
-                    float targetDmg = DamageUtils.crystalDamage(target, crystalPos, armorMode.getValue());
+                    float targetDmg = DamageUtils.crystalDamage(target, crystalPos, predictedTargetPos, armorMode.getValue());
                     float selfDmg = DamageUtils.selfCrystalDamage(crystalPos, armorForSelf.getValue() ? armorMode.getValue() : DamageUtils.ArmorEnchantmentMode.None);
                     Vector2f targetRotation = RotationUtils.calculate(supportPos, Direction.UP);
                     boolean visible = RaytraceUtils.overBlock(targetRotation, supportPos, Direction.UP, false);
