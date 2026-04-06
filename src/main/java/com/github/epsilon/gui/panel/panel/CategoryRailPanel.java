@@ -39,6 +39,8 @@ public class CategoryRailPanel {
     private final Animation headerDividerAnimation = new Animation(Easing.EASE_OUT_CUBIC, 220L);
     private final Animation selectionYAnimation = new Animation(Easing.EASE_OUT_CUBIC, 180L);
     private final Animation selectionHeightAnimation = new Animation(Easing.EASE_OUT_CUBIC, 180L);
+    private final Animation hoverYAnimation = new Animation(Easing.EASE_OUT_CUBIC, 160L);
+    private final Animation hoverAlphaAnimation = new Animation(Easing.EASE_OUT_CUBIC, 100L);
     private final Animation settingsHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private PanelLayout.Rect bounds;
     private boolean clippedTextPending;
@@ -58,6 +60,8 @@ public class CategoryRailPanel {
         this.headerDividerAnimation.setStartValue(0.0f);
         this.selectionYAnimation.setStartValue(0.0f);
         this.selectionHeightAnimation.setStartValue(32.0f);
+        this.hoverYAnimation.setStartValue(0.0f);
+        this.hoverAlphaAnimation.setStartValue(0.0f);
         this.settingsHoverAnimation.setStartValue(0.0f);
     }
 
@@ -129,6 +133,25 @@ public class CategoryRailPanel {
                 }
                 lookupY += CATEGORY_ITEM_SPACING;
             }
+        }
+
+        float hoveredY = -1.0f;
+        float scanY = categoryStartY;
+        for (Category category : Category.values()) {
+            PanelLayout.Rect scanRect = new PanelLayout.Rect(bounds.x() + 5.0f, scanY, bounds.width() - 10.0f, CATEGORY_ITEM_HEIGHT);
+            if (scanRect.contains(mouseX, mouseY)) { hoveredY = scanY; break; }
+            scanY += CATEGORY_ITEM_SPACING;
+        }
+        if (hoveredY < 0) {
+            PanelLayout.Rect settingsScanRect = new PanelLayout.Rect(bounds.x() + 5.0f, getSettingsButtonY(), bounds.width() - 10.0f, CATEGORY_ITEM_HEIGHT);
+            if (settingsScanRect.contains(mouseX, mouseY)) hoveredY = getSettingsButtonY();
+        }
+        hoverAlphaAnimation.run(hoveredY >= 0 ? 1.0f : 0.0f);
+        if (hoveredY >= 0) hoverYAnimation.run(hoveredY);
+        float hoverAlpha = hoverAlphaAnimation.getValue();
+        if (hoverAlpha > 0.01f) {
+            roundRectRenderer.addRoundRect(bounds.x() + 5.0f, hoverYAnimation.getValue(), bounds.width() - 10.0f, CATEGORY_ITEM_HEIGHT, MD3Theme.CARD_RADIUS,
+                    MD3Theme.withAlpha(MD3Theme.SURFACE_CONTAINER_HIGH, (int) (200 * hoverAlpha)));
         }
 
         selectionYAnimation.run(selectedItemY);
@@ -254,6 +277,8 @@ public class CategoryRailPanel {
                 || !headerDividerAnimation.isFinished()
                 || !selectionYAnimation.isFinished()
                 || !selectionHeightAnimation.isFinished()
+                || !hoverYAnimation.isFinished()
+                || !hoverAlphaAnimation.isFinished()
                 || !settingsHoverAnimation.isFinished();
     }
 
