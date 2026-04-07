@@ -53,6 +53,7 @@ public class ModuleManager {
                 Velocity.INSTANCE,
 
                 // Player
+                AutoKouZi.INSTANCE,
                 AutoSprint.INSTANCE,
                 AutoTool.INSTANCE,
                 BreakCooldown.INSTANCE,
