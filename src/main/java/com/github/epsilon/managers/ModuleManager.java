@@ -46,6 +46,7 @@ public class ModuleManager {
                 AutoTotem.INSTANCE,
                 CrystalAura.INSTANCE,
                 KillAura.INSTANCE,
+                MaceAura.INSTANCE,
                 PacketMine.INSTANCE,
                 Surround.INSTANCE,
                 TriggerBot.INSTANCE,
