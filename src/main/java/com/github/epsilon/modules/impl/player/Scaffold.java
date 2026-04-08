@@ -289,7 +289,7 @@ public class Scaffold extends Module {
             }
         }
 
-        boolean hasRotated = RaytraceUtils.overBlock(currentBlockInfo.position, RotationManager.INSTANCE.getRotation(), currentBlockInfo.dir, sideCheck.getValue());
+        boolean hasRotated = RaytraceUtils.overBlock(RotationManager.INSTANCE.getRotation(), currentBlockInfo.position, currentBlockInfo.dir, sideCheck.getValue());
         if (hasRotated) {
             InteractionResult result = mc.gameMode.useItemOn(mc.player, item.getHand(), new BlockHitResult(getVec3(currentBlockInfo.position, currentBlockInfo.dir), currentBlockInfo.dir, currentBlockInfo.position, false));
             if (result.consumesAction()) {
@@ -367,7 +367,7 @@ public class Scaffold extends Module {
     private Vector2f getRotation(BlockInfo blockCache) {
         Vector2f calculate = onAir() ? RotationUtils.calculate(blockCache.position, blockCache.dir) : RotationUtils.calculate(blockCache.position.getCenter());
         Vector2f reverseYaw = new Vector2f(Mth.wrapDegrees(mc.player.getYRot() - 180), calculate.y);
-        boolean hasRotated = RaytraceUtils.overBlock(blockCache.position, reverseYaw, blockCache.dir, false);
+        boolean hasRotated = RaytraceUtils.overBlock(reverseYaw, blockCache.position, blockCache.dir, false);
         if (hasRotated) return reverseYaw;
         else return calculate;
     }

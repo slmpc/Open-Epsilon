@@ -1,47 +1,58 @@
 package com.github.epsilon.modules.impl.render.notification;
 
-import net.minecraft.util.Mth;
+import com.github.epsilon.utils.render.animation.Animation;
+import com.github.epsilon.utils.render.animation.Easing;
 
 public class Notification {
 
+    private final String title;
+    private final String subTitle;
     private final NotificationMode mode;
-    private final String title, subTitle;
-    private final long displayTime;
-    private final long startTime;
+    private final long createTime;
+    private final int displayDuration;
+    private final boolean isModule;
 
-    public boolean isRequestedToRemove;
-    private float animationFactor = 0f;
+    private Animation yAnimation;
+    private float currentY;
+    private float targetY;
 
-    public Notification(String title, String subTitle, NotificationMode mode, long displayTime) {
+    public Notification(String title, String subTitle, NotificationMode mode, int displayTime, float initialY, boolean isModule) {
         this.title = title;
         this.subTitle = subTitle;
         this.mode = mode;
-        this.displayTime = displayTime;
-        this.startTime = System.currentTimeMillis();
+        this.createTime = System.currentTimeMillis();
+        this.displayDuration = displayTime;
+        this.isModule = isModule;
+        this.yAnimation = new Animation(Easing.EASE_OUT_EXPO, 300L);
+        this.yAnimation.setStartValue(initialY);
+        this.currentY = initialY;
+        this.targetY = initialY;
     }
 
-    public void update(float speed, float frameTime) {
-        if (System.currentTimeMillis() - startTime > displayTime) {
-            isRequestedToRemove = true;
+    public void update() {
+        if (yAnimation != null) {
+            yAnimation.run(targetY);
+            currentY = yAnimation.getValue();
         }
-        float target = isRequestedToRemove ? 0.0f : 1.0f;
-        animationFactor = Mth.lerp(speed * frameTime, animationFactor, target);
     }
 
-    public float getAlpha() {
-        return animationFactor;
+    public boolean isExpired() {
+        return System.currentTimeMillis() - createTime > displayDuration + 500L;
     }
 
-    public NotificationMode getMode() {
-        return mode;
+    public String getTitle() { return title; }
+    public String getSubTitle() { return subTitle; }
+    public NotificationMode getMode() { return mode; }
+    public int getDisplayDuration() { return displayDuration; }
+    public float getCurrentY() { return currentY; }
+    public boolean isModule() { return isModule; }
+    public long getCreateTime() { return createTime; }
+
+    public void setTargetY(float targetY) {
+        this.targetY = targetY;
     }
 
-    public String getSubTitle() {
-        return subTitle;
+    public Animation getYAnimation() {
+        return yAnimation;
     }
-
-    public String getTitle() {
-        return title;
-    }
-
 }

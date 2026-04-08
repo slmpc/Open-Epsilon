@@ -6,6 +6,7 @@ import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.Random;
@@ -26,6 +27,7 @@ public class Disabler extends Module {
 
     private int lastSlot = -1;
     private float playerYaw, lastYaw, lastPitch;
+    private float yawOffset = 0.0f;
 
     @SubscribeEvent
     public void onPacket(PacketEvent.Send event) {
@@ -45,7 +47,10 @@ public class Disabler extends Module {
             if (event.getPacket() instanceof ServerboundMovePlayerPacket packet && packet.hasRotation()) {
                 float yaw = packet.yRot;
                 if (yaw < 360.0f && yaw > -360.0f) {
-                    packet.yRot = yaw + 720f;
+                    yawOffset = 720f;
+                    packet.yRot = yaw + yawOffset;
+                } else {
+                    yawOffset = 0.0f;
                 }
                 return;
             }
@@ -69,7 +74,10 @@ public class Disabler extends Module {
                 float originalYaw = packet.yRot;
 
                 if (originalYaw < 360.0F && originalYaw > -360.0F) {
-                    packet.yRot = originalYaw + 720f;
+                    yawOffset = 720f;
+                    packet.yRot = originalYaw + yawOffset;
+                } else {
+                    yawOffset = 0.0f;
                 }
 
                 float lastPlayerYaw = this.playerYaw;
@@ -81,9 +89,20 @@ public class Disabler extends Module {
                     float perturbation = 0.005f + random.nextFloat() * 0.015f;
                     if (random.nextBoolean()) {
                         packet.yRot = packet.yRot + perturbation;
+                        yawOffset += perturbation;
                     } else {
                         packet.yRot = packet.yRot - perturbation;
+                        yawOffset -= perturbation;
                     }
+                }
+            }
+        }
+
+        if (event.getPacket() instanceof ServerboundUseItemPacket packet) {
+            if ((aimModulo360.getValue() || duplicateRotPlace.getValue()) && yawOffset != 0.0f) {
+                float yaw = packet.yRot;
+                if (yaw < 360.0f && yaw > -360.0f) {
+                    packet.yRot = yaw + yawOffset;
                 }
             }
         }

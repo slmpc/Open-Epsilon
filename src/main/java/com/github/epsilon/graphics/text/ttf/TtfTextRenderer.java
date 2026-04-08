@@ -188,6 +188,11 @@ public class TtfTextRenderer implements ITextRenderer {
     }
 
     @Override
+    public float getLineHeight(float scale, TtfFontLoader fontLoader) {
+        return fontLoader.fontFile.fontHeight * DEFAULT_SCALE * scale;
+    }
+
+    @Override
     public float getWidth(String text, float scale, TtfFontLoader fontLoader) {
         fontLoader.checkAndLoadChars(text);
         final var finalScale = scale * DEFAULT_SCALE;

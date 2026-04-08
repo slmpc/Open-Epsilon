@@ -6,6 +6,7 @@ import com.github.epsilon.gui.panel.PanelScreen;
 import com.github.epsilon.managers.ConfigManager;
 import com.github.epsilon.managers.RenderManager;
 import com.github.epsilon.modules.HudModule;
+import com.github.epsilon.modules.impl.render.notification.NotificationManager;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
@@ -39,6 +40,12 @@ public class HudEditorScreen extends Screen {
 
     private HudEditorScreen() {
         super(Component.literal("HUDEditor"));
+    }
+
+    @Override
+    protected void init() {
+        NotificationManager.INSTANCE.clear();
+        super.init();
     }
 
     @Override

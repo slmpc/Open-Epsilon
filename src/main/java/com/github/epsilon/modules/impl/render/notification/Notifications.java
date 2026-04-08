@@ -4,15 +4,14 @@ import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.TextRenderer;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.HudModule;
-import com.github.epsilon.settings.impl.ColorSetting;
 import com.github.epsilon.settings.impl.DoubleSetting;
+import com.github.epsilon.settings.impl.IntSetting;
+import com.github.epsilon.utils.render.animation.Animation;
 import com.google.common.base.Suppliers;
 import net.minecraft.client.DeltaTracker;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Iterator;
 import java.util.function.Supplier;
 
 public class Notifications extends HudModule {
@@ -20,95 +19,126 @@ public class Notifications extends HudModule {
     public static final Notifications INSTANCE = new Notifications();
 
     private final DoubleSetting scale = doubleSetting("Scale", 1.0, 0.5, 2.0, 0.1);
-    private final DoubleSetting animSpeed = doubleSetting("Animation Speed", 10.0, 1.0, 20.0, 0.5);
-    private final ColorSetting bgColor = colorSetting("Background Color", new Color(20, 20, 20, 150));
+    private final IntSetting backgroundAlpha = intSetting("BackgroundAlpha", 201, 0, 255, 1);
+    private final IntSetting displayTime = intSetting("DisplayTime", 2000, 500, 5000, 100);
 
     private final Supplier<TextRenderer> textRendererSupplier = Suppliers.memoize(TextRenderer::new);
     private final Supplier<RoundRectRenderer> roundRectRendererSupplier = Suppliers.memoize(RoundRectRenderer::new);
 
     private Notifications() {
-        super("Notifications", Category.RENDER, 10f, 10f, 150f, 35f);
+        super("Notifications", Category.RENDER, 4f, 4f, 150f, 35f);
     }
 
     @Override
     protected void updateBounds(DeltaTracker delta) {
-        float moduleScale = scale.getValue().floatValue();
-        float spacing = 38.0f * moduleScale;
-
-        long activeCount = NotificationManager.INSTANCE.getNotifications().stream()
-                .filter(n -> n.getAlpha() > 0.001f).count();
-
-        setBounds(150f * moduleScale, Math.max(35f * moduleScale, activeCount * spacing));
+        float s = scale.getValue().floatValue();
+        float h = textRendererSupplier.get().getLineHeight(s) * 4.0f - 20.0f;
+        long count = NotificationManager.INSTANCE.getNotifications().stream().filter(n -> !n.isExpired()).count();
+        setBounds(150f * s, Math.max(h, count * (h + 4.0f * s)));
     }
 
     @Override
     public void render(DeltaTracker delta) {
-        float frameTime = delta == null ? 0.05f : delta.getGameTimeDeltaTicks() / 20.0f;
-        NotificationManager.INSTANCE.update(animSpeed.getValue().floatValue(), frameTime);
-
-        List<Notification> list = new ArrayList<>(NotificationManager.INSTANCE.getNotifications());
-        if (list.isEmpty()) return;
-
-        Collections.reverse(list);
+        NotificationManager.INSTANCE.update();
+        if (NotificationManager.INSTANCE.isEmpty()) return;
 
         TextRenderer textRenderer = textRendererSupplier.get();
         RoundRectRenderer roundRectRenderer = roundRectRendererSupplier.get();
 
-        float moduleScale = scale.getValue().floatValue();
-        float spacing = 38.0f * moduleScale;
-        float currentY = this.y;
+        float s = scale.getValue().floatValue();
+        float boxHeight = textRenderer.getLineHeight(s) * 4.0f - 20.0f;
+        float spacing = boxHeight + 4.0f * s;
+        int bgAlpha = backgroundAlpha.getValue();
 
-        HorizontalAnchor hAnchor = getHorizontalAnchor();
-        VerticalAnchor vAnchor = getVerticalAnchor();
+        Iterator<Notification> iterator = NotificationManager.INSTANCE.getNotifications().iterator();
+        int index = 0;
 
-        for (Notification n : list) {
-            float alpha = n.getAlpha();
-            if (alpha <= 0.001f) continue;
+        while (iterator.hasNext()) {
+            Notification n = iterator.next();
+            n.update();
+            if (n.isExpired()) continue;
 
-            float boxWidth = 140.0f * moduleScale;
-            float boxHeight = 32.0f * moduleScale;
+            float boxWidth = Math.max(150.0f * s, 12.0f * s + textRenderer.getWidth(n.getTitle() + " " + n.getSubTitle(), s));
+            float renderX = getHorizontalAnchor() == HorizontalAnchor.Right ? this.x + this.width - boxWidth
+                    : getHorizontalAnchor() == HorizontalAnchor.Center ? this.x + (this.width - boxWidth) / 2.0f
+                    : this.x;
+            float targetY = getVerticalAnchor() == VerticalAnchor.Bottom ? this.y + this.height - (index + 1) * spacing : this.y + index * spacing;
 
-            float itemX = switch (hAnchor) {
-                case Right -> this.x + this.width - boxWidth;
-                case Center -> this.x + (this.width - boxWidth) / 2.0f;
-                default -> this.x;
-            };
-
-            float xOffset = (1.0f - alpha) * 20.0f * (hAnchor == HorizontalAnchor.Right ? 1 : -1);
-            float renderX = itemX + xOffset;
-
-            Color baseBg = bgColor.getValue();
-            Color animatedBg = new Color(baseBg.getRed(), baseBg.getGreen(), baseBg.getBlue(), (int) (baseBg.getAlpha() * alpha));
-            roundRectRenderer.addRoundRect(renderX, currentY, boxWidth, boxHeight, 6.0f * moduleScale, animatedBg);
-
-            Color dotColor = getModeColor(n.getMode(), alpha);
-            float dotSize = 6.0f * moduleScale;
-            float dotX = renderX + 8.0f * moduleScale;
-            float dotY = currentY + (boxHeight - dotSize) / 2.0f;
-            roundRectRenderer.addRoundRect(dotX, dotY, dotSize, dotSize, dotSize / 2.0f, dotColor);
-
-            float textX = dotX + dotSize + 8.0f * moduleScale;
-            textRenderer.addText(n.getTitle(), textX, currentY + 5.0f * moduleScale, moduleScale * 0.85f, new Color(255, 255, 255, (int) (255 * alpha)));
-            textRenderer.addText(n.getSubTitle(), textX, currentY + 18.0f * moduleScale, moduleScale * 0.75f, new Color(200, 200, 200, (int) (200 * alpha)));
-
-            if (vAnchor == VerticalAnchor.Bottom) {
-                currentY -= spacing;
-            } else {
-                currentY += spacing;
+            if (Math.abs(targetY - n.getCurrentY()) > 0.5f) {
+                n.setTargetY(targetY);
+                Animation anim = n.getYAnimation();
+                if (anim != null) anim.setDuration(300L);
             }
+
+            float y = n.getCurrentY();
+            long time = System.currentTimeMillis() - n.getCreateTime();
+            long exitTime = time - n.getDisplayDuration();
+
+            if (time <= 300L) {
+                float p = easeOutCubic(time / 300.0f);
+                float w = boxWidth * p;
+                roundRectRenderer.addRoundRect(renderX + boxWidth - w, y, w, boxHeight, 0.0f, new Color(118, 185, 0, 255));
+                roundRectRenderer.drawAndClear();
+            } else if (time <= 500L) {
+                float p = easeOutCubic((time - 300L) / 200.0f);
+                int a = (int) (bgAlpha * p);
+                roundRectRenderer.addRoundRect(renderX, y, boxWidth, boxHeight, 0.0f, new Color(0, 0, 0, a));
+                float sliderWidth = 4.0f * s + (boxWidth - 4.0f * s) * (1.0f - p);
+                roundRectRenderer.addRoundRect(renderX, y, sliderWidth, boxHeight, 0.0f, new Color(118, 185, 0, 255));
+                roundRectRenderer.drawAndClear();
+                renderText(textRenderer, n, renderX, y, boxHeight, s, (int) (255 * p));
+            } else if (exitTime < 0) {
+                roundRectRenderer.addRoundRect(renderX, y, boxWidth, boxHeight, 0.0f, new Color(0, 0, 0, bgAlpha));
+                roundRectRenderer.addRoundRect(renderX, y, 4.0f * s, boxHeight, 0.0f, new Color(118, 185, 0, 255));
+                roundRectRenderer.drawAndClear();
+                renderText(textRenderer, n, renderX, y, boxHeight, s, 255);
+            } else if (exitTime <= 200L) {
+                float p = easeOutCubicDec(exitTime / 200.0f);
+                int a = (int) (bgAlpha * p);
+                roundRectRenderer.addRoundRect(renderX, y, boxWidth, boxHeight, 0.0f, new Color(0, 0, 0, a));
+                float sliderWidth = 4.0f * s + (boxWidth - 4.0f * s) * (1.0f - p);
+                roundRectRenderer.addRoundRect(renderX, y, sliderWidth, boxHeight, 0.0f, new Color(118, 185, 0, 255));
+                roundRectRenderer.drawAndClear();
+                renderText(textRenderer, n, renderX, y, boxHeight, s, (int) (255 * p));
+            } else if (exitTime <= 500L) {
+                float p = easeOutCubicDec((exitTime - 200L) / 300.0f);
+                float w = boxWidth * p;
+                roundRectRenderer.addRoundRect(renderX + boxWidth - w, y, w, boxHeight, 0.0f, new Color(118, 185, 0, 255));
+            }
+
+            roundRectRenderer.drawAndClear();
+            textRenderer.drawAndClear();
+            index++;
         }
-        roundRectRenderer.drawAndClear();
-        textRenderer.drawAndClear();
     }
 
-    private Color getModeColor(NotificationMode mode, float alpha) {
-        int a = (int) (255 * alpha);
+    private void renderText(TextRenderer textRenderer, Notification n, float x, float y, float boxHeight, float s, int alpha) {
+        float textY = y + boxHeight * 0.5f - s - textRenderer.getLineHeight(s) * 0.5f;
+        Color titleColor = n.isModule()
+                ? new Color(n.getMode() == NotificationMode.Success ? 118 : 255, n.getMode() == NotificationMode.Success ? 185 : 75, n.getMode() == NotificationMode.Success ? 0 : 75, alpha)
+                : getModeColor(n.getMode(), alpha);
+        textRenderer.addText(n.getTitle(), x + 8.0f * s, textY, s, titleColor);
+        textRenderer.addText(" " + n.getSubTitle(), x + 8.0f * s + textRenderer.getWidth(n.getTitle(), s), textY, s, new Color(255, 255, 255, alpha));
+    }
+
+    private Color getModeColor(NotificationMode mode, int alpha) {
         return switch (mode) {
-            case Success -> new Color(85, 255, 85, a);
-            case Error -> new Color(255, 85, 85, a);
-            case Question -> new Color(255, 255, 85, a);
-            case Info -> new Color(85, 170, 255, a);
+            case Success -> new Color(118, 185, 0, alpha);
+            case Error -> new Color(255, 75, 75, alpha);
+            case Question -> new Color(255, 255, 85, alpha);
+            case Info -> new Color(85, 170, 255, alpha);
         };
     }
 
+    private static float easeOutCubic(float t) {
+        return 1.0f - (1.0f - t) * (1.0f - t) * (1.0f - t);
+    }
+
+    private static float easeOutCubicDec(float t) {
+        return 1.0f - easeOutCubic(t);
+    }
+
+    public static void addModuleNotification(String moduleName, boolean enabled) {
+        NotificationManager.INSTANCE.postModuleNotification(moduleName, enabled, INSTANCE.displayTime.getValue());
+    }
 }

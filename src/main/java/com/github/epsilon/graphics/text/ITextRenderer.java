@@ -16,6 +16,8 @@ public interface ITextRenderer {
 
     float getHeight(float scale, TtfFontLoader fontLoader);
 
+    float getLineHeight(float scale, TtfFontLoader fontLoader);
+
     float getWidth(String text, float scale, TtfFontLoader fontLoader);
 
     default void setScissor(int x, int y, int width, int height) {

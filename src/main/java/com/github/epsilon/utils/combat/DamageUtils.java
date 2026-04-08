@@ -52,8 +52,8 @@ public class DamageUtils {
      * @param mode       the armor enchantment mode to apply for calculate
      * @return estimated damage after all reductions (≥ 0)
      */
-    public static float crystalDamage(LivingEntity target, Vec3 crystalPos, ArmorEnchantmentMode mode) {
-        return explosionDamage(target, crystalPos, CRYSTAL_EXPLOSION_RADIUS, mode);
+    public static float crystalDamage(LivingEntity target, Vec3 crystalPos, Vec3 targetPos, ArmorEnchantmentMode mode) {
+        return explosionDamage(target, crystalPos, CRYSTAL_EXPLOSION_RADIUS, targetPos, mode);
     }
 
     /**
@@ -67,7 +67,7 @@ public class DamageUtils {
      * @return estimated damage after all reductions (≥ 0)
      */
     public static float anchorDamage(LivingEntity target, Vec3 anchorPos, ArmorEnchantmentMode mode) {
-        return explosionDamage(target, anchorPos, ANCHOR_EXPLOSION_RADIUS, mode);
+        return explosionDamage(target, anchorPos, ANCHOR_EXPLOSION_RADIUS, null, mode);
     }
 
     /**
@@ -80,33 +80,27 @@ public class DamageUtils {
      * @param mode         the armor enchantment mode to apply for calculate
      * @return estimated damage after all reductions (≥ 0)
      */
-    public static float explosionDamage(LivingEntity target, Vec3 explosionPos, float radius, ArmorEnchantmentMode mode) {
+    public static float explosionDamage(LivingEntity target, Vec3 explosionPos, float radius, Vec3 targetPos, ArmorEnchantmentMode mode) {
         if (target.isInvulnerable()) return 0f;
 
         float doubleRadius = radius * 2.0f;
-        double dist = Math.sqrt(target.distanceToSqr(explosionPos)) / doubleRadius;
+        Vec3 entityPos = targetPos != null ? targetPos : target.position();
+        double dist = Math.sqrt(entityPos.distanceToSqr(explosionPos)) / doubleRadius;
         if (dist > 1.0) return 0f;
 
-        // Exposure (ray-traced visibility percentage)
-        float exposure = getSeenPercent(explosionPos, target);
+        AABB box = targetPos != null ? getPredictedBoundingBox(target, targetPos) : target.getBoundingBox();
+        float exposure = getSeenPercent(explosionPos, box, target);
         if (exposure <= 0f) return 0f;
 
-        // ─ base damage (from ExplosionDamageCalculator.getEntityDamageAmount) ─
         double impact = (1.0 - dist) * exposure;
         float baseDamage = (float) ((impact * impact + impact) / 2.0 * 7.0 * doubleRadius + 1.0);
 
-        // ─ difficulty scaling (only for players) ─
         if (target instanceof Player player) {
             baseDamage = applyDifficultyScaling(baseDamage, player);
         }
 
-        // ─ armor reduction (CombatRules.getDamageAfterAbsorb) ─
         float afterArmor = applyArmorReduction(target, baseDamage);
-
-        // ─ Resistance potion effect ─
         float afterResistance = applyResistanceReduction(target, afterArmor);
-
-        // ─ enchantment protection (Protection / Blast Protection) ─
         float afterEnchants = applyEnchantmentReduction(target, afterResistance, mode);
 
         return Math.max(0f, afterEnchants);
@@ -136,7 +130,10 @@ public class DamageUtils {
      * explosion center and returns the fraction that are unobstructed.
      */
     public static float getSeenPercent(Vec3 center, LivingEntity entity) {
-        AABB bb = entity.getBoundingBox();
+        return getSeenPercent(center, entity.getBoundingBox(), entity);
+    }
+
+    public static float getSeenPercent(Vec3 center, AABB bb, LivingEntity entity) {
         double xs = 1.0 / ((bb.maxX - bb.minX) * 2.0 + 1.0);
         double ys = 1.0 / ((bb.maxY - bb.minY) * 2.0 + 1.0);
         double zs = 1.0 / ((bb.maxZ - bb.minZ) * 2.0 + 1.0);
@@ -280,8 +277,24 @@ public class DamageUtils {
      * Shortcut: calculates how much crystal damage the local player would take.
      */
     public static float selfCrystalDamage(Vec3 crystalPos, ArmorEnchantmentMode mode) {
+        return selfCrystalDamage(crystalPos, null, mode);
+    }
+
+    public static float selfCrystalDamage(Vec3 crystalPos, Vec3 selfPos, ArmorEnchantmentMode mode) {
         if (mc.player == null) return 0f;
-        return crystalDamage(mc.player, crystalPos, mode);
+        return crystalDamage(mc.player, crystalPos, selfPos, mode);
+    }
+
+    public static AABB getPredictedBoundingBox(LivingEntity entity, Vec3 pos) {
+        float width = entity.getBbWidth();
+        float height = entity.getBbHeight();
+        double halfWidth = Math.min(width, 2.0f) / 2.0;
+        double clampedHeight = Math.min(height, 3.0);
+
+        return new AABB(
+                pos.x - halfWidth, pos.y, pos.z - halfWidth,
+                pos.x + halfWidth, pos.y + clampedHeight, pos.z + halfWidth
+        );
     }
 
     private DamageUtils() {

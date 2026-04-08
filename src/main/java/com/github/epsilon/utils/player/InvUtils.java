@@ -72,6 +72,10 @@ public class InvUtils {
     }
 
     public static void swap(int slot, boolean saveSwap) {
+        if (slot == 40) {
+            return;
+        }
+
         if (mc.player.getInventory().getSelectedSlot() == slot && SyncManager.serverSlot == slot) {
             return;
         }

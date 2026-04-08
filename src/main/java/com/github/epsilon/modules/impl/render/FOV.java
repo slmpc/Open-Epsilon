@@ -20,4 +20,5 @@ public class FOV extends Module {
     private void onComputeFov(ViewportEvent.ComputeFov event) {
         event.setFOV(fovModifier.getValue());
     }
+
 }

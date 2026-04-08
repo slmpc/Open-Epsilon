@@ -77,7 +77,6 @@ public class PanelScreen extends Screen {
                 || moduleListPanel.hasActiveAnimations()
                 || moduleDetailPanel.hasActiveAnimations()
                 || clientSettingPanel.hasActiveAnimations()) {
-            // Keep rebuilding cached sections while animations are still interpolating.
             dirtyState.markAllDirty();
         }
 

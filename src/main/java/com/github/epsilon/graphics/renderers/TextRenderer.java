@@ -62,6 +62,14 @@ public class TextRenderer implements IRenderer {
         return textRenderer.getHeight(scale, fontLoader);
     }
 
+    public float getLineHeight(float scale) {
+        return textRenderer.getLineHeight(scale, StaticFontLoader.DEFAULT);
+    }
+
+    public float getLineHeight(float scale, TtfFontLoader fontLoader) {
+        return textRenderer.getLineHeight(scale, fontLoader);
+    }
+
     public float getWidth(String text, float scale) {
         return textRenderer.getWidth(text, scale, StaticFontLoader.DEFAULT);
     }
