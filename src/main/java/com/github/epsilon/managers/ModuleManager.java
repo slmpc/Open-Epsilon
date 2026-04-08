@@ -48,6 +48,7 @@ public class ModuleManager {
                 KillAura.INSTANCE,
                 MaceAura.INSTANCE,
                 PacketMine.INSTANCE,
+                SpearKill.INSTANCE,
                 Surround.INSTANCE,
                 TriggerBot.INSTANCE,
                 Velocity.INSTANCE,
