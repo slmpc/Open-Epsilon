@@ -24,6 +24,8 @@ public class CategoryRailPanel {
 
     private static final float CATEGORY_ITEM_HEIGHT = 34.0f;
     private static final float CATEGORY_ITEM_SPACING = 38.0f;
+    private static final float CATEGORY_START_Y = 40.0f;
+    private static final float RAIL_ICON_CENTER_X_OFFSET = 2.0f;
     private static final String SETTINGS_ICON = "7";
 
     protected final PanelState state;
@@ -73,7 +75,6 @@ public class CategoryRailPanel {
     public void render(GuiGraphicsExtractor GuiGraphicsExtractor, PanelLayout.Rect bounds, int mouseX, int mouseY, float partialTick) {
         this.bounds = bounds;
         applyTextScissor(bounds, GuiGraphicsExtractor.guiHeight());
-        float progress = Math.max(0.0f, Math.min(1.0f, (getAnimatedWidth() - MD3Theme.RAIL_COLLAPSED_WIDTH) / (MD3Theme.RAIL_EXPANDED_WIDTH - MD3Theme.RAIL_COLLAPSED_WIDTH)));
         contentAnimation.run(state.isSidebarExpanded() ? 1.0f : 0.0f);
         float contentProgress = contentAnimation.getValue();
         headerTitleAnimation.run(contentProgress);
@@ -94,7 +95,7 @@ public class CategoryRailPanel {
         float titleProgress = headerTitleAnimation.getValue();
         float subtitleProgress = headerSubtitleAnimation.getValue();
         float dividerProgress = headerDividerAnimation.getValue();
-        float categoryStartY = getCategoryStartY(bounds, progress, titleScale, subtitleScale);
+        float categoryStartY = getCategoryStartY(bounds);
         if (titleProgress > 0.02f) {
             Color brandColor = MD3Theme.withAlpha(MD3Theme.TEXT_PRIMARY, (int) (255 * titleProgress));
             Color subColor = MD3Theme.withAlpha(MD3Theme.TEXT_SECONDARY, (int) (210 * subtitleProgress));
@@ -181,7 +182,7 @@ public class CategoryRailPanel {
 
             roundRectRenderer.addRoundRect(itemRect.x(), itemRect.y(), itemRect.width(), itemRect.height(), MD3Theme.CARD_RADIUS, background);
             float iconWidth = clippedTextRenderer.getWidth(category.icon, itemIconScale, StaticFontLoader.ICONS);
-            float iconX = menuButton.x() + (menuButton.width() - iconWidth) / 2.0f + 2f;
+            float iconX = getRailIconCenterX(menuButton) - iconWidth / 2.0f;
             clippedTextRenderer.addText(category.icon, iconX, iconY, itemIconScale, iconColor, StaticFontLoader.ICONS);
 
             if (contentProgress > 0.02f) {
@@ -209,7 +210,7 @@ public class CategoryRailPanel {
         Color settingsLabelColor = settingsSelected ? MD3Theme.ON_SECONDARY_CONTAINER : MD3Theme.TEXT_PRIMARY;
         roundRectRenderer.addRoundRect(settingsRect.x(), settingsRect.y(), settingsRect.width(), settingsRect.height(), MD3Theme.CARD_RADIUS, settingsBg);
         float settingsIconWidth = clippedTextRenderer.getWidth(SETTINGS_ICON, itemIconScale, StaticFontLoader.ICONS);
-        float settingsIconX = menuButton.x() + (menuButton.width() - settingsIconWidth) / 2.0f + 2f;
+        float settingsIconX = getRailIconCenterX(menuButton) - settingsIconWidth / 2.0f;
         float settingsIconHeight = clippedTextRenderer.getHeight(itemIconScale, StaticFontLoader.ICONS);
         float settingsIconY = settingsRect.y() + (settingsRect.height() - settingsIconHeight) / 2.0f - 2f;
         clippedTextRenderer.addText(SETTINGS_ICON, settingsIconX, settingsIconY, itemIconScale, settingsIconColor, StaticFontLoader.ICONS);
@@ -243,8 +244,7 @@ public class CategoryRailPanel {
             return true;
         }
 
-        float progress = Math.max(0.0f, Math.min(1.0f, (getAnimatedWidth() - MD3Theme.RAIL_COLLAPSED_WIDTH) / (MD3Theme.RAIL_EXPANDED_WIDTH - MD3Theme.RAIL_COLLAPSED_WIDTH)));
-        float itemY = getCategoryStartY(bounds, progress, 0.78f, 0.52f);
+        float itemY = getCategoryStartY(bounds);
         for (Category category : Category.values()) {
             PanelLayout.Rect itemRect = new PanelLayout.Rect(bounds.x() + 5.0f, itemY, bounds.width() - 10.0f, CATEGORY_ITEM_HEIGHT);
             if (itemRect.contains(event.x(), event.y())) {
@@ -265,7 +265,7 @@ public class CategoryRailPanel {
     }
 
     private PanelLayout.Rect getMenuButtonBounds() {
-        return new PanelLayout.Rect(bounds.x() + 4.0f, bounds.y() + 4.0f, 28.0f, 28.0f);
+        return new PanelLayout.Rect(bounds.x() + 4.0f + RAIL_ICON_CENTER_X_OFFSET, bounds.y() + 4.0f, 28.0f, 28.0f);
     }
 
     public boolean hasActiveAnimations() {
@@ -286,14 +286,9 @@ public class CategoryRailPanel {
         return rect.contains(mouseX, mouseY);
     }
 
-    private float getCategoryStartY(PanelLayout.Rect bounds, float progress, float titleScale, float subtitleScale) {
-        float collapsedStart = bounds.y() + 40.0f;
-        float titleY = bounds.y() + 7.0f;
-        float titleHeight = clippedTextRenderer.getHeight(titleScale, StaticFontLoader.DUCKSANS);
-        float subtitleY = titleY + titleHeight + 3.0f;
-        float dividerY = subtitleY + clippedTextRenderer.getHeight(subtitleScale) + 4.0f;
-        float expandedStart = dividerY + 6.0f;
-        return collapsedStart + (expandedStart - collapsedStart) * progress;
+    private float getCategoryStartY(PanelLayout.Rect bounds) {
+        // Keep category list vertically stable regardless of sidebar expansion progress.
+        return bounds.y() + CATEGORY_START_Y;
     }
 
     private float getSettingsButtonY() {
@@ -304,11 +299,15 @@ public class CategoryRailPanel {
         Color lineColor = MD3Theme.TEXT_PRIMARY;
         float glyphWidth = 12.0f;
         float glyphHeight = 10.0f;
-        float x = button.x() + (button.width() - glyphWidth) / 2.0f;
+        float x = getRailIconCenterX(button) - glyphWidth / 2.0f;
         float y = button.y() + (button.height() - glyphHeight) / 2.0f;
         rectRenderer.addRect(x, y, 12.0f, 1.6f, lineColor);
         rectRenderer.addRect(x, y + 4.0f, 12.0f, 1.6f, lineColor);
         rectRenderer.addRect(x, y + 8.0f, 12.0f, 1.6f, lineColor);
+    }
+
+    private float getRailIconCenterX(PanelLayout.Rect railButton) {
+        return railButton.x() + railButton.width() / 2.0f;
     }
 
     private int getCategoryCount(Category category) {
