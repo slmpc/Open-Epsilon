@@ -187,7 +187,7 @@ public class CrystalAura extends Module {
 
             Vec3 crystalPos = crystal.position();
 
-            float targetDmg = DamageUtils.crystalDamage(target, crystalPos, armorMode.getValue());
+            float targetDmg = DamageUtils.crystalDamage(target, crystalPos, target.position(), armorMode.getValue());
             float selfDmg = DamageUtils.selfCrystalDamage(crystalPos, armorForSelf.getValue() ? armorMode.getValue() : DamageUtils.ArmorEnchantmentMode.None);
             float hp = mc.player.getHealth() + mc.player.getAbsorptionAmount();
             if (noSuicide.getValue() && hp - selfDmg <= 0.5f) continue;
@@ -248,7 +248,7 @@ public class CrystalAura extends Module {
             doSwing(breakSwing.getValue());
             breakTimer.reset();
             Vec3 crystalPosition = currentCrystal.position();
-            float tgtDmg = DamageUtils.crystalDamage(target, crystalPosition, armorMode.getValue());
+            float tgtDmg = DamageUtils.crystalDamage(target, crystalPosition, target.position(), armorMode.getValue());
             float selfDmg = DamageUtils.selfCrystalDamage(crystalPosition, armorForSelf.getValue() ? armorMode.getValue() : DamageUtils.ArmorEnchantmentMode.None);
             updateRenderTarget(currentCrystal.blockPosition().below(), tgtDmg, selfDmg);
 
@@ -322,10 +322,10 @@ public class CrystalAura extends Module {
                             supportPos.getZ() + 0.5
                     );
 
-                    float targetDmg = DamageUtils.crystalDamage(target, crystalPos, armorMode.getValue());
+                    float targetDmg = DamageUtils.crystalDamage(target, crystalPos, predictedTargetPos, armorMode.getValue());
                     float selfDmg = DamageUtils.selfCrystalDamage(crystalPos, armorForSelf.getValue() ? armorMode.getValue() : DamageUtils.ArmorEnchantmentMode.None);
                     Vector2f targetRotation = RotationUtils.calculate(supportPos, Direction.UP);
-                    boolean visible = RaytraceUtils.overBlock(supportPos, targetRotation, Direction.UP, false);
+                    boolean visible = RaytraceUtils.overBlock(targetRotation, supportPos, Direction.UP, false);
                     boolean wallBypassAllowed = !visible && distanceSq <= wallRangeSq;
                     if (!visible && !wallBypassAllowed) continue;
 
@@ -445,7 +445,7 @@ public class CrystalAura extends Module {
             if (record.selectedPriorityValue() != requestPriority) return;
             boolean canPlace = candidate.throughWall
                     ? candidate.wallBypassAllowed && isAimingAtBlock(record.currentRotation(), candidate.targetRotation)
-                    : RaytraceUtils.overBlock(candidate.supportPos, record.currentRotation(), Direction.UP, false);
+                    : RaytraceUtils.overBlock(record.currentRotation(), candidate.supportPos, Direction.UP, false);
             if (!canPlace) {
                 InvUtils.swapBack();
                 return;
