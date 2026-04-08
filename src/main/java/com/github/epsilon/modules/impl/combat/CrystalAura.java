@@ -443,15 +443,19 @@ public class CrystalAura extends Module {
                 return;
             }
             if (record.selectedPriorityValue() != requestPriority) return;
+
+            Direction placementDirection = getPlacementDirection(record.currentRotation(), candidate.supportPos);
+            if (placementDirection == null) return;
+
             boolean canPlace = candidate.throughWall
                     ? candidate.wallBypassAllowed && isAimingAtBlock(record.currentRotation(), candidate.targetRotation)
-                    : RaytraceUtils.overBlock(record.currentRotation(), candidate.supportPos, Direction.UP, false);
+                    : RaytraceUtils.overBlock(record.currentRotation(), candidate.supportPos, placementDirection, false);
             if (!canPlace) {
                 InvUtils.swapBack();
                 return;
             }
 
-            BlockHitResult hitResult = new BlockHitResult(hitVec, Direction.UP, candidate.supportPos, false);
+            BlockHitResult hitResult = new BlockHitResult(hitVec, placementDirection, candidate.supportPos, false);
             InteractionResult result = mc.gameMode.useItemOn(mc.player, placeHand, hitResult);
             if (result.consumesAction()) {
                 doSwing(placeSwing.getValue());
@@ -520,6 +524,24 @@ public class CrystalAura extends Module {
             default -> {
             }
         }
+    }
+
+    private Direction getPlacementDirection(Vector2f currentRotation, BlockPos placePos) {
+        Vec3 playerEye = mc.player.getEyePosition();
+        Vec3 blockCenter = Vec3.atCenterOf(placePos);
+        Vec3 toPlayer = playerEye.subtract(blockCenter);
+
+        List<Direction> directions = new ArrayList<>(List.of(Direction.values()));
+        directions.sort((a, b) -> {
+            double dotA = a.getStepX() * toPlayer.x + a.getStepY() * toPlayer.y + a.getStepZ() * toPlayer.z;
+            double dotB = b.getStepX() * toPlayer.x + b.getStepY() * toPlayer.y + b.getStepZ() * toPlayer.z;
+            return Double.compare(dotB, dotA);
+        });
+
+        for (Direction direction : directions) {
+            if (RaytraceUtils.overBlock(currentRotation, placePos, direction, false)) return direction;
+        }
+        return null;
     }
 
     private void updateRenderTarget(BlockPos pos, float damage, float selfDmg) {
