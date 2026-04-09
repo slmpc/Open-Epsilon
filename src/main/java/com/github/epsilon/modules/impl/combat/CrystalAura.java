@@ -18,7 +18,6 @@ import com.github.epsilon.utils.rotation.RotationUtils;
 import com.github.epsilon.utils.timer.TimerUtils;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
@@ -39,11 +38,10 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector4d;
+import org.joml.*;
 
 import java.awt.*;
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -724,29 +722,15 @@ public class CrystalAura extends Module {
     }
 
     private Vector2f projectToScreen(Vec3 pos) {
-        int[] viewport = new int[]{0, 0, mc.getWindow().getWidth(), mc.getWindow().getHeight()};
-        CameraRenderState cameraState = mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
-        Matrix4f viewProjectionMatrix = new Matrix4f(cameraState.projectionMatrix).mul(cameraState.viewRotationMatrix);
+        Vector3f projected = WorldToScreen.getWorldPositionToScreen(pos);
 
-        AABB box = new AABB(
-                pos.x - 0.5, pos.y - 0.5, pos.z - 0.5,
-                pos.x + 0.5, pos.y + 0.5, pos.z + 0.5
-        );
-        Vector4d projected = WorldToScreen.projectEntity(viewport, viewProjectionMatrix, box);
-        if (projected == null) return null;
-
-        double guiScale = mc.getWindow().getGuiScale();
-        double minX = projected.x / guiScale;
-        double minY = projected.y / guiScale;
-        double maxX = projected.z / guiScale;
-        double maxY = projected.w / guiScale;
+        float guiScale = mc.getWindow().getGuiScale();
 
         float screenWidth = mc.getWindow().getGuiScaledWidth();
         float screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        if (maxX < 0 || maxY < 0 || minX > screenWidth || minY > screenHeight) return null;
-        float centerX = (float) ((minX + maxX) * 0.5);
-        float centerY = (float) ((minY + maxY) * 0.5);
+        float centerX = projected.x / guiScale;
+        float centerY = projected.y / guiScale;
         if (centerX < 0.0f || centerY < 0.0f || centerX > screenWidth || centerY > screenHeight) return null;
         return new Vector2f(centerX, centerY);
     }
