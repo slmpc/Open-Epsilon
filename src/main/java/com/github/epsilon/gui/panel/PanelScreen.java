@@ -11,13 +11,16 @@ import com.github.epsilon.gui.panel.panel.ClientSettingPanel;
 import com.github.epsilon.gui.panel.panel.ModuleDetailPanel;
 import com.github.epsilon.gui.panel.panel.ModuleListPanel;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
+import com.github.epsilon.gui.panel.util.IMEFocusHelper;
 import com.github.epsilon.managers.RenderManager;
 import com.github.epsilon.modules.impl.ClientSetting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.IMEPreeditOverlay;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.PreeditEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
@@ -46,6 +49,8 @@ public class PanelScreen extends Screen {
     private String lastSearchQuery = "";
     private boolean lastSidebarExpanded;
     private boolean lastClientSettingMode;
+
+    private @Nullable IMEPreeditOverlay preeditOverlay;
 
     private @Nullable LuminRenderSystem.LuminRenderTarget renderTarget;
 
@@ -135,6 +140,10 @@ public class PanelScreen extends Screen {
 
         LuminRenderSystem.setActiveTarget(null);
 
+        if (preeditOverlay != null) {
+            this.preeditOverlay.updateInputPosition((int) IMEFocusHelper.activeCursorX, (int) IMEFocusHelper.activeCursorY);
+            guiGraphics.setPreeditOverlay(this.preeditOverlay);
+        }
         guiGraphics.blit(renderTarget.getIdentifier(), 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), 0, 1, 1, 0);
     }
 
@@ -263,7 +272,14 @@ public class PanelScreen extends Screen {
     }
 
     @Override
+    public boolean preeditUpdated(@Nullable PreeditEvent event) {
+        this.preeditOverlay = event != null ? new IMEPreeditOverlay(event, this.font, 10) : null;
+        return true;
+    }
+
+    @Override
     public void onClose() {
+        IMEFocusHelper.deactivate();
         super.onClose();
     }
 

@@ -15,6 +15,7 @@ import com.github.epsilon.gui.panel.component.setting.KeybindSettingRow;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
 import com.github.epsilon.gui.panel.util.PanelContentBuffer;
 import com.github.epsilon.gui.panel.util.PanelContentInvalidationState;
+import com.github.epsilon.gui.panel.util.IMEFocusHelper;
 import com.github.epsilon.gui.panel.util.ScrollBarDragState;
 import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.managers.ConfigManager;
@@ -379,6 +380,7 @@ public class ClientSettingPanel {
             int safeCursor = Math.min(friendInputCursor, friendInputBuffer.length());
             float caretX = textX + textRenderer.getWidth(friendInputBuffer.substring(0, safeCursor), textScale);
             rectRenderer.addRect(caretX, inputBounds.y() + 6.0f, 1.0f, inputBounds.height() - 12.0f, MD3Theme.TEXT_PRIMARY);
+            IMEFocusHelper.updateCursorPos(caretX, textY);
         }
 
         // Enter hint when focused and has text
@@ -412,11 +414,12 @@ public class ClientSettingPanel {
                     ? PanelState.ClientSettingTab.GENERAL
                     : PanelState.ClientSettingTab.FRIEND;
             state.setClientSettingTab(clickedTab);
-            if (clickedTab == PanelState.ClientSettingTab.FRIEND) {
-                settingListController.clearFocus();
-            } else {
-                friendInputFocused = false;
-            }
+        if (clickedTab == PanelState.ClientSettingTab.FRIEND) {
+                    settingListController.clearFocus();
+                } else {
+                    friendInputFocused = false;
+                    IMEFocusHelper.deactivate();
+                }
             markDirty();
             markFriendDirty();
             return true;
@@ -477,6 +480,7 @@ public class ClientSettingPanel {
         if (inputBounds.contains(event.x(), event.y())) {
             friendInputFocused = true;
             friendInputCursor = friendInputBuffer.length();
+            IMEFocusHelper.activate();
             markFriendDirty();
             return true;
         }
@@ -484,6 +488,7 @@ public class ClientSettingPanel {
         // Unfocus input if clicked elsewhere
         if (friendInputFocused) {
             friendInputFocused = false;
+            IMEFocusHelper.deactivate();
             markFriendDirty();
         }
 
@@ -631,6 +636,7 @@ public class ClientSettingPanel {
             }
             case GLFW.GLFW_KEY_ESCAPE -> { // Escape
                 friendInputFocused = false;
+                IMEFocusHelper.deactivate();
                 markFriendDirty();
                 yield true;
             }

@@ -4,15 +4,18 @@ import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.gui.panel.MD3Theme;
 import com.github.epsilon.gui.panel.PanelScreen;
+import com.github.epsilon.gui.panel.util.IMEFocusHelper;
 import com.github.epsilon.managers.ConfigManager;
 import com.github.epsilon.managers.RenderManager;
 import com.github.epsilon.modules.HudModule;
 import com.github.epsilon.modules.impl.render.notification.NotificationManager;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.IMEPreeditOverlay;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.PreeditEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
@@ -41,6 +44,7 @@ public class HudEditorScreen extends Screen {
     private Float snapPreviewY;
 
     private @Nullable LuminRenderSystem.LuminRenderTarget renderTarget;
+    private @Nullable IMEPreeditOverlay preeditOverlay;
 
     private HudEditorScreen() {
         super(Component.literal("HUDEditor"));
@@ -112,6 +116,11 @@ public class HudEditorScreen extends Screen {
         inspector.renderPopups(guiGraphics, mouseX, mouseY, a);
 
         LuminRenderSystem.setActiveTarget(null);
+
+        if (preeditOverlay != null) {
+            preeditOverlay.updateInputPosition((int) IMEFocusHelper.activeCursorX, (int) IMEFocusHelper.activeCursorY);
+            guiGraphics.setPreeditOverlay(preeditOverlay);
+        }
 
         guiGraphics.blit(renderTarget.getIdentifier(), 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), 0, 1, 1, 0);
     }
@@ -229,6 +238,12 @@ public class HudEditorScreen extends Screen {
     }
 
     @Override
+    public boolean preeditUpdated(@Nullable PreeditEvent event) {
+        this.preeditOverlay = event != null ? new IMEPreeditOverlay(event, this.font, 10) : null;
+        return true;
+    }
+
+    @Override
     public boolean isPauseScreen() {
         return false;
     }
@@ -237,6 +252,7 @@ public class HudEditorScreen extends Screen {
     public void onClose() {
         dragging = null;
         clearSnapPreview();
+        IMEFocusHelper.deactivate();
         ConfigManager.INSTANCE.saveNow();
         super.onClose();
         minecraft.setScreen(PanelScreen.INSTANCE);
