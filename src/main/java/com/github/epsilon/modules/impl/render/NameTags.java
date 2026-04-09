@@ -89,9 +89,13 @@ public class NameTags extends Module {
             float boxWidth = width + padding * 2.0f;
             float boxHeight = padding * 2.0f + lineHeight * lineCount + lineGap * Math.max(0, lineCount - 1);
 
-            float centerX = (float) ((projected.x + projected.z) * 0.5);
-            float x = centerX - boxWidth * 0.5f;
-            float y = (float) projected.y - boxHeight - 4.0f * renderScale;
+            final var projectedPosition = WorldToScreen.getWorldPositionToScreen(target.getEyePosition().add(0.0f, 0.5f, 0.0f));
+            if (projectedPosition.z > 1.0f || projectedPosition.z < 0.0f) continue;
+
+            float guiScale = mc.getWindow().getGuiScale();
+
+            float x = (projectedPosition.x / guiScale) - boxWidth / 2.0f;
+            float y = projectedPosition.y / guiScale - boxHeight - 4.0f * renderScale;
 
             if (x + boxWidth < 0.0f || y + boxHeight < 0.0f || x > screenWidth || y > screenHeight) continue;
 
