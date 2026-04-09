@@ -6,14 +6,33 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4d;
-import org.joml.Vector4f;
+import org.joml.*;
+
+import java.lang.Math;
 
 public final class WorldToScreen {
 
     private static final Minecraft mc = Minecraft.getInstance();
+
+    public static Vector3f getWorldPositionToScreen(Vec3 pos) {
+        final var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        final Vector3f position = new Vec3(
+                pos.x - camera.position().x,
+                pos.y - camera.position().y,
+                pos.z - camera.position().z
+        ).toVector3f();
+
+        CameraRenderState cameraState = mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+        Matrix4f viewProjectionMatrix = new Matrix4f(cameraState.projectionMatrix).mul(cameraState.viewRotationMatrix);
+
+        final int[] viewport = new int[]{0, 0, mc.getWindow().getWidth(), mc.getWindow().getHeight()};
+        final Vector4f out = new Vector4f();
+
+        viewProjectionMatrix.project(position, viewport, out);
+        out.y = viewport[3] - out.y;
+
+        return new Vector3f(out.x, out.y, out.z);
+    }
 
     public static Vector4d getEntityPositionsOn2D(LivingEntity target, float tickDelta) {
         final Vec3 position = interpolate(target, tickDelta);
