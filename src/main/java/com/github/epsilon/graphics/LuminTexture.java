@@ -3,21 +3,34 @@ package com.github.epsilon.graphics;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 
 import javax.annotation.Nonnull;
 
-public record LuminTexture(
-        @Nonnull GpuTexture texture,
-        @Nonnull GpuTextureView textureView,
-        @Nonnull GpuSampler sampler,
-        boolean closeTexture,
-        boolean closeSampler
-) {
+public class LuminTexture extends AbstractTexture {
+
+    private final boolean closeTexture;
+    private final boolean closeSampler;
+
+    public LuminTexture(
+            @Nonnull GpuTexture texture,
+            @Nonnull GpuTextureView textureView,
+            @Nonnull GpuSampler sampler,
+            boolean closeTexture,
+            boolean closeSampler
+    ) {
+        this.texture = texture;
+        this.textureView = textureView;
+        this.sampler = sampler;
+        this.closeTexture = closeTexture;
+        this.closeSampler = closeSampler;
+    }
 
     public LuminTexture(@Nonnull GpuTexture texture, @Nonnull GpuTextureView textureView, @Nonnull GpuSampler sampler) {
         this(texture, textureView, sampler, true, true);
     }
 
+    @Override
     public void close() {
         if (closeSampler) {
             sampler.close();

@@ -10,11 +10,10 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.TextureTransform;
 import net.minecraft.util.ARGB;
 import org.joml.Vector3f;
@@ -111,8 +110,9 @@ public class TtfTextRenderer implements ITextRenderer {
             }
         }
 
-        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
-        if (target.getColorTextureView() == null) return;
+        GpuTextureView colorView = LuminRenderSystem.resolveColorView();
+        GpuTextureView depthView = LuminRenderSystem.resolveDepthView();
+        if (colorView == null) return;
 
         GpuBufferSlice dynamicUniforms = RenderSystem.getDynamicUniforms().writeTransform(
                 RenderSystem.getModelViewMatrix(), new Vector4f(1, 1, 1, 1),
@@ -138,8 +138,8 @@ public class TtfTextRenderer implements ITextRenderer {
 
             try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
                     () -> "Lumin TTF Draw",
-                    target.getColorTextureView(), OptionalInt.empty(),
-                    target.getDepthTextureView(), OptionalDouble.empty())
+                    colorView, OptionalInt.empty(),
+                    depthView, OptionalDouble.empty())
             ) {
                 pass.setPipeline(LuminRenderPipelines.TTF_FONT);
                 if (scissorEnabled) {
@@ -152,7 +152,7 @@ public class TtfTextRenderer implements ITextRenderer {
 
                 pass.setVertexBuffer(0, batch.buffer.getGpuBuffer());
                 pass.setIndexBuffer(ibo, autoIndices.type());
-                pass.bindTexture("Sampler0", atlas.getTexture().textureView(), atlas.getTexture().sampler());
+                pass.bindTexture("Sampler0", atlas.getTexture().getTextureView(), atlas.getTexture().getSampler());
 
                 pass.drawIndexed(0, 0, indexCount, 1);
             }

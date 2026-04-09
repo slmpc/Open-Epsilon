@@ -108,11 +108,11 @@ public class ShadowRenderer implements IRenderer {
         if (buffer.isMapped()) buffer.unmap();
 
         LuminRenderSystem.QuadRenderingInfo info = LuminRenderSystem.prepareQuadRendering(vertexCount);
-        if (info == null || info.target().getColorTextureView() == null) return;
+        if (info == null || info.colorView() == null) return;
 
         try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-                () -> "Lumin Shadow Draw", info.target().getColorTextureView(), OptionalInt.empty(),
-                info.target().getDepthTextureView(), OptionalDouble.empty())
+                () -> "Lumin Shadow Draw", info.colorView(), OptionalInt.empty(),
+                info.depthView(), OptionalDouble.empty())
         ) {
             pass.setPipeline(LuminRenderPipelines.SHADOW);
             if (scissorEnabled) pass.enableScissor(scissorX, scissorY, scissorW, scissorH);

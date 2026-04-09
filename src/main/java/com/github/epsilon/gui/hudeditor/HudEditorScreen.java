@@ -1,5 +1,6 @@
 package com.github.epsilon.gui.hudeditor;
 
+import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.gui.panel.MD3Theme;
 import com.github.epsilon.gui.panel.PanelScreen;
@@ -15,6 +16,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.List;
 
@@ -38,6 +40,8 @@ public class HudEditorScreen extends Screen {
     private Float snapPreviewX;
     private Float snapPreviewY;
 
+    private @Nullable LuminRenderSystem.LuminRenderTarget renderTarget;
+
     private HudEditorScreen() {
         super(Component.literal("HUDEditor"));
     }
@@ -49,10 +53,20 @@ public class HudEditorScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
+
+        final var window = minecraft.getWindow();
+        if (renderTarget == null) {
+            renderTarget = LuminRenderSystem.LuminRenderTarget.create("hud-editor", window.getWidth(), window.getHeight());
+        }
+        renderTarget.clear();
+        renderTarget.resize(window.getWidth(), window.getHeight());
+
+        LuminRenderSystem.setActiveTarget(renderTarget);
+
         MD3Theme.syncFromSettings();
 
-        RenderManager.INSTANCE.applyRenderAfterGui(delta -> {
+        RenderManager.INSTANCE.applyRender(delta -> {
             int screenWidth = minecraft.getWindow().getGuiScaledWidth();
             int screenHeight = minecraft.getWindow().getGuiScaledHeight();
             List<HudModule> hudModules = HudEditorModules.collectEnabledHudModules(delta);
@@ -92,10 +106,14 @@ public class HudEditorScreen extends Screen {
 
             overlayRenderer.addSnapPreview(snapPreviewX, snapPreviewY, screenWidth, screenHeight);
             overlayRenderer.flushRenderer();
-            inspector.queueRender(graphics, selected, screenWidth, screenHeight, mouseX, mouseY, a, graphics.guiHeight());
+            inspector.queueRender(guiGraphics, selected, screenWidth, screenHeight, mouseX, mouseY, a, guiGraphics.guiHeight());
         });
 
-        inspector.renderPopups(graphics, mouseX, mouseY, a);
+        inspector.renderPopups(guiGraphics, mouseX, mouseY, a);
+
+        LuminRenderSystem.setActiveTarget(null);
+
+        guiGraphics.blit(renderTarget.getIdentifier(), 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), 0, 1, 1, 0);
     }
 
     @Override

@@ -6,16 +6,12 @@ import com.github.epsilon.events.EpsilonRenderGuiEvent;
 import com.github.epsilon.graphics.LuminRenderPipelines;
 import com.github.epsilon.managers.ModuleManager;
 import com.github.epsilon.managers.RenderManager;
-import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.*;
 import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = Epsilon.MODID, value = Dist.CLIENT)
@@ -39,9 +35,9 @@ public class EventHandler {
     }
 
     @SubscribeEvent
-    public static void onRenderGuiPre(EpsilonRenderGuiEvent.BeforeGui event) {
+    public static void onRenderFramePost(RenderFrameEvent.Post event) {
         RenderSystem.backupProjectionMatrix();
-        RenderManager.INSTANCE.callGui(Minecraft.getInstance().getDeltaTracker());
+        RenderManager.INSTANCE.callAfterFrame(Minecraft.getInstance().getDeltaTracker());
         RenderSystem.restoreProjectionMatrix();
     }
 

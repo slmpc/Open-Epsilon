@@ -125,7 +125,7 @@ public class ColorPickerPopup implements PanelPopupHost.Popup {
             }
         }
 
-        RenderManager.INSTANCE.applyRenderAfterGui(() -> {
+        RenderManager.INSTANCE.applyRender(() -> {
             shadowRenderer.drawAndClear();
             roundRectRenderer.drawAndClear();
             rectRenderer.drawAndClear();

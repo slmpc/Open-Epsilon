@@ -1,5 +1,6 @@
 package com.github.epsilon.gui.panel;
 
+import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.ShadowRenderer;
@@ -19,6 +20,8 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
+
+import javax.annotation.Nullable;
 
 public class PanelScreen extends Screen {
 
@@ -44,6 +47,8 @@ public class PanelScreen extends Screen {
     private boolean lastSidebarExpanded;
     private boolean lastClientSettingMode;
 
+    private @Nullable LuminRenderSystem.LuminRenderTarget renderTarget;
+
     private PanelScreen() {
         super(Component.literal("PanelGui"));
     }
@@ -54,7 +59,17 @@ public class PanelScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(@NonNull GuiGraphicsExtractor GuiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+
+        final var window = minecraft.getWindow();
+        if (renderTarget == null) {
+            renderTarget = LuminRenderSystem.LuminRenderTarget.create("click-gui", window.getWidth(), window.getHeight());
+        }
+        renderTarget.clear();
+        renderTarget.resize(window.getWidth(), window.getHeight());
+
+        LuminRenderSystem.setActiveTarget(renderTarget);
+
         String currentCategory = state.getSelectedCategory().name();
         String currentModule = state.getSelectedModule() == null ? "" : state.getSelectedModule().getName();
         String currentQuery = state.getSearchQuery();
@@ -101,22 +116,26 @@ public class PanelScreen extends Screen {
         PanelLayout.Layout layout = PanelLayout.compute(width, height, railWidth);
 
         drawChrome(layout);
-        categoryRailPanel.render(GuiGraphicsExtractor, layout.rail(), mouseX, mouseY, partialTick);
+        categoryRailPanel.render(guiGraphics, layout.rail(), mouseX, mouseY, partialTick);
         if (state.isClientSettingMode()) {
             PanelLayout.Rect clientSettingsBounds = new PanelLayout.Rect(
                     layout.modules().x(), layout.modules().y(),
                     layout.detail().right() - layout.modules().x(),
                     layout.modules().height()
             );
-            clientSettingPanel.render(GuiGraphicsExtractor, clientSettingsBounds, mouseX, mouseY, partialTick);
+            clientSettingPanel.render(guiGraphics, clientSettingsBounds, mouseX, mouseY, partialTick);
         } else {
-            moduleListPanel.render(GuiGraphicsExtractor, layout.modules(), mouseX, mouseY, partialTick);
-            moduleDetailPanel.render(GuiGraphicsExtractor, layout.detail(), mouseX, mouseY, partialTick);
+            moduleListPanel.render(guiGraphics, layout.modules(), mouseX, mouseY, partialTick);
+            moduleDetailPanel.render(guiGraphics, layout.detail(), mouseX, mouseY, partialTick);
         }
 
-        RenderManager.INSTANCE.applyRenderAfterGui(this::flushQueuedRenderers);
+        RenderManager.INSTANCE.applyRender(this::flushQueuedRenderers);
 
-        popupHost.render(GuiGraphicsExtractor, mouseX, mouseY, partialTick);
+        popupHost.render(guiGraphics, mouseX, mouseY, partialTick);
+
+        LuminRenderSystem.setActiveTarget(null);
+
+        guiGraphics.blit(renderTarget.getIdentifier(), 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), 0, 1, 1, 0);
     }
 
     private void drawChrome(PanelLayout.Layout layout) {
@@ -149,6 +168,7 @@ public class PanelScreen extends Screen {
         }
         categoryRailPanel.flushClippedText();
     }
+
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
@@ -247,4 +267,7 @@ public class PanelScreen extends Screen {
         super.onClose();
     }
 
+    public LuminRenderSystem.LuminRenderTarget getRenderTarget() {
+        return renderTarget;
+    }
 }

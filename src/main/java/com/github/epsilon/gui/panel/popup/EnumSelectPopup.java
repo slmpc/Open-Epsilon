@@ -128,7 +128,7 @@ public class EnumSelectPopup implements PanelPopupHost.Popup {
             itemTextRenderer.setScissor(sx, sy, sw, sh);
         }
 
-        RenderManager.INSTANCE.applyRenderAfterGui(() -> {
+        RenderManager.INSTANCE.applyRender(() -> {
             shadowRenderer.drawAndClear();
             roundRectRenderer.drawAndClear();
             itemRoundRectRenderer.drawAndClear();

@@ -11,7 +11,7 @@ public class RenderManager {
 
     public static final RenderManager INSTANCE = new RenderManager();
 
-    private final ArrayList<Consumer<DeltaTracker>> renderGuiQueue = new ArrayList<>();
+    private final ArrayList<Consumer<DeltaTracker>> renderAfterFrameQueue = new ArrayList<>();
     private final ArrayList<Consumer<DeltaTracker>> renderHudQueue = new ArrayList<>();
     private final ArrayList<Consumer<DeltaTracker>> renderAfterWorldQueue = new ArrayList<>();
 
@@ -34,17 +34,25 @@ public class RenderManager {
         renderHudQueue.add(func);
     }
 
-    public void applyRenderAfterGui(Consumer<DeltaTracker> func) {
-        renderGuiQueue.add(func);
+    public void applyRender(Consumer<DeltaTracker> func) {
+        func.accept(Minecraft.getInstance().getDeltaTracker());
     }
 
-    public void applyRenderAfterGui(Runnable func) {
-        renderGuiQueue.add(_ -> func.run());
+    public void applyRender(Runnable func) {
+        func.run();
     }
 
-    public void callGui(DeltaTracker tracker) {
-        if (!renderGuiQueue.isEmpty()) {
-            renderGuiQueue.forEach(func -> func.accept(tracker));
+    public void applyRenderAfterFrame(Consumer<DeltaTracker> func) {
+        renderAfterFrameQueue.add(func);
+    }
+
+    public void applyRenderAfterFrame(Runnable func) {
+        renderAfterFrameQueue.add(_ -> func.run());
+    }
+
+    public void callAfterFrame(DeltaTracker tracker) {
+        if (!renderAfterFrameQueue.isEmpty()) {
+            renderAfterFrameQueue.forEach(func -> func.accept(tracker));
         }
     }
 
@@ -63,7 +71,7 @@ public class RenderManager {
     }
 
     public void clear() {
-        renderGuiQueue.clear();
+        renderAfterFrameQueue.clear();
         renderHudQueue.clear();
         renderAfterWorldQueue.clear();
     }
