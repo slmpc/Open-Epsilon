@@ -107,7 +107,7 @@ public class CategoryRailPanel {
             float subtitleOffset = (1.0f - subtitleProgress) * 10.0f;
             clippedTextRenderer.addText("Epsilon " + Epsilon.VERSION, bounds.x() + 38.0f + titleOffset, titleY, titleScale, brandColor, StaticFontLoader.DUCKSANS);
             if (subtitleProgress > 0.02f) {
-                clippedTextRenderer.addText("26.1 Rewrite", bounds.x() + 38.0f + subtitleOffset, subtitleY, subtitleScale, subColor);
+                clippedTextRenderer.addText("Open Source", bounds.x() + 38.0f + subtitleOffset, subtitleY, subtitleScale, subColor);
             }
             if (dividerProgress > 0.02f) {
                 float dividerY = subtitleY + clippedTextRenderer.getHeight(subtitleScale) + 4.0f;

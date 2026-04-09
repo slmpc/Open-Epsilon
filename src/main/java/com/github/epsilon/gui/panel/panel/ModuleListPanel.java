@@ -14,6 +14,7 @@ import com.github.epsilon.gui.panel.adapter.ModuleViewModel;
 import com.github.epsilon.gui.panel.component.ModuleRow;
 import com.github.epsilon.gui.panel.util.PanelContentBuffer;
 import com.github.epsilon.gui.panel.util.PanelContentInvalidationState;
+import com.github.epsilon.gui.panel.util.IMEFocusHelper;
 import com.github.epsilon.gui.panel.util.ScrollBarDragState;
 import com.github.epsilon.gui.panel.util.ScrollBarUtil;
 import com.github.epsilon.modules.Module;
@@ -141,6 +142,7 @@ public class ModuleListPanel {
         if (searchBounds.contains(event.x(), event.y())) {
             searchFocused = true;
             searchCursorIndex = state.getSearchQuery().length();
+            IMEFocusHelper.activate();
             markDirty();
             return true;
         }
@@ -199,6 +201,7 @@ public class ModuleListPanel {
             case 257, 335 -> true;
             case 256 -> {
                 searchFocused = false;
+                IMEFocusHelper.deactivate();
                 yield true;
             }
             case 259 -> {
@@ -248,6 +251,7 @@ public class ModuleListPanel {
         }
         if (!getSearchBounds().contains(mouseX, mouseY)) {
             searchFocused = false;
+            IMEFocusHelper.deactivate();
             markDirty();
         }
     }
@@ -315,6 +319,7 @@ public class ModuleListPanel {
         if (searchFocused) {
             float caretX = textX + textRenderer.getWidth(query.substring(0, Math.min(searchCursorIndex, query.length())), scale);
             rectRenderer.addRect(caretX, searchBounds.y() + 4.0f, 1.0f, searchBounds.height() - 8.0f, MD3Theme.TEXT_PRIMARY);
+            IMEFocusHelper.updateCursorPos(caretX, textY);
         }
     }
 }

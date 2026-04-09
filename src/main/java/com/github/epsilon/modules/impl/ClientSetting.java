@@ -2,10 +2,7 @@ package com.github.epsilon.modules.impl;
 
 import com.github.epsilon.gui.hudeditor.HudEditorScreen;
 import com.github.epsilon.modules.Module;
-import com.github.epsilon.settings.impl.BoolSetting;
-import com.github.epsilon.settings.impl.ButtonSetting;
-import com.github.epsilon.settings.impl.EnumSetting;
-import com.github.epsilon.settings.impl.KeybindSetting;
+import com.github.epsilon.settings.impl.*;
 import org.lwjgl.glfw.GLFW;
 
 public class ClientSetting extends Module {
@@ -35,13 +32,13 @@ public class ClientSetting extends Module {
 
     public final KeybindSetting guiKeybind = keybindSetting("Gui Keybind", GLFW.GLFW_KEY_RIGHT_SHIFT);
 
-    public final BoolSetting closeOnOutside = boolSetting("Close Gui On Outside", false);
-
-    public final BoolSetting i18nFallback = boolSetting("I18n Fallback", true);
-
     private final ButtonSetting openHudEditor = buttonSetting("Open Hud Editor", () -> {
         mc.setScreen(HudEditorScreen.INSTANCE);
     });
+
+    public final BoolSetting i18nFallback = boolSetting("I18n Fallback", true);
+
+    public final BoolSetting closeOnOutside = boolSetting("Close Gui On Outside", false);
 
     public final EnumSetting<ThemeMode> themeMode = enumSetting("Theme Mode", ThemeMode.Dark);
     public final EnumSetting<ThemePreset> themePreset = enumSetting("Theme Preset", ThemePreset.TonalSpot);

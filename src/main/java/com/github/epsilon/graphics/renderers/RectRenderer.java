@@ -107,12 +107,12 @@ public class RectRenderer implements IRenderer {
         }
 
         LuminRenderSystem.QuadRenderingInfo info = LuminRenderSystem.prepareQuadRendering(vertexCount);
-        if (info == null || info.target().getColorTextureView() == null) return;
+        if (info == null || info.colorView() == null) return;
 
         try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
                 () -> "Rect Draw",
-                info.target().getColorTextureView(), OptionalInt.empty(),
-                info.target().getDepthTextureView(), OptionalDouble.empty())
+                info.colorView(), OptionalInt.empty(),
+                info.depthView(), OptionalDouble.empty())
         ) {
             pass.setPipeline(LuminRenderPipelines.RECTANGLE);
             if (scissorEnabled) {
@@ -130,8 +130,6 @@ public class RectRenderer implements IRenderer {
 
     @Override
     public void clear() {
-        // 这一帧的任务彻底结束，切换到下一个 Buffer
-        // 下一帧 addRawRect 时的 tryMap 会获取到全新的 Buffer 空间
         if (vertexCount > 0) {
             if (buffer.isMapped()) {
                 buffer.unmap();

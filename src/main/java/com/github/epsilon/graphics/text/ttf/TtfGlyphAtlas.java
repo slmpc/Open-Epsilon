@@ -57,7 +57,7 @@ public class TtfGlyphAtlas {
         }
 
         RenderSystem.getDevice().createCommandEncoder().writeToTexture(
-                this.texture.texture(),
+                this.texture.getTexture(),
                 glyph.glyphData(),
                 NativeImage.Format.LUMINANCE,
                 0,

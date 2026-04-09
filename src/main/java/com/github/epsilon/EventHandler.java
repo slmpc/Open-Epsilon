@@ -2,17 +2,16 @@ package com.github.epsilon;
 
 import com.github.epsilon.assets.i18n.LanguageReloadListener;
 import com.github.epsilon.assets.resources.ResourceLocationUtils;
+import com.github.epsilon.events.EpsilonRenderGuiEvent;
 import com.github.epsilon.graphics.LuminRenderPipelines;
 import com.github.epsilon.managers.ModuleManager;
 import com.github.epsilon.managers.RenderManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
-import net.neoforged.neoforge.client.event.RenderFrameEvent;
+import net.neoforged.neoforge.client.event.*;
 import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = Epsilon.MODID, value = Dist.CLIENT)
@@ -37,7 +36,21 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void onRenderFramePost(RenderFrameEvent.Post event) {
-        RenderManager.INSTANCE.callAndClear(event.getPartialTick());
+        RenderSystem.backupProjectionMatrix();
+        RenderManager.INSTANCE.callAfterFrame(Minecraft.getInstance().getDeltaTracker());
+        RenderSystem.restoreProjectionMatrix();
+    }
+
+    @SubscribeEvent
+    public static void onRenderInGameGuiPre(EpsilonRenderGuiEvent.AfterInGameGui event) {
+        RenderSystem.backupProjectionMatrix();
+        RenderManager.INSTANCE.callInGameGui(Minecraft.getInstance().getDeltaTracker());
+        RenderSystem.restoreProjectionMatrix();
+    }
+
+    @SubscribeEvent
+    public static void onRenderGuiPost(RenderGuiEvent.Post event) {
+        RenderManager.INSTANCE.clear();
     }
 
 }

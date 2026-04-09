@@ -131,8 +131,8 @@ public class TextureRenderer implements IRenderer {
 
         LuminRenderSystem.applyOrthoProjection();
 
-        var target = Minecraft.getInstance().getMainRenderTarget();
-        if (target.getColorTextureView() == null) return;
+        GpuTextureView colorView = LuminRenderSystem.resolveColorView();
+        if (colorView == null) return;
 
         GpuBufferSlice dynamicUniforms = RenderSystem.getDynamicUniforms().writeTransform(
                 RenderSystem.getModelViewMatrix(),
@@ -167,7 +167,7 @@ public class TextureRenderer implements IRenderer {
 
             try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
                     () -> "Rounded Texture Draw",
-                    target.getColorTextureView(), OptionalInt.empty(),
+                    colorView, OptionalInt.empty(),
                     null, OptionalDouble.empty())
             ) {
                 pass.setPipeline(LuminRenderPipelines.TEXTURE);
@@ -178,7 +178,7 @@ public class TextureRenderer implements IRenderer {
                 // 使用 RingBuffer 当前指向的 GpuBuffer
                 pass.setVertexBuffer(0, batch.buffer.getGpuBuffer());
                 pass.setIndexBuffer(ibo, autoIndices.type());
-                pass.bindTexture("Sampler0", texture.textureView(), texture.sampler());
+                pass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
 
                 pass.drawIndexed(0, 0, indexCount, 1);
             }

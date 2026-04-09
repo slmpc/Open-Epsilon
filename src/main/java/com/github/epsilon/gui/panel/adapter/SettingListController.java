@@ -15,6 +15,8 @@ import com.github.epsilon.settings.Setting;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.PreeditEvent;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,6 +142,15 @@ public final class SettingListController {
     public boolean charTyped(CharacterEvent event) {
         for (SettingEntry entry : settingEntries) {
             if (entry.row.charTyped(event)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean preeditUpdated(@Nullable PreeditEvent event) {
+        for (SettingEntry entry : settingEntries) {
+            if (entry.row.preeditUpdated(event)) {
                 return true;
             }
         }

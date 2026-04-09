@@ -6,6 +6,7 @@ import com.github.epsilon.graphics.renderers.TextRenderer;
 import com.github.epsilon.gui.panel.MD3Theme;
 import com.github.epsilon.gui.panel.PanelLayout;
 import com.github.epsilon.gui.panel.component.SettingRow;
+import com.github.epsilon.gui.panel.util.IMEFocusHelper;
 import com.github.epsilon.settings.impl.StringSetting;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
@@ -13,6 +14,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.PreeditEvent;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
 
@@ -69,6 +72,7 @@ public class StringSettingRow extends SettingRow<StringSetting> {
             float caretX = slice.textX() + textRenderer.getWidth(slice.text().substring(0, Math.min(slice.caretIndex(), slice.text().length())), FIELD_SCALE);
             caretX = Math.min(caretX, fieldBounds.right() - 5.0f);
             rectRenderer.addRect(caretX, fieldBounds.y() + 4.0f, 1.0f, fieldBounds.height() - 8.0f, MD3Theme.INVERSE_ON_SURFACE);
+            IMEFocusHelper.updateCursorPos(caretX, textY);
         }
     }
 
@@ -82,6 +86,7 @@ public class StringSettingRow extends SettingRow<StringSetting> {
             return false;
         }
         focused = true;
+        IMEFocusHelper.activate();
         inputBuffer = normalize(setting.getValue());
         cursorIndex = getCursorIndex(event.x(), fieldBounds);
         clearSelection();
@@ -100,11 +105,13 @@ public class StringSettingRow extends SettingRow<StringSetting> {
             case 257, 335 -> {
                 commitInput();
                 focused = false;
+                IMEFocusHelper.deactivate();
                 clearSelection();
                 yield true;
             }
             case 256 -> {
                 focused = false;
+                IMEFocusHelper.deactivate();
                 inputBuffer = null;
                 clearSelection();
                 yield true;
@@ -164,11 +171,13 @@ public class StringSettingRow extends SettingRow<StringSetting> {
         if (!focused && this.focused) {
             commitInput();
             inputBuffer = null;
+            IMEFocusHelper.deactivate();
         }
         this.focused = focused;
         if (focused && inputBuffer == null) {
             inputBuffer = normalize(setting.getValue());
             cursorIndex = inputBuffer.length();
+            IMEFocusHelper.activate();
         }
         if (!focused) {
             clearSelection();
