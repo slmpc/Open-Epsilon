@@ -114,7 +114,7 @@ public class PanelScreen extends Screen {
             moduleDetailPanel.render(GuiGraphicsExtractor, layout.detail(), mouseX, mouseY, partialTick);
         }
 
-        RenderManager.INSTANCE.applyRenderAfterFrame(this::flushQueuedRenderers);
+        RenderManager.INSTANCE.applyRenderAfterGui(this::flushQueuedRenderers);
 
         popupHost.render(GuiGraphicsExtractor, mouseX, mouseY, partialTick);
     }

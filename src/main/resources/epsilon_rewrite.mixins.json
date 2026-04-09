@@ -25,7 +25,8 @@
     "render.MixinLivingEntityRenderer",
     "render.MixinParticleManager",
     "render.MixinScreenEffectRenderer",
-    "render.MixinWindow"
+    "render.MixinWindow",
+    "render.MixinGuiRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

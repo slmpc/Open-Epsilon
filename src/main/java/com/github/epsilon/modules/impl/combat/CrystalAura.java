@@ -714,7 +714,7 @@ public class CrystalAura extends Module {
         }
         Color textColor = new Color(255, 255, 255, Math.max(0, Math.min(255, (int) (220 * renderScale))));
 
-        RenderManager.INSTANCE.applyRenderWorldHud(() -> {
+        RenderManager.INSTANCE.applyRenderAfterWorld(() -> {
             TextRenderer tr = rectRenderer.get();
             tr.addText(text, textX, textY, textScale, textColor);
             tr.drawAndClear();

@@ -1,5 +1,6 @@
 package com.github.epsilon.managers;
 
+import com.github.epsilon.gui.hudeditor.HudEditorScreen;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 
@@ -12,17 +13,17 @@ public class RenderManager {
 
     private final ArrayList<Consumer<DeltaTracker>> renderGuiQueue = new ArrayList<>();
     private final ArrayList<Consumer<DeltaTracker>> renderHudQueue = new ArrayList<>();
-    private final ArrayList<Consumer<DeltaTracker>> renderWorldHudQueue = new ArrayList<>();
+    private final ArrayList<Consumer<DeltaTracker>> renderAfterWorldQueue = new ArrayList<>();
 
     private RenderManager() {
     }
 
-    public void applyRenderWorldHud(Runnable func) {
-        renderWorldHudQueue.add(_ -> func.run());
+    public void applyRenderAfterWorld(Runnable func) {
+        renderAfterWorldQueue.add(_ -> func.run());
     }
 
-    public void applyRenderWorldHud(Consumer<DeltaTracker> func) {
-        renderWorldHudQueue.add(func);
+    public void applyRenderAfterWorld(Consumer<DeltaTracker> func) {
+        renderAfterWorldQueue.add(func);
     }
 
     public void applyRenderHud(Runnable func) {
@@ -33,35 +34,38 @@ public class RenderManager {
         renderHudQueue.add(func);
     }
 
-    public void applyRenderAfterFrame(Consumer<DeltaTracker> func) {
+    public void applyRenderAfterGui(Consumer<DeltaTracker> func) {
         renderGuiQueue.add(func);
     }
 
-    public void applyRenderAfterFrame(Runnable func) {
+    public void applyRenderAfterGui(Runnable func) {
         renderGuiQueue.add(_ -> func.run());
     }
 
-    public void callAndClear(DeltaTracker tracker) {
+    public void callGui(DeltaTracker tracker) {
+        if (!renderGuiQueue.isEmpty()) {
+            renderGuiQueue.forEach(func -> func.accept(tracker));
+        }
+    }
+
+    public void callInGameGui(DeltaTracker tracker) {
         final var screen = Minecraft.getInstance().screen;
 
-        if (!renderWorldHudQueue.isEmpty() && screen == null) {
-            ArrayList<Consumer<DeltaTracker>> pending = new ArrayList<>(renderWorldHudQueue);
+        if (!renderAfterWorldQueue.isEmpty()) {
+            ArrayList<Consumer<DeltaTracker>> pending = new ArrayList<>(renderAfterWorldQueue);
             pending.forEach(func -> func.accept(tracker));
         }
 
-        if (!renderHudQueue.isEmpty() && screen == null) {
+        if (!renderHudQueue.isEmpty() && screen != HudEditorScreen.INSTANCE) {
             ArrayList<Consumer<DeltaTracker>> pending = new ArrayList<>(renderHudQueue);
             pending.forEach(func -> func.accept(tracker));
         }
+    }
 
-        if (!renderGuiQueue.isEmpty()) {
-            ArrayList<Consumer<DeltaTracker>> pending = new ArrayList<>(renderGuiQueue);
-            pending.forEach(func -> func.accept(tracker));
-        }
-
-        renderWorldHudQueue.clear();
-        renderHudQueue.clear();
+    public void clear() {
         renderGuiQueue.clear();
+        renderHudQueue.clear();
+        renderAfterWorldQueue.clear();
     }
 
 }

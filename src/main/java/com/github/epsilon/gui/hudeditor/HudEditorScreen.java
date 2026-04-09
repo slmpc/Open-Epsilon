@@ -52,7 +52,7 @@ public class HudEditorScreen extends Screen {
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         MD3Theme.syncFromSettings();
 
-        RenderManager.INSTANCE.applyRenderAfterFrame(delta -> {
+        RenderManager.INSTANCE.applyRenderAfterGui(delta -> {
             int screenWidth = minecraft.getWindow().getGuiScaledWidth();
             int screenHeight = minecraft.getWindow().getGuiScaledHeight();
             List<HudModule> hudModules = HudEditorModules.collectEnabledHudModules(delta);

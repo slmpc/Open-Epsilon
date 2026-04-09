@@ -107,7 +107,7 @@ public class NameTags extends Module {
 
         if (drawList.isEmpty()) return;
 
-        RenderManager.INSTANCE.applyRenderWorldHud(() -> renderTagList(drawList));
+        RenderManager.INSTANCE.applyRenderAfterWorld(() -> renderTagList(drawList));
     }
 
     private void renderTagList(List<TagDrawData> drawList) {
