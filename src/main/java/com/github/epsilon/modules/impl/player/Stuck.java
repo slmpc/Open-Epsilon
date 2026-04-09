@@ -43,7 +43,8 @@ public class Stuck extends Module {
 
     @SubscribeEvent
     private void onKeyboardInput(KeyboardInputEvent event) {
-        event.getInput().setMovementFactor(new Vec2(0,0));
+        event.setForward(0);
+        event.setStrafe(0);
     }
 
     @SubscribeEvent

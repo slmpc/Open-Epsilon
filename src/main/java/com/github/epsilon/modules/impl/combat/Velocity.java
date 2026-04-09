@@ -241,8 +241,6 @@ public class Velocity extends Module {
     public void onKeyboardInput(KeyboardInputEvent event) {
         if (mode.is(Mode.NoXZ)) {
             if (stage == VelocityStage.DELAY && velocity != null && mc.hitResult instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof Player player && !AntiBot.INSTANCE.isBot(player)) {
-                event.getInput().setLeft(true);
-                event.getInput().setForward(false);
                 stage = VelocityStage.ATTACK;
                 this.target = player;
             }

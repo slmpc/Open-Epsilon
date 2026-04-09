@@ -55,7 +55,7 @@ public class NoFall extends Module {
     private void onMovementInputEvent(KeyboardInputEvent event){
         if (jump){
             //shit fixed
-            event.getInput().setJumping(true);
+            event.setJump(true);
             jump = false;
         }
     }
