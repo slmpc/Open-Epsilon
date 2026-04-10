@@ -15,6 +15,8 @@ public class Module {
 
     private final String name;
 
+    private String addonId;
+
     public Category category;
 
     private int keyBind = -1;
@@ -49,6 +51,14 @@ public class Module {
         for (Setting<?> setting : settings) {
             setting.initTranslateComponent(moduleComponent.createChild(setting.getName().toLowerCase()));
         }
+    }
+
+    public void setAddonId(String addonId) {
+        this.addonId = addonId;
+    }
+
+    public String getAddonId() {
+        return addonId;
     }
 
     protected boolean nullCheck() {

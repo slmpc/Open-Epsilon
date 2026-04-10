@@ -33,6 +33,7 @@ public abstract class EpsilonAddon {
      */
     protected void registerModule(Module module) {
         ModuleManager.INSTANCE.registerAddonModule(
+                this,
                 module,
                 DefaultTranslateComponent.create(addonId + ".modules." + module.getName().toLowerCase())
         );

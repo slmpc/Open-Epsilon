@@ -1,5 +1,6 @@
 package com.github.epsilon.managers;
 
+import com.github.epsilon.addon.EpsilonAddon;
 import com.github.epsilon.assets.i18n.EpsilonTranslateComponent;
 import com.github.epsilon.assets.i18n.TranslateComponent;
 import com.github.epsilon.gui.panel.PanelScreen;
@@ -99,6 +100,7 @@ public class ModuleManager {
 
         // Initialize i18n for all epsilon modules
         for (Module module : modules) {
+            module.setAddonId("epsilon");
             module.initI18n(EpsilonTranslateComponent.create("modules", module.getName().toLowerCase()));
         }
     }
@@ -109,7 +111,8 @@ public class ModuleManager {
      * @param module          the module to register
      * @param moduleComponent the TranslateComponent for this module (e.g. "myaddon.modules.fly")
      */
-    public void registerAddonModule(Module module, TranslateComponent moduleComponent) {
+    public void registerAddonModule(EpsilonAddon addon, Module module, TranslateComponent moduleComponent) {
+        module.setAddonId(addon.addonId);
         module.initI18n(moduleComponent);
         modules.add(module);
     }
