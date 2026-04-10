@@ -106,7 +106,7 @@ public final class WorldToScreen {
         return projectEntity(viewport, matrix, absoluteBoundingBox, cameraPos);
     }
 
-    private static Vec3 interpolate(LivingEntity entity, float tickDelta) {
+    public static Vec3 interpolate(LivingEntity entity, float tickDelta) {
         double x = Mth.lerp(tickDelta, entity.xOld, entity.getX());
         double y = Mth.lerp(tickDelta, entity.yOld, entity.getY());
         double z = Mth.lerp(tickDelta, entity.zOld, entity.getZ());

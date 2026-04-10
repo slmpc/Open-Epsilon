@@ -14,6 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Vector4d;
@@ -89,7 +90,9 @@ public class NameTags extends Module {
             float boxWidth = width + padding * 2.0f;
             float boxHeight = padding * 2.0f + lineHeight * lineCount + lineGap * Math.max(0, lineCount - 1);
 
-            final var projectedPosition = WorldToScreen.getWorldPositionToScreen(target.getEyePosition().add(0.0f, 0.5f, 0.0f));
+            final var currentPosition = WorldToScreen.interpolate(target, partialTick);
+
+            final var projectedPosition = WorldToScreen.getWorldPositionToScreen(currentPosition.add(0.0f, 0.5f + target.getEyeHeight(), 0.0f));
             if (projectedPosition.z > 1.0f || projectedPosition.z < 0.0f) continue;
 
             float guiScale = mc.getWindow().getGuiScale();

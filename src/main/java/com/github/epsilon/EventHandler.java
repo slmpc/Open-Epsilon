@@ -39,18 +39,14 @@ public class EventHandler {
         RenderSystem.backupProjectionMatrix();
         RenderManager.INSTANCE.callAfterFrame(Minecraft.getInstance().getDeltaTracker());
         RenderSystem.restoreProjectionMatrix();
+        RenderManager.INSTANCE.clear();
     }
 
     @SubscribeEvent
-    public static void onRenderInGameGuiPre(EpsilonRenderGuiEvent.AfterInGameGui event) {
+    public static void onRenderInGameGuiPre(EpsilonRenderGuiEvent.BeforeInGameGui event) {
         RenderSystem.backupProjectionMatrix();
         RenderManager.INSTANCE.callInGameGui(Minecraft.getInstance().getDeltaTracker());
         RenderSystem.restoreProjectionMatrix();
-    }
-
-    @SubscribeEvent
-    public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-        RenderManager.INSTANCE.clear();
     }
 
 }
