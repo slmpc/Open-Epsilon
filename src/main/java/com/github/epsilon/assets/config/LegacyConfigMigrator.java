@@ -87,13 +87,29 @@ public class LegacyConfigMigrator {
             }
 
             // Rename the old file so we never migrate again
-            Files.move(legacyConfigFile, configDir.resolve("config.json.bak"));
-            Epsilon.LOGGER.info("迁移完成，旧配置已备份为 config.json.bak");
+            Path backupFile = getAvailableBackupPath();
+            Files.move(legacyConfigFile, backupFile);
+            Epsilon.LOGGER.info("迁移完成，旧配置已备份为 {}", backupFile.getFileName());
         } catch (Exception e) {
             Epsilon.LOGGER.error("迁移旧版配置失败: {}", legacyConfigFile, e);
         }
     }
 
+    private Path getAvailableBackupPath() {
+        Path backupFile = configDir.resolve("config.json.bak");
+        if (!Files.exists(backupFile)) {
+            return backupFile;
+        }
+
+        int index = 1;
+        Path candidate;
+        do {
+            candidate = configDir.resolve("config.json.bak." + index);
+            index++;
+        } while (Files.exists(candidate));
+
+        return candidate;
+    }
     private static JsonObject getObject(JsonObject parent, String key) {
         JsonElement el = parent.get(key);
         return (el != null && el.isJsonObject()) ? el.getAsJsonObject() : null;
