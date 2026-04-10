@@ -9,7 +9,8 @@ public final class IMEFocusHelper {
 
     public static float activeCursorY = 0.0f;
 
-    private IMEFocusHelper() {}
+    private IMEFocusHelper() {
+    }
 
     /**
      * Enables OS-level text / IME input.

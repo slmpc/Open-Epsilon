@@ -38,10 +38,10 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.joml.*;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.awt.*;
-import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -290,10 +290,10 @@ public class CrystalAura extends Module {
             // smooth 旋转未能对准最佳目标，检查当前实际命中位置是否在满足常规 place 限制的候选列表中
             for (PlaceCandidate candidate :
                     getValidCandidates(
-                        candidates,
-                        placeMinDmg.getValue().floatValue(),
-                        placeMaxSelfDmg.getValue().floatValue(),
-                        placeBalance.getValue().floatValue()
+                            candidates,
+                            placeMinDmg.getValue().floatValue(),
+                            placeMaxSelfDmg.getValue().floatValue(),
+                            placeBalance.getValue().floatValue()
                     )
             ) {
                 if (candidate.supportPos.equals(placePos)) {
@@ -317,6 +317,7 @@ public class CrystalAura extends Module {
 
     /**
      * 收集所有可行的放置位置，计算它们的伤害和可见性，并返回一个候选列表。
+     *
      * @param predictedTargetPos 预判后的目标坐标
      * @return 可行的位置
      */
@@ -412,6 +413,7 @@ public class CrystalAura extends Module {
 
     /**
      * 从所有候选中找到可击杀目标且自伤最低的致命候选 (跳过常规伤害门槛限制)
+     *
      * @param candidates 可行的放置点
      * @return 致命候选，如果没有则返回 null
      */
@@ -439,14 +441,15 @@ public class CrystalAura extends Module {
 
     /**
      * 收集满足所有常规条件的候选，优先返回可直接看见的候选，否则返回穿墙候选
+     *
      * @param candidates 可行的放置点
-     * @param minDmg 放置点最小伤害
+     * @param minDmg     放置点最小伤害
      * @param maxSelfDmg 最大自伤
      * @param minBalance 对目标伤害与对自伤害的最低可承受值
      * @return 满足条件的放置点列表
      */
     private List<PlaceCandidate> getValidCandidates(List<PlaceCandidate> candidates,
-                                                     float minDmg, float maxSelfDmg, float minBalance) {
+                                                    float minDmg, float maxSelfDmg, float minBalance) {
         float hp = mc.player.getHealth() + mc.player.getAbsorptionAmount();
         List<PlaceCandidate> visibleValid = new ArrayList<>();
         List<PlaceCandidate> wallValid = new ArrayList<>();

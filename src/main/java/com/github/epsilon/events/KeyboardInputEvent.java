@@ -1,11 +1,9 @@
 package com.github.epsilon.events;
 
 import net.minecraft.world.entity.player.Input;
-import net.minecraft.world.phys.Vec2;
 import net.neoforged.bus.api.Event;
 
 public class KeyboardInputEvent extends Event {
-
 
     private float forward;
     private float strafe;
@@ -16,7 +14,6 @@ public class KeyboardInputEvent extends Event {
     public KeyboardInputEvent(boolean forward, boolean backward, boolean left, boolean right, boolean jump, boolean sneak, boolean sprint) {
         float f = forward == backward ? 0.0F : (forward ? 1.0F : -1.0F);
         float g = left == right ? 0.0F : (left ? 1.0F : -1.0F);
-
         this.forward = f;
         this.strafe = g;
         this.jump = jump;
@@ -75,4 +72,5 @@ public class KeyboardInputEvent extends Event {
     public void setSprint(boolean sprint) {
         this.sprint = sprint;
     }
+
 }

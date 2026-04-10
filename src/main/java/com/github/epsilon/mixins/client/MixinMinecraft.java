@@ -24,6 +24,7 @@ public class MixinMinecraft {
             rightClickDelay = useCooldown.cooldown.getValue();
         }
     }
+
     @Inject(method = "updateLevelInEngines", at = @At("HEAD"), cancellable = true)
     private void worldEvent(ClientLevel world, CallbackInfo ci) {
         WorldEvent worldEvent = new WorldEvent();

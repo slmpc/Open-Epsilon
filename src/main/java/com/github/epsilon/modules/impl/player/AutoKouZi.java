@@ -113,33 +113,33 @@ public class AutoKouZi extends Module {
 
     private String generateSentence() {
         List<String> templates = Arrays.asList(
-            "我$verb了你的$family",
-            "你$family被我$verb了",
-            "$adjective的$family",
-            "你个$adjective$family",
-            "我$verb你$family",
-            "$family被我$verb了",
-            "你$family真$adjective",
-            "$adjective$family被我$verb",
-            "我$adjective$family",
-            "$family$verb了你"
+                "我$verb了你的$family",
+                "你$family被我$verb了",
+                "$adjective的$family",
+                "你个$adjective$family",
+                "我$verb你$family",
+                "$family被我$verb了",
+                "你$family真$adjective",
+                "$adjective$family被我$verb",
+                "我$adjective$family",
+                "$family$verb了你"
         );
 
         List<String> verbs = Arrays.asList(
-            "操", "日", "干", "草", "艹", "强奸", "上了", "爆了", "插了", "弄了"
+                "操", "日", "干", "草", "艹", "强奸", "上了", "爆了", "插了", "弄了"
         );
 
         List<String> families = Arrays.asList(
-            "妈", "母亲", "老母", "妈妈", "妈逼", "母亲逼",
-            "爹", "爸", "父亲", "老爹",
-            "奶奶", "爷爷", "祖宗",
-            "全家", "一家老小"
+                "妈", "母亲", "老母", "妈妈", "妈逼", "母亲逼",
+                "爹", "爸", "父亲", "老爹",
+                "奶奶", "爷爷", "祖宗",
+                "全家", "一家老小"
         );
 
         List<String> adjectives = Arrays.asList(
-            "傻逼", "脑瘫", "废物", "垃圾", "贱货", "婊子",
-            "狗", "猪", "畜生", "杂种", "野种",
-            "死", "烂", "臭", "脏"
+                "傻逼", "脑瘫", "废物", "垃圾", "贱货", "婊子",
+                "狗", "猪", "畜生", "杂种", "野种",
+                "死", "烂", "臭", "脏"
         );
 
         String template = templates.get(random.nextInt(templates.size()));
@@ -175,7 +175,7 @@ public class AutoKouZi extends Module {
     private void loadFromDefaultPath() {
         try {
             InputStream is = getClass().getClassLoader().getResourceAsStream(
-                "assets/epsilon_rewrite/kouzi.txt"
+                    "assets/epsilon_rewrite/kouzi.txt"
             );
 
             if (is == null) {
@@ -184,7 +184,7 @@ public class AutoKouZi extends Module {
             }
 
             BufferedReader reader = new BufferedReader(
-                new InputStreamReader(is, StandardCharsets.UTF_8)
+                    new InputStreamReader(is, StandardCharsets.UTF_8)
             );
 
             String line;

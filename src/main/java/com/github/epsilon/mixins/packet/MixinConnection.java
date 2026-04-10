@@ -28,7 +28,7 @@ public class MixinConnection {
 
     @Redirect(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;genericsFtw(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;)V"))
     private void onReceivePacket(Packet<?> packet, PacketListener listener) {
-        if (ClientboundPacketManager.onPacketReceive(packet)){
+        if (ClientboundPacketManager.onPacketReceive(packet)) {
             return;
         }
         PacketEvent.Receive event = NeoForge.EVENT_BUS.post(new PacketEvent.Receive(packet));
@@ -39,7 +39,7 @@ public class MixinConnection {
 
     @Redirect(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;sendPacket(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V"))
     private void onSendPacket(Connection instance, Packet<?> packet, @Nullable ChannelFutureListener listener, boolean flush) {
-        if (ServerboundPacketManager.onPacket(packet)){
+        if (ServerboundPacketManager.onPacket(packet)) {
             return;
         }
         if (PacketUtils.bypassPackets.contains(packet)) {

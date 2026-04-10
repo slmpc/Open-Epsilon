@@ -140,7 +140,10 @@ public class CategoryRailPanel {
         float scanY = categoryStartY;
         for (Category category : Category.values()) {
             PanelLayout.Rect scanRect = new PanelLayout.Rect(bounds.x() + 5.0f, scanY, bounds.width() - 10.0f, CATEGORY_ITEM_HEIGHT);
-            if (scanRect.contains(mouseX, mouseY)) { hoveredY = scanY; break; }
+            if (scanRect.contains(mouseX, mouseY)) {
+                hoveredY = scanY;
+                break;
+            }
             scanY += CATEGORY_ITEM_SPACING;
         }
         if (hoveredY < 0) {

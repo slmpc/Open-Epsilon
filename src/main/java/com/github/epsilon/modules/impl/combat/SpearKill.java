@@ -3,7 +3,10 @@ package com.github.epsilon.modules.impl.combat;
 import com.github.epsilon.managers.TargetManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
-import com.github.epsilon.settings.impl.*;
+import com.github.epsilon.settings.impl.BoolSetting;
+import com.github.epsilon.settings.impl.DoubleSetting;
+import com.github.epsilon.settings.impl.EnumSetting;
+import com.github.epsilon.settings.impl.IntSetting;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
@@ -13,8 +16,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
-/*
- * Author Moli
+/**
+ * @author Moli
  */
 
 public class SpearKill extends Module {
@@ -136,7 +139,7 @@ public class SpearKill extends Module {
 
     private int getReadyTicks(Item item) {
         int value;
-        
+
         if (item == Items.WOODEN_SPEAR) value = 14;
         else if (item == Items.STONE_SPEAR || item == Items.GOLDEN_SPEAR) value = 13;
         else if (item == Items.COPPER_SPEAR) value = 12;
@@ -144,7 +147,7 @@ public class SpearKill extends Module {
         else if (item == Items.DIAMOND_SPEAR) value = 9;
         else if (item == Items.NETHERITE_SPEAR) value = 7;
         else value = 10;
-        
+
         return Math.round(value * (chargeTimeModifier.getValue() / 100.0f));
     }
 

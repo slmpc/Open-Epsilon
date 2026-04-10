@@ -18,19 +18,18 @@ import static com.github.epsilon.Epsilon.mc;
 public class ClientboundPacketManager {
     public static LinkedBlockingQueue<Packet> packets = new LinkedBlockingQueue<>();
 
-    public static void flush(){
+    public static void flush() {
         if (mc.getConnection() != null)
-            while (!packets.isEmpty()){
+            while (!packets.isEmpty()) {
                 try {
                     packets.poll().handle(mc.getConnection().getConnection().getPacketListener());
                 } catch (Exception e) {
-                    ChatUtils.addChatMessage("failed to flush clientbound packets: "+e.getMessage());
+                    ChatUtils.addChatMessage("failed to flush clientbound packets: " + e.getMessage());
                 }
             }
     }
 
-    public static boolean isDisallowedPacket(Packet packet)
-    {
+    public static boolean isDisallowedPacket(Packet packet) {
         return !(packet instanceof ClientboundSystemChatPacket)
                 && !(packet instanceof ClientboundPlayerChatPacket)
                 && !(packet instanceof ClientboundSetDisplayObjectivePacket)
@@ -52,26 +51,29 @@ public class ClientboundPacketManager {
                 && !(packet instanceof ClientboundResetScorePacket)
                 && !(packet instanceof ClientboundSetScorePacket);
     }
+
     @SubscribeEvent
-    private static void onWorldChange(WorldEvent event){
+    private static void onWorldChange(WorldEvent event) {
         shouldFlush = true;
         tracking = false;
     }
-    public static void startTracking(){
+
+    public static void startTracking() {
         tracking = true;
     }
+
     public static boolean tracking = false;
     public static boolean shouldFlush = false;
 
-    public static boolean onPacketReceive(Packet packet) {
+    public static boolean onPacketReceive(Packet<?> packet) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return false;
-        if (shouldFlush){
+        if (shouldFlush) {
             flush();
             shouldFlush = false;
             return false;
         }
-        if (!isDisallowedPacket(packet) && tracking){
+        if (!isDisallowedPacket(packet) && tracking) {
             packets.add(packet);
             return true;
         }

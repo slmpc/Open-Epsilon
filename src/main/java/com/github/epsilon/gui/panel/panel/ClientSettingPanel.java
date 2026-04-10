@@ -13,11 +13,7 @@ import com.github.epsilon.gui.panel.PanelState;
 import com.github.epsilon.gui.panel.adapter.SettingListController;
 import com.github.epsilon.gui.panel.component.setting.KeybindSettingRow;
 import com.github.epsilon.gui.panel.popup.PanelPopupHost;
-import com.github.epsilon.gui.panel.util.PanelContentBuffer;
-import com.github.epsilon.gui.panel.util.PanelContentInvalidationState;
-import com.github.epsilon.gui.panel.util.IMEFocusHelper;
-import com.github.epsilon.gui.panel.util.ScrollBarDragState;
-import com.github.epsilon.gui.panel.util.ScrollBarUtil;
+import com.github.epsilon.gui.panel.util.*;
 import com.github.epsilon.managers.ConfigManager;
 import com.github.epsilon.managers.FriendManager;
 import com.github.epsilon.modules.impl.ClientSetting;
@@ -414,12 +410,12 @@ public class ClientSettingPanel {
                     ? PanelState.ClientSettingTab.GENERAL
                     : PanelState.ClientSettingTab.FRIEND;
             state.setClientSettingTab(clickedTab);
-        if (clickedTab == PanelState.ClientSettingTab.FRIEND) {
-                    settingListController.clearFocus();
-                } else {
-                    friendInputFocused = false;
-                    IMEFocusHelper.deactivate();
-                }
+            if (clickedTab == PanelState.ClientSettingTab.FRIEND) {
+                settingListController.clearFocus();
+            } else {
+                friendInputFocused = false;
+                IMEFocusHelper.deactivate();
+            }
             markDirty();
             markFriendDirty();
             return true;

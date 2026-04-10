@@ -21,11 +21,9 @@ import java.util.OptionalDouble;
 
 public class LuminRenderSystem {
 
-    public static final Projection guiOrthoProjection =
-            new Projection();
+    public static final Projection guiOrthoProjection = new Projection();
 
-    private static final ProjectionMatrixBuffer guiProjectionMatrixBuffer =
-            new ProjectionMatrixBuffer("lumin-gui");
+    private static final ProjectionMatrixBuffer guiProjectionMatrixBuffer = new ProjectionMatrixBuffer("lumin-gui");
 
     @Nullable
     private static LuminRenderTarget activeTarget = null;

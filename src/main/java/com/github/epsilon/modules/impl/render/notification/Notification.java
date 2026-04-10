@@ -40,13 +40,33 @@ public class Notification {
         return System.currentTimeMillis() - createTime > displayDuration + 500L;
     }
 
-    public String getTitle() { return title; }
-    public String getSubTitle() { return subTitle; }
-    public NotificationMode getMode() { return mode; }
-    public int getDisplayDuration() { return displayDuration; }
-    public float getCurrentY() { return currentY; }
-    public boolean isModule() { return isModule; }
-    public long getCreateTime() { return createTime; }
+    public String getTitle() {
+        return title;
+    }
+
+    public String getSubTitle() {
+        return subTitle;
+    }
+
+    public NotificationMode getMode() {
+        return mode;
+    }
+
+    public int getDisplayDuration() {
+        return displayDuration;
+    }
+
+    public float getCurrentY() {
+        return currentY;
+    }
+
+    public boolean isModule() {
+        return isModule;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
 
     public void setTargetY(float targetY) {
         this.targetY = targetY;

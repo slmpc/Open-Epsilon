@@ -22,7 +22,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -66,11 +65,11 @@ public class Surround extends Module {
     private final TimerUtils placeTimer = new TimerUtils();
 
     private static final BlockPos[] SURROUND_OFFSETS = {
-        new BlockPos(0, -1, 0),
-        new BlockPos(0, 0, -1),
-        new BlockPos(1, 0, 0),
-        new BlockPos(0, 0, 1),
-        new BlockPos(-1, 0, 0)
+            new BlockPos(0, -1, 0),
+            new BlockPos(0, 0, -1),
+            new BlockPos(1, 0, 0),
+            new BlockPos(0, 0, 1),
+            new BlockPos(-1, 0, 0)
     };
 
     @Override
@@ -109,15 +108,15 @@ public class Surround extends Module {
         if (!placeTimer.passedMillise(placeDelay.getValue())) return;
 
         boolean isMoving = MoveUtils.isMoving() || mc.options.keyUp.isDown() || mc.options.keyDown.isDown()
-            || mc.options.keyLeft.isDown() || mc.options.keyRight.isDown();
+                || mc.options.keyLeft.isDown() || mc.options.keyRight.isDown();
 
         if (onlyStatic.getValue() && isMoving && swapMode.is(SwapMode.InvSwitch)) {
             return;
         }
 
         FindItemResult itemResult = swapMode.is(SwapMode.InvSwitch)
-            ? InvUtils.find(this::isValidBlock)
-            : InvUtils.findInHotbar(this::isValidBlock);
+                ? InvUtils.find(this::isValidBlock)
+                : InvUtils.findInHotbar(this::isValidBlock);
         if (!itemResult.found()) return;
 
         int placedCount = 0;
@@ -174,9 +173,9 @@ public class Surround extends Module {
 
             Direction hitSide = side.getOpposite();
             Vec3 hitVec = new Vec3(
-                neighborPos.getX() + 0.5 + hitSide.getStepX() * 0.5,
-                neighborPos.getY() + 0.5 + hitSide.getStepY() * 0.5,
-                neighborPos.getZ() + 0.5 + hitSide.getStepZ() * 0.5
+                    neighborPos.getX() + 0.5 + hitSide.getStepX() * 0.5,
+                    neighborPos.getY() + 0.5 + hitSide.getStepY() * 0.5,
+                    neighborPos.getZ() + 0.5 + hitSide.getStepZ() * 0.5
             );
 
             if (mc.player.getEyePosition().distanceToSqr(hitVec) > 18.0) continue;
@@ -250,11 +249,12 @@ public class Surround extends Module {
     }
 
     private record PlaceInfo(
-        BlockPos targetPos,
-        BlockPos neighborPos,
-        Direction side,
-        Vec3 hitVec,
-        Vector2f rotation,
-        int distance
-    ) {}
+            BlockPos targetPos,
+            BlockPos neighborPos,
+            Direction side,
+            Vec3 hitVec,
+            Vector2f rotation,
+            int distance
+    ) {
+    }
 }

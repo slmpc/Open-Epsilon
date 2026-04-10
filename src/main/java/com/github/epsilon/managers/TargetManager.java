@@ -132,7 +132,8 @@ public class TargetManager {
             case Monster _ -> {
                 if (!request.mob()) return false;
             }
-            default -> {}
+            default -> {
+            }
         }
 
         return request.extraFilter().test(entity);

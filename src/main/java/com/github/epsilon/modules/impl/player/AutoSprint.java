@@ -5,6 +5,7 @@ import com.github.epsilon.modules.Module;
 import com.github.epsilon.modules.impl.combat.KillAura;
 import com.github.epsilon.settings.impl.BoolSetting;
 import com.github.epsilon.settings.impl.DoubleSetting;
+import com.github.epsilon.utils.player.MoveUtils;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
@@ -25,9 +26,9 @@ public class AutoSprint extends Module {
     private void onClientTick(ClientTickEvent.Pre event) {
         if (nullCheck()) return;
         mc.player.setSprinting(
-                mc.player.getFoodData().getFoodLevel() > 6
+                MoveUtils.isMoving()
+                        && mc.player.getFoodData().getFoodLevel() > 6
                         && !mc.player.horizontalCollision
-                        && mc.player.input.hasForwardImpulse()
                         && (!mc.player.isUsingItem() || !stopWhileUsing.getValue())
                         && (!pauseWhileAura.getValue() || !KillAura.INSTANCE.isEnabled() || KillAura.INSTANCE.target == null));
     }

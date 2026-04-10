@@ -30,7 +30,7 @@ public class NoFall extends Module {
     private boolean jump;
 
     @SubscribeEvent
-    private void onMotion(MotionEvent e) {
+    private void onMotion(MotionEvent event) {
         if (nullCheck()) return;
 
         if (mc.player.fallDistance > fallDistance.getValue()) {
@@ -39,22 +39,22 @@ public class NoFall extends Module {
 
         if (flag && mc.player.onGround()) {
             switch (mode.getValue()) {
-                case GroundSpoof -> e.setOnGround(false);
+                case GroundSpoof -> event.setOnGround(false);
                 case Packet -> {
                     mc.getConnection().send(new ServerboundMovePlayerPacket.StatusOnly(false, false));
                 }
                 case GrimMotion -> {
-                    e.setY(e.getY() + 0.1f);
+                    event.setY(event.getY() + 0.1f);
                     jump = true;
                 }
             }
             flag = false;
         }
     }
+
     @SubscribeEvent
-    private void onMovementInputEvent(KeyboardInputEvent event){
-        if (jump){
-            //shit fixed
+    private void onMovementInputEvent(KeyboardInputEvent event) {
+        if (jump) {
             event.setJump(true);
             jump = false;
         }

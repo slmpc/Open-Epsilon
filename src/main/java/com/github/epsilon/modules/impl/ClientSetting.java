@@ -2,7 +2,10 @@ package com.github.epsilon.modules.impl;
 
 import com.github.epsilon.gui.hudeditor.HudEditorScreen;
 import com.github.epsilon.modules.Module;
-import com.github.epsilon.settings.impl.*;
+import com.github.epsilon.settings.impl.BoolSetting;
+import com.github.epsilon.settings.impl.ButtonSetting;
+import com.github.epsilon.settings.impl.EnumSetting;
+import com.github.epsilon.settings.impl.KeybindSetting;
 import org.lwjgl.glfw.GLFW;
 
 public class ClientSetting extends Module {

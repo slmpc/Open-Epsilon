@@ -37,9 +37,17 @@ public class NotificationManager {
         }
     }
 
-    public Queue<Notification> getNotifications() { return notifications; }
-    public boolean isEmpty() { return notifications.isEmpty(); }
-    public void clear() { notifications.clear(); }
+    public Queue<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public boolean isEmpty() {
+        return notifications.isEmpty();
+    }
+
+    public void clear() {
+        notifications.clear();
+    }
 
     private void makeRoomIfNeeded() {
         if (notifications.size() >= MAX_NOTIFICATIONS) {

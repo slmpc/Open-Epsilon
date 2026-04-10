@@ -4,7 +4,10 @@ import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.managers.TargetManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
-import com.github.epsilon.settings.impl.*;
+import com.github.epsilon.settings.impl.BoolSetting;
+import com.github.epsilon.settings.impl.DoubleSetting;
+import com.github.epsilon.settings.impl.EnumSetting;
+import com.github.epsilon.settings.impl.IntSetting;
 import com.github.epsilon.utils.player.FindItemResult;
 import com.github.epsilon.utils.player.InvUtils;
 import com.github.epsilon.utils.rotation.RotationUtils;
@@ -177,7 +180,7 @@ public class MaceAura extends Module {
             doNormalAttack();
         } else {
             doMaceAttack(vclip.getValue());
-            if (damageOverride.getValue()){
+            if (damageOverride.getValue()) {
                 doMaceAttack(overrideVClip.getValue());
             }
         }
@@ -207,7 +210,7 @@ public class MaceAura extends Module {
         Vec3 startPos = mc.player.position();
         Vec3 targetPos = startPos.add(0.0, vclip, 0.0);
         // 何意味，，，
-        if (paperServer.getValue()){
+        if (paperServer.getValue()) {
             for (int i = 0; i < 4; i++) {
                 mc.getConnection().send(new ServerboundMovePlayerPacket.StatusOnly(false, false));
             }
