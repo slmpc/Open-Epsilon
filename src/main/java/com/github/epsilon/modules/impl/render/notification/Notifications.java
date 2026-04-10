@@ -1,7 +1,6 @@
 package com.github.epsilon.modules.impl.render.notification;
 
 import com.github.epsilon.graphics.renderers.RectRenderer;
-import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.TextRenderer;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.HudModule;
@@ -79,19 +78,16 @@ public class Notifications extends HudModule {
                 float p = easeOutCubic(time / 300.0f);
                 float w = boxWidth * p;
                 rectRenderer.addRect(renderX + boxWidth - w, y, w, boxHeight, new Color(118, 185, 0, 255));
-                rectRenderer.drawAndClear();
             } else if (time <= 500L) {
                 float p = easeOutCubic((time - 300L) / 200.0f);
                 int a = (int) (bgAlpha * p);
                 rectRenderer.addRect(renderX, y, boxWidth, boxHeight, new Color(0, 0, 0, a));
                 float sliderWidth = 4.0f * s + (boxWidth - 4.0f * s) * (1.0f - p);
                 rectRenderer.addRect(renderX, y, sliderWidth, boxHeight, new Color(118, 185, 0, 255));
-                rectRenderer.drawAndClear();
                 renderText(textRenderer, n, renderX, y, boxHeight, s, (int) (255 * p));
             } else if (exitTime < 0) {
                 rectRenderer.addRect(renderX, y, boxWidth, boxHeight, new Color(0, 0, 0, bgAlpha));
                 rectRenderer.addRect(renderX, y, 4.0f * s, boxHeight, new Color(118, 185, 0, 255));
-                rectRenderer.drawAndClear();
                 renderText(textRenderer, n, renderX, y, boxHeight, s, 255);
             } else if (exitTime <= 200L) {
                 float p = easeOutCubicDec(exitTime / 200.0f);
@@ -99,7 +95,6 @@ public class Notifications extends HudModule {
                 rectRenderer.addRect(renderX, y, boxWidth, boxHeight, new Color(0, 0, 0, a));
                 float sliderWidth = 4.0f * s + (boxWidth - 4.0f * s) * (1.0f - p);
                 rectRenderer.addRect(renderX, y, sliderWidth, boxHeight, new Color(118, 185, 0, 255));
-                rectRenderer.drawAndClear();
                 renderText(textRenderer, n, renderX, y, boxHeight, s, (int) (255 * p));
             } else if (exitTime <= 500L) {
                 float p = easeOutCubicDec((exitTime - 200L) / 300.0f);
@@ -142,4 +137,5 @@ public class Notifications extends HudModule {
     public static void addModuleNotification(String moduleName, boolean enabled) {
         NotificationManager.INSTANCE.postModuleNotification(moduleName, enabled, INSTANCE.displayTime.getValue());
     }
+
 }

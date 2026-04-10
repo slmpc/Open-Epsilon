@@ -76,4 +76,5 @@ public class Notification {
     public Animation getYAnimation() {
         return yAnimation;
     }
+
 }
