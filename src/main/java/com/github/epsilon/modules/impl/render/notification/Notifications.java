@@ -73,12 +73,13 @@ public class Notifications extends HudModule {
             float y = n.getCurrentY();
             long time = System.currentTimeMillis() - n.getCreateTime();
             long exitTime = time - n.getDisplayDuration();
+            boolean skipIntro = n.shouldSkipIntroAnimation();
 
-            if (time <= 300L) {
+            if (!skipIntro && time <= 300L) {
                 float p = easeOutCubic(time / 300.0f);
                 float w = boxWidth * p;
                 rectRenderer.addRect(renderX + boxWidth - w, y, w, boxHeight, new Color(118, 185, 0, 255));
-            } else if (time <= 500L) {
+            } else if (!skipIntro && time <= 500L) {
                 float p = easeOutCubic((time - 300L) / 200.0f);
                 int a = (int) (bgAlpha * p);
                 rectRenderer.addRect(renderX, y, boxWidth, boxHeight, new Color(0, 0, 0, a));
