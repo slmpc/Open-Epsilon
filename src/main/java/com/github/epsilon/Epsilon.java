@@ -31,6 +31,7 @@ public class Epsilon {
     @SubscribeEvent
     private static void onClientSetup(FMLClientSetupEvent event) {
         LOGGER.info("Welcome to Epsilon, Meow~");
+
         mc = Minecraft.getInstance();
         VERSION = event.getContainer().getModInfo().getVersion().toString();
 
@@ -38,8 +39,7 @@ public class Epsilon {
         ModuleManager.INSTANCE.initModules();
 
         // 发送 Addon 注册事件，允许第三方 Addon 注册 Module
-        EpsilonAddonSetupEvent addonEvent = new EpsilonAddonSetupEvent();
-        NeoForge.EVENT_BUS.post(addonEvent);
+        EpsilonAddonSetupEvent addonEvent = NeoForge.EVENT_BUS.post(new EpsilonAddonSetupEvent());
         for (EpsilonAddon addon : addonEvent.addons) {
             addon.onSetup();
             LOGGER.info("Loaded Epsilon addon: {}", addon.addonId);
