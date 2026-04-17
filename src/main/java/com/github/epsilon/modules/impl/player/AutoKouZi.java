@@ -175,7 +175,7 @@ public class AutoKouZi extends Module {
     private void loadFromDefaultPath() {
         try {
             InputStream is = getClass().getClassLoader().getResourceAsStream(
-                    "assets/epsilon_rewrite/kouzi.txt"
+                    "assets/open_epsilon/kouzi.txt"
             );
 
             if (is == null) {

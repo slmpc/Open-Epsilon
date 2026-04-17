@@ -20,10 +20,10 @@ import org.apache.logging.log4j.Logger;
 @EventBusSubscriber(modid = Epsilon.MODID, value = Dist.CLIENT)
 public class Epsilon {
 
-    public static final String MODID = "epsilon_rewrite";
+    public static final String MODID = "open_epsilon";
     public static String VERSION = "Loading ...";
 
-    public static final Logger LOGGER = LogManager.getLogger("Epsilon");
+    public static final Logger LOGGER = LogManager.getLogger("Open Epsilon");
 
     public static int skipTicks;
     public static Minecraft mc;
