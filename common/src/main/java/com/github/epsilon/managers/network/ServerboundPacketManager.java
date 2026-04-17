@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.Packet;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static com.github.epsilon.EpsilonCommon.mc;
+import static com.github.epsilon.Epsilon.mc;
 
 public class ServerboundPacketManager {
 

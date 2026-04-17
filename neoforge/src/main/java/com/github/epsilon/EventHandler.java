@@ -9,7 +9,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
-@EventBusSubscriber(modid = EpsilonCommon.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Epsilon.MODID, value = Dist.CLIENT)
 public class EventHandler {
 
     @SubscribeEvent

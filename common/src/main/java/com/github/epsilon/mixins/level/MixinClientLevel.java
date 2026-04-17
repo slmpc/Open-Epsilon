@@ -1,7 +1,7 @@
 package com.github.epsilon.mixins.level;
 
 
-import com.github.epsilon.EpsilonCommon;
+import com.github.epsilon.Epsilon;
 import com.github.epsilon.events.bus.EpsilonEventBus;
 import com.github.epsilon.events.world.EntityJoinWorldEvent;
 import net.minecraft.client.Minecraft;
@@ -18,8 +18,8 @@ public class MixinClientLevel {
 
     @Redirect(method = "tickNonPassenger", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;tick()V"))
     private void hookTickNonPassenger(Entity instance) {
-        if (EpsilonCommon.skipTicks > 0 && instance == Minecraft.getInstance().player) {
-            EpsilonCommon.skipTicks--;
+        if (Epsilon.skipTicks > 0 && instance == Minecraft.getInstance().player) {
+            Epsilon.skipTicks--;
         } else {
             instance.tick();
         }

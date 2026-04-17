@@ -1,6 +1,6 @@
 package com.github.epsilon.assets.config;
 
-import com.github.epsilon.EpsilonCommon;
+import com.github.epsilon.Epsilon;
 import com.github.epsilon.modules.Module;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -66,7 +66,7 @@ public class LegacyConfigMigrator {
                 .anyMatch(m -> Files.exists(getModuleFile(m)));
         if (anyExists) return;
 
-        EpsilonCommon.LOGGER.info("检测到旧版 config.json，正在迁移到按模块分离的配置文件...");
+        Epsilon.LOGGER.info("检测到旧版 config.json，正在迁移到按模块分离的配置文件...");
         try {
             String json = Files.readString(legacyConfigFile, StandardCharsets.UTF_8);
             JsonElement parsed = JsonParser.parseString(json);
@@ -92,9 +92,9 @@ public class LegacyConfigMigrator {
             // Rename the old file so we never migrate again
             Path backupFile = getAvailableBackupPath();
             Files.move(legacyConfigFile, backupFile);
-            EpsilonCommon.LOGGER.info("迁移完成，旧配置已备份为 {}", backupFile.getFileName());
+            Epsilon.LOGGER.info("迁移完成，旧配置已备份为 {}", backupFile.getFileName());
         } catch (Exception e) {
-            EpsilonCommon.LOGGER.error("迁移旧版配置失败: {}", legacyConfigFile, e);
+            Epsilon.LOGGER.error("迁移旧版配置失败: {}", legacyConfigFile, e);
         }
     }
 

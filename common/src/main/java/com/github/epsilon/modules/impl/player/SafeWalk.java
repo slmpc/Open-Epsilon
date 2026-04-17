@@ -1,9 +1,9 @@
 package com.github.epsilon.modules.impl.player;
+import com.github.epsilon.Epsilon;
 
 import com.github.epsilon.events.movement.MotionEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
-import com.github.epsilon.utils.compat.PlatformCompat;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.github.epsilon.events.bus.EventHandler;
 
@@ -29,7 +29,7 @@ public class SafeWalk extends Module {
 
     @Override
     public void onDisable() {
-        boolean isHoldingShift = InputConstants.isKeyDown(mc.getWindow(), PlatformCompat.getKeyMappingKey(mc.options.keyShift).getValue());
+        boolean isHoldingShift = InputConstants.isKeyDown(mc.getWindow(), Epsilon.platform.getKeyMappingKey(mc.options.keyShift).getValue());
         mc.options.keyShift.setDown(isHoldingShift);
     }
 

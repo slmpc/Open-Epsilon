@@ -1,6 +1,6 @@
 package com.github.epsilon.managers;
 
-import com.github.epsilon.EpsilonCommon;
+import com.github.epsilon.Epsilon;
 import com.github.epsilon.assets.config.LegacyConfigMigrator;
 import com.github.epsilon.modules.HudModule;
 import com.github.epsilon.modules.Module;
@@ -49,7 +49,7 @@ public class ConfigManager {
             applyToModules(ModuleManager.INSTANCE.getModules());
             loadFriends();
         } catch (Exception e) {
-            EpsilonCommon.LOGGER.error("初始化配置失败", e);
+            Epsilon.LOGGER.error("初始化配置失败", e);
         }
     }
 
@@ -99,7 +99,7 @@ public class ConfigManager {
             if (parsed == null || !parsed.isJsonObject()) return;
             applyModuleObject(module, parsed.getAsJsonObject());
         } catch (Exception e) {
-            EpsilonCommon.LOGGER.error("读取模块配置失败: {}", file, e);
+            Epsilon.LOGGER.error("读取模块配置失败: {}", file, e);
         }
     }
 
@@ -158,7 +158,7 @@ public class ConfigManager {
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE);
         } catch (IOException e) {
-            EpsilonCommon.LOGGER.error("写入模块配置失败: {}", file, e);
+            Epsilon.LOGGER.error("写入模块配置失败: {}", file, e);
         }
     }
 
@@ -207,7 +207,7 @@ public class ConfigManager {
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE);
         } catch (IOException e) {
-            EpsilonCommon.LOGGER.error("写入好友文件失败: {}", friendFile, e);
+            Epsilon.LOGGER.error("写入好友文件失败: {}", friendFile, e);
         }
     }
 
@@ -225,7 +225,7 @@ public class ConfigManager {
                 }
             }
         } catch (Exception e) {
-            EpsilonCommon.LOGGER.error("读取好友文件失败: {}", friendFile, e);
+            Epsilon.LOGGER.error("读取好友文件失败: {}", friendFile, e);
         }
     }
 

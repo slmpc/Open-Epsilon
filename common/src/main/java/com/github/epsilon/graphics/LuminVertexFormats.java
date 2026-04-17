@@ -1,16 +1,16 @@
 package com.github.epsilon.graphics;
+import com.github.epsilon.Epsilon;
 
-import com.github.epsilon.utils.compat.PlatformCompat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 public class LuminVertexFormats {
 
     public static final VertexFormatElement ROUND_INNER_RECT =
-            PlatformCompat.registerVertexFormatElement(PlatformCompat.findNextVertexFormatElementId(), 2, VertexFormatElement.Type.FLOAT, false, 4);
+            Epsilon.platform.registerVertexFormatElement(Epsilon.platform.findNextVertexFormatElementId(), 2, VertexFormatElement.Type.FLOAT, false, 4);
 
     public static final VertexFormatElement ROUND_RADIUS =
-            PlatformCompat.registerVertexFormatElement(PlatformCompat.findNextVertexFormatElementId(), 4, VertexFormatElement.Type.FLOAT, false, 4);
+            Epsilon.platform.registerVertexFormatElement(Epsilon.platform.findNextVertexFormatElementId(), 4, VertexFormatElement.Type.FLOAT, false, 4);
 
     public static final VertexFormat ROUND_RECT = VertexFormat.builder()
             .add("Position", VertexFormatElement.POSITION)

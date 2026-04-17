@@ -1,4 +1,5 @@
 package com.github.epsilon.modules.impl.world;
+import com.github.epsilon.Epsilon;
 
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
@@ -6,7 +7,6 @@ import com.github.epsilon.modules.impl.player.InvManager;
 import com.github.epsilon.settings.impl.BoolSetting;
 import com.github.epsilon.settings.impl.IntSetting;
 import com.github.epsilon.utils.math.MathUtils;
-import com.github.epsilon.utils.compat.PlatformCompat;
 import com.github.epsilon.utils.player.InvHelper;
 import com.github.epsilon.utils.timer.TimerUtils;
 import net.minecraft.client.gui.screens.Screen;
@@ -51,7 +51,7 @@ public class Stealer extends Module {
             return true;
         } else if (stack.is(ItemTags.ARMOR_ENCHANTABLE)) {
             float protection = InvHelper.getProtection(stack);
-            float bestArmor = InvHelper.getBestArmorScore(PlatformCompat.getEquipmentSlot(stack));
+            float bestArmor = InvHelper.getBestArmorScore(Epsilon.platform.getEquipmentSlot(stack));
             return !(protection <= bestArmor);
         } else if (stack.is(ItemTags.SWORDS)) {
             float damage = InvHelper.getSwordDamage(stack);
@@ -149,7 +149,7 @@ public class Stealer extends Module {
             for (int i = 0; i < menu.getRowCount() * 9; i++) {
                 ItemStack checkStack = menu.getSlot(i).getItem();
                 if (stack.is(ItemTags.ARMOR_ENCHANTABLE) && checkStack.is(ItemTags.ARMOR_ENCHANTABLE)) {
-                    if (PlatformCompat.getEquipmentSlot(stack) == PlatformCompat.getEquipmentSlot(checkStack) && InvHelper.getProtection(checkStack) > InvHelper.getProtection(stack)) {
+                    if (Epsilon.platform.getEquipmentSlot(stack) == Epsilon.platform.getEquipmentSlot(checkStack) && InvHelper.getProtection(checkStack) > InvHelper.getProtection(stack)) {
                         return false;
                     }
                 } else if (stack.is(ItemTags.SWORDS) && checkStack.is(ItemTags.SWORDS)) {

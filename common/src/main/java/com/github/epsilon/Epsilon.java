@@ -1,7 +1,6 @@
 package com.github.epsilon;
 
 import com.github.epsilon.assets.i18n.I18NFileGenerator;
-import com.github.epsilon.events.bus.EpsilonEventBus;
 import com.github.epsilon.managers.ConfigManager;
 import com.github.epsilon.managers.ModuleManager;
 import com.github.epsilon.managers.SyncManager;
@@ -15,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Common initialization logic shared by all loaders.
  */
-public class EpsilonCommon {
+public class Epsilon {
 
     public static final String MODID = "open_epsilon";
     public static String VERSION = "Loading ...";
@@ -26,9 +25,18 @@ public class EpsilonCommon {
     public static Minecraft mc;
 
     /**
+     * Active platform implementation. Must be set by the loader entry point
+     * <em>before</em> calling {@link #init()}.
+     */
+    public static PlatformCompat platform;
+
+    /**
      * Called during client setup on all loaders.
      */
     public static void init() {
+        if (platform == null) {
+            throw new IllegalStateException("Epsilon.platform must be set before calling Epsilon.init()");
+        }
         LOGGER.info("Welcome to Epsilon, Meow~");
 
         mc = Minecraft.getInstance();
@@ -36,7 +44,6 @@ public class EpsilonCommon {
         // 初始化 Managers
         ModuleManager.INSTANCE.initModules();
 
-        // 初始化网络和同步管理器（触发单例构造，注册到事件总线）
         SyncManager.INSTANCE.getClass();
         ClientboundPacketManager.INSTANCE.getClass();
         ServerboundPacketManager.INSTANCE.getClass();

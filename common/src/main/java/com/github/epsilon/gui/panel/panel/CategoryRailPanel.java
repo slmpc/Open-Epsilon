@@ -1,6 +1,6 @@
 package com.github.epsilon.gui.panel.panel;
 
-import com.github.epsilon.EpsilonCommon;
+import com.github.epsilon.Epsilon;
 import com.github.epsilon.assets.i18n.EpsilonTranslateComponent;
 import com.github.epsilon.assets.i18n.TranslateComponent;
 import com.github.epsilon.graphics.renderers.RectRenderer;
@@ -105,7 +105,7 @@ public class CategoryRailPanel {
             float subtitleY = titleY + titleHeight + pad;
             float titleOffset = (1.0f - titleProgress) * 8.0f;
             float subtitleOffset = (1.0f - subtitleProgress) * 10.0f;
-            clippedTextRenderer.addText("Epsilon " + EpsilonCommon.VERSION, bounds.x() + 38.0f + titleOffset, titleY, titleScale, brandColor, StaticFontLoader.DUCKSANS);
+            clippedTextRenderer.addText("Epsilon " + Epsilon.VERSION, bounds.x() + 38.0f + titleOffset, titleY, titleScale, brandColor, StaticFontLoader.DUCKSANS);
             if (subtitleProgress > 0.02f) {
                 clippedTextRenderer.addText("Open Source", bounds.x() + 38.0f + subtitleOffset, subtitleY, subtitleScale, subColor);
             }
