@@ -10,7 +10,6 @@ base {
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(java_version)
     withSourcesJar()
-    withJavadocJar()
 }
 
 repositories {
@@ -29,25 +28,27 @@ repositories {
 }
 
 sourcesJar {
+    def capturedModName = project.findProperty('mod_name') ?: ''
     from(rootProject.file('LICENSE')) {
-        rename { "${it}_${mod_name}" }
+        rename { "${it}_${capturedModName}" }
     }
 }
 
 jar {
+    def capturedModName = project.findProperty('mod_name') ?: ''
     from(rootProject.file('LICENSE')) {
-        rename { "${it}_${mod_name}" }
+        rename { "${it}_${capturedModName}" }
     }
 
     manifest {
         attributes([
-                'Specification-Title'   : mod_name,
-                'Specification-Vendor'  : mod_author,
+                'Specification-Title'   : project.findProperty('mod_name') ?: '',
+                'Specification-Vendor'  : project.findProperty('mod_author') ?: '',
                 'Specification-Version' : project.jar.archiveVersion,
                 'Implementation-Title'  : project.name,
                 'Implementation-Version': project.jar.archiveVersion,
-                'Implementation-Vendor' : mod_author,
-                'Built-On-Minecraft'    : minecraft_version
+                'Implementation-Vendor' : project.findProperty('mod_author') ?: '',
+                'Built-On-Minecraft'    : project.findProperty('minecraft_version') ?: ''
         ])
     }
 }
@@ -64,7 +65,7 @@ processResources {
             'mod_author'                   : mod_author,
             'mod_id'                       : mod_id,
             'license'                      : license,
-            'description'                  : project.description,
+            'description'                  : project.findProperty('description') ?: '',
             'neoforge_version'             : neoforge_version,
             'neoforge_loader_version_range': neoforge_loader_version_range,
             'credits'                      : credits,
@@ -88,6 +89,11 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    (options as StandardJavadocDocletOptions).addBooleanOption('Xdoclint:none', true)
 }
 
 publishing {

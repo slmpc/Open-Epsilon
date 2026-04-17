@@ -32,7 +32,7 @@ loom {
 }
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
-['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements', 'includeInternal', 'modCompileClasspath'].each { variant ->
+['apiElements', 'runtimeElements', 'sourcesElements', 'includeInternal', 'modCompileClasspath'].each { variant ->
     configurations.named("$variant") {
         attributes {
             attribute(loaderAttribute, 'fabric')

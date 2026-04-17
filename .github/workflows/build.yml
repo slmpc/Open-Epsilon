@@ -21,17 +21,22 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # This is needed to be able to run ./gradlew below
-      # You can run `git update-index --chmod +x gradlew` then remove this step.
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
         run: ./gradlew build
-        
-      - name: Upload Artifacts
+
+      - name: Upload NeoForge Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
-          path: build/libs/*.jar
+          name: neoforge-artifacts
+          path: neoforge/build/libs/*.jar
+          if-no-files-found: error
+
+      - name: Upload Fabric Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-artifacts
+          path: fabric/build/libs/*.jar
           if-no-files-found: error

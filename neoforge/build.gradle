@@ -40,7 +40,7 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
-['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+['apiElements', 'runtimeElements', 'sourcesElements'].each { variant ->
     configurations.named("$variant") {
         attributes {
             attribute(loaderAttribute, 'neoforge')
