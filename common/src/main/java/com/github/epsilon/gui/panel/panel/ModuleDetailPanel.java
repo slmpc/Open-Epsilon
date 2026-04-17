@@ -51,10 +51,14 @@ public class ModuleDetailPanel {
     private final Animation bindModeHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private final Animation keybindHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
     private final Animation keybindFocusAnimation = new Animation(Easing.EASE_OUT_CUBIC, 150L);
+    private final Animation hiddenAnimation = new Animation(Easing.EASE_OUT_CUBIC, 180L);
+    private final Animation hiddenHoverAnimation = new Animation(Easing.EASE_OUT_CUBIC, 120L);
 
     private static final TranslateComponent toggleComponent = EpsilonTranslateComponent.create("keybind", "toggle");
     private static final TranslateComponent holdComponent = EpsilonTranslateComponent.create("keybind", "hold");
     private static final TranslateComponent noneComponent = EpsilonTranslateComponent.create("keybind", "none");
+    private static final TranslateComponent visibleComponent = EpsilonTranslateComponent.create("module", "visible");
+    private static final TranslateComponent hiddenComponent = EpsilonTranslateComponent.create("module", "hidden");
 
     public ModuleDetailPanel(PanelState state, RoundRectRenderer roundRectRenderer, RectRenderer rectRenderer, ShadowRenderer shadowRenderer, TextRenderer textRenderer, PanelPopupHost popupHost) {
         this.state = state;
@@ -66,6 +70,8 @@ public class ModuleDetailPanel {
         this.bindModeHoverAnimation.setStartValue(0.0f);
         this.keybindHoverAnimation.setStartValue(0.0f);
         this.keybindFocusAnimation.setStartValue(0.0f);
+        this.hiddenAnimation.setStartValue(0.0f);
+        this.hiddenHoverAnimation.setStartValue(0.0f);
     }
 
     public void render(GuiGraphicsExtractor GuiGraphicsExtractor, PanelLayout.Rect bounds, int mouseX, int mouseY, float partialTick) {
@@ -94,6 +100,7 @@ public class ModuleDetailPanel {
 
         drawKeybindControl(module, mouseX, mouseY);
         drawBindModeControl(module, mouseX, mouseY);
+        drawHiddenControl(module, mouseX, mouseY);
 
         PanelLayout.Rect viewport = getViewport();
         List<Setting<?>> settings = module.getSettings().stream().filter(Setting::isAvailable).toList();
@@ -155,6 +162,14 @@ public class ModuleDetailPanel {
         if (bindModeBounds.contains(event.x(), event.y())) {
             float midpoint = bindModeBounds.centerX();
             module.setBindMode(event.x() < midpoint ? Module.BindMode.Toggle : Module.BindMode.Hold);
+            markDirty();
+            return true;
+        }
+
+        PanelLayout.Rect hiddenBounds = getHiddenBounds();
+        if (hiddenBounds.contains(event.x(), event.y())) {
+            float midpoint = hiddenBounds.centerX();
+            module.setHidden(event.x() >= midpoint);
             markDirty();
             return true;
         }
@@ -262,7 +277,7 @@ public class ModuleDetailPanel {
     }
 
     private float getHeaderControlGroupWidth() {
-        return getKeybindControlSize() + getHeaderControlGap() + getBindModeControlWidth();
+        return getKeybindControlSize() + getHeaderControlGap() + getBindModeControlWidth() + getHeaderControlGap() + getHiddenControlWidth();
     }
 
     private float getHeaderContentInset() {
@@ -283,6 +298,14 @@ public class ModuleDetailPanel {
 
     private float getBindModeControlWidth() {
         return 96.0f;
+    }
+
+    private float getHiddenControlWidth() {
+        return 96.0f;
+    }
+
+    private PanelLayout.Rect getHiddenBounds() {
+        return new PanelLayout.Rect(getHeaderControlGroupX() + getKeybindControlSize() + getHeaderControlGap() + getBindModeControlWidth() + getHeaderControlGap(), getHeaderControlsY(), getHiddenControlWidth(), getHeaderControlHeight());
     }
 
     private float getHeaderControlGap() {
@@ -376,6 +399,51 @@ public class ModuleDetailPanel {
         textRenderer.addText(label, textX, textY, scale, foreground);
     }
 
+    private void drawHiddenControl(Module module, int mouseX, int mouseY) {
+        PanelLayout.Rect hiddenBounds = getHiddenBounds();
+        hiddenAnimation.run(module.isHidden() ? 1.0f : 0.0f);
+        hiddenHoverAnimation.run(hiddenBounds.contains(mouseX, mouseY) ? 1.0f : 0.0f);
+        float progress = hiddenAnimation.getValue();
+        float hoverProgress = hiddenHoverAnimation.getValue();
+        float outerRadius = getHeaderControlRadius();
+        float shellInset = 1.0f;
+        float innerX = hiddenBounds.x() + shellInset;
+        float innerY = hiddenBounds.y() + shellInset;
+        float innerWidth = hiddenBounds.width() - shellInset * 2.0f;
+        float innerHeight = hiddenBounds.height() - shellInset * 2.0f;
+        float segmentWidth = innerWidth / 2.0f;
+        float indicatorInset = 1.5f;
+        float indicatorWidth = segmentWidth - indicatorInset * 2.0f;
+        float indicatorX = innerX + indicatorInset + segmentWidth * progress;
+        float indicatorY = innerY + indicatorInset;
+        float indicatorHeight = innerHeight - indicatorInset * 2.0f;
+        float indicatorRadius = Math.max(4.0f, outerRadius - 2.0f);
+
+        roundRectRenderer.addRoundRect(hiddenBounds.x(), hiddenBounds.y(), hiddenBounds.width(), hiddenBounds.height(), outerRadius, MD3Theme.OUTLINE_SOFT);
+        roundRectRenderer.addRoundRect(innerX, innerY, innerWidth, innerHeight, Math.max(outerRadius - shellInset, 1.0f), MD3Theme.isLightTheme() ? MD3Theme.SURFACE : MD3Theme.SURFACE_CONTAINER_HIGH);
+        if (hoverProgress > 0.01f) {
+            int hoverAlpha = MD3Theme.isLightTheme() ? 10 : 14;
+            roundRectRenderer.addRoundRect(innerX, innerY, innerWidth, innerHeight, Math.max(outerRadius - shellInset, 1.0f), MD3Theme.withAlpha(MD3Theme.TEXT_PRIMARY, (int) (hoverAlpha * hoverProgress)));
+        }
+
+        float dividerX = innerX + segmentWidth - 0.5f;
+        rectRenderer.addRect(dividerX, innerY + 3.0f, 1.0f, innerHeight - 6.0f, MD3Theme.OUTLINE_SOFT);
+        roundRectRenderer.addRoundRect(indicatorX, indicatorY, indicatorWidth, indicatorHeight, indicatorRadius, MD3Theme.SECONDARY_CONTAINER);
+
+        String visibleText = visibleComponent.getTranslatedName();
+        String hiddenText = hiddenComponent.getTranslatedName();
+
+        float visibleScale = 0.52f;
+        float hiddenScale = 0.52f;
+        float visibleWidth = textRenderer.getWidth(visibleText, visibleScale);
+        float hiddenWidth = textRenderer.getWidth(hiddenText, hiddenScale);
+        float textHeight = textRenderer.getHeight(visibleScale);
+        float centerY = innerY + (innerHeight - textHeight) / 2.0f - 1.0f;
+        Color inactiveText = MD3Theme.isLightTheme() ? MD3Theme.TEXT_SECONDARY : MD3Theme.TEXT_MUTED;
+        textRenderer.addText(visibleText, innerX + (segmentWidth - visibleWidth) / 2.0f, centerY, visibleScale, MD3Theme.lerp(MD3Theme.ON_SECONDARY_CONTAINER, inactiveText, progress));
+        textRenderer.addText(hiddenText, innerX + segmentWidth + (segmentWidth - hiddenWidth) / 2.0f, centerY, hiddenScale, MD3Theme.lerp(inactiveText, MD3Theme.ON_SECONDARY_CONTAINER, progress));
+    }
+
     private String formatCompactKeybind(int keyCode) {
         if (keyCode < 0) {
             return noneComponent.getTranslatedName();
@@ -426,7 +494,9 @@ public class ModuleDetailPanel {
                 || !keybindHoverAnimation.isFinished()
                 || !keybindFocusAnimation.isFinished()
                 || !bindModeAnimation.isFinished()
-                || !bindModeHoverAnimation.isFinished();
+                || !bindModeHoverAnimation.isFinished()
+                || !hiddenAnimation.isFinished()
+                || !hiddenHoverAnimation.isFinished();
     }
 
     private boolean shouldRebuildContent(PanelLayout.Rect bounds, int mouseX, int mouseY, Module module, List<Setting<?>> settings, int currentGuiHeight) {
@@ -436,7 +506,7 @@ public class ModuleDetailPanel {
         if (Float.compare(lastDetailScroll, state.getDetailScroll()) != 0) {
             return true;
         }
-        if (!Objects.equals(lastModuleKey, module.getName() + ":" + module.getBindMode() + ":" + module.getKeyBind())) {
+        if (!Objects.equals(lastModuleKey, module.getName() + ":" + module.getBindMode() + ":" + module.getKeyBind() + ":" + module.isHidden())) {
             return true;
         }
         List<String> visibleSettings = settings.stream().map(Setting::getName).toList();
@@ -446,7 +516,7 @@ public class ModuleDetailPanel {
     private void rememberSnapshot(PanelLayout.Rect bounds, int mouseX, int mouseY, Module module, List<Setting<?>> settings, int currentGuiHeight) {
         contentState.rememberSnapshot(bounds, mouseX, mouseY, currentGuiHeight);
         lastDetailScroll = state.getDetailScroll();
-        lastModuleKey = module.getName() + ":" + module.getBindMode() + ":" + module.getKeyBind();
+        lastModuleKey = module.getName() + ":" + module.getBindMode() + ":" + module.getKeyBind() + ":" + module.isHidden();
         lastVisibleSettings = settings.stream().map(Setting::getName).toList();
     }
 

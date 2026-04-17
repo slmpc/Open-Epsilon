@@ -25,7 +25,7 @@ public class Module {
 
     private BindMode bindMode = BindMode.Toggle;
 
-    private final BoolSetting hidden;
+    private boolean hidden = false;
 
     private boolean enabled;
 
@@ -39,7 +39,6 @@ public class Module {
         mc = Minecraft.getInstance();
         this.name = name;
         this.category = category;
-        hidden = boolSetting("Hidden", false);
     }
 
     /**
@@ -106,6 +105,7 @@ public class Module {
     public void reset() {
         setEnabled(false);
         bindMode = BindMode.Toggle;
+        hidden = false;
         for (Setting<?> setting : settings) {
             setting.reset();
         }
@@ -145,7 +145,11 @@ public class Module {
     }
 
     public boolean isHidden() {
-        return hidden.getValue();
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     protected IntSetting intSetting(String name, int defaultValue, int min, int max, int step, Setting.Dependency dependency) {

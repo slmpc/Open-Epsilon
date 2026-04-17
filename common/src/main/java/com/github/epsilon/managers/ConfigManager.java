@@ -118,6 +118,13 @@ public class ConfigManager {
             }
         }
 
+        if (moduleObj.has("hidden") && moduleObj.get("hidden").isJsonPrimitive()) {
+            try {
+                module.setHidden(moduleObj.get("hidden").getAsBoolean());
+            } catch (Exception ignored) {
+            }
+        }
+
         if (module instanceof HudModule hud) {
             HudModule.HorizontalAnchor horizontalAnchor = readHorizontalAnchor(moduleObj, "hudHorizontalAnchor");
             HudModule.VerticalAnchor verticalAnchor = readVerticalAnchor(moduleObj, "hudVerticalAnchor");
@@ -168,6 +175,7 @@ public class ConfigManager {
         obj.addProperty("enabled", module.isEnabled());
         obj.addProperty("keyBind", module.getKeyBind());
         obj.addProperty("bindMode", module.getBindMode().name());
+        obj.addProperty("hidden", module.isHidden());
 
         if (module instanceof HudModule hud) {
             hud.updateLayout(null);
