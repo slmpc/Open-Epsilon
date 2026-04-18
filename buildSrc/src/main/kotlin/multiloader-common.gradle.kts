@@ -1,0 +1,122 @@
+plugins {
+    `java-library`
+    `maven-publish`
+}
+
+val modId = project.property("mod_id").toString()
+val minecraftVersion = project.property("minecraft_version").toString()
+val javaVersion = project.property("java_version").toString()
+val modName = project.findProperty("mod_name")?.toString() ?: ""
+val modAuthor = project.findProperty("mod_author")?.toString() ?: ""
+val minecraftVersionRange = project.property("minecraft_version_range").toString()
+val fabricVersion = project.property("fabric_version").toString()
+val fabricLoaderVersion = project.property("fabric_loader_version").toString()
+val license = project.property("license").toString()
+val neoforgeVersion = project.property("neoforge_version").toString()
+val neoforgeLoaderVersionRange = project.property("neoforge_loader_version_range").toString()
+val credits = project.findProperty("credits")?.toString() ?: ""
+
+base {
+    archivesName.set("${modId}-${project.name}-${minecraftVersion}")
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion))
+    withSourcesJar()
+}
+
+repositories {
+    maven { url = uri("https://maven.aliyun.com/repository/public") }
+    maven { url = uri("https://maven.aliyun.com/repository/central") }
+    mavenCentral()
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Sponge"
+                url = uri("https://repo.spongepowered.org/repository/maven-public")
+            }
+        }
+        filter { includeGroupAndSubgroups("org.spongepowered") }
+    }
+}
+
+tasks.named<Jar>("sourcesJar") {
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${modName}" }
+    }
+}
+
+tasks.named<Jar>("jar") {
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${modName}" }
+    }
+
+    manifest {
+        attributes(mapOf(
+            "Specification-Title" to modName,
+            "Specification-Vendor" to modAuthor,
+            "Specification-Version" to archiveVersion,
+            "Implementation-Title" to project.name,
+            "Implementation-Version" to archiveVersion,
+            "Implementation-Vendor" to modAuthor,
+            "Built-On-Minecraft" to minecraftVersion
+        ))
+    }
+}
+
+tasks.named<ProcessResources>("processResources") {
+    val expandProps = mapOf(
+        "version" to version,
+        "group" to project.group,
+        "minecraft_version" to minecraftVersion,
+        "minecraft_version_range" to minecraftVersionRange,
+        "fabric_version" to fabricVersion,
+        "fabric_loader_version" to fabricLoaderVersion,
+        "mod_name" to modName,
+        "mod_author" to modAuthor,
+        "mod_id" to modId,
+        "license" to license,
+        "description" to (project.findProperty("description")?.toString() ?: ""),
+        "neoforge_version" to neoforgeVersion,
+        "neoforge_loader_version_range" to neoforgeLoaderVersionRange,
+        "credits" to credits,
+        "java_version" to javaVersion
+    )
+
+    val jsonExpandProps = expandProps.mapValues { (_, value) ->
+        if (value is String) value.replace("\n", "\\\\n") else value
+    }
+
+    filesMatching(listOf("META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
+        expand(expandProps)
+    }
+
+    filesMatching(listOf("pack.mcmeta", "fabric.mod.json", "*.mixins.json")) {
+        expand(jsonExpandProps)
+    }
+
+    inputs.properties(expandProps)
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+}
+
+tasks.withType<Javadoc>().configureEach {
+    options.encoding = "UTF-8"
+    (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("mavenJava") {
+            artifactId = base.archivesName.get()
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            url = uri("file://${project.projectDir}/repo")
+        }
+    }
+}
