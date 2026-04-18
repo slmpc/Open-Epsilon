@@ -13,10 +13,7 @@ import com.github.epsilon.modules.impl.combat.*;
 import com.github.epsilon.modules.impl.player.*;
 import com.github.epsilon.modules.impl.render.*;
 import com.github.epsilon.modules.impl.render.notification.Notifications;
-import com.github.epsilon.modules.impl.world.AutoAccount;
-import com.github.epsilon.modules.impl.world.AutoFarm;
-import com.github.epsilon.modules.impl.world.FakePlayer;
-import com.github.epsilon.modules.impl.world.Stealer;
+import com.github.epsilon.modules.impl.world.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 
@@ -89,6 +86,7 @@ public class ModuleManager {
                 Stealer.INSTANCE,
                 FakePlayer.INSTANCE,
                 AutoAccount.INSTANCE,
+                ComputeTest.INSTANCE,
 
                 // Hud
                 Notifications.INSTANCE,

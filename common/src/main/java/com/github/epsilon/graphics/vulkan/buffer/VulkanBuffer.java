@@ -99,6 +99,10 @@ public final class VulkanBuffer implements AutoCloseable {
         vmaFlushAllocation(allocator, allocation, offset, byteCount);
     }
 
+    public void invalidate(long offset, long byteCount) {
+        vmaInvalidateAllocation(allocator, allocation, offset, byteCount);
+    }
+
     @Override
     public void close() {
         vmaDestroyBuffer(allocator, buffer, allocation);
