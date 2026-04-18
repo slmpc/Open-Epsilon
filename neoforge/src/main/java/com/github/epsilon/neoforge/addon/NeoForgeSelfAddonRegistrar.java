@@ -1,5 +1,6 @@
 package com.github.epsilon.neoforge.addon;
 
+import com.github.epsilon.neoforge.NeoForgePlatformAddon;
 import net.neoforged.neoforge.common.NeoForge;
 
 /**

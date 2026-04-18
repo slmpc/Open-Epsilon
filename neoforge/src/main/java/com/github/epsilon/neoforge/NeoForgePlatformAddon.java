@@ -1,4 +1,4 @@
-package com.github.epsilon.neoforge.addon;
+package com.github.epsilon.neoforge;
 
 import com.github.epsilon.Epsilon;
 import com.github.epsilon.addon.EpsilonAddon;

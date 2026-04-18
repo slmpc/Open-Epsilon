@@ -1,4 +1,4 @@
-package com.github.epsilon.fabric.addon;
+package com.github.epsilon.fabric;
 
 import com.github.epsilon.Epsilon;
 import com.github.epsilon.addon.EpsilonAddon;
