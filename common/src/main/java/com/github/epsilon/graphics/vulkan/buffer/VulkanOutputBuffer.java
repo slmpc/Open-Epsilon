@@ -5,6 +5,7 @@ import org.lwjgl.vulkan.VkBufferCopy;
 import org.lwjgl.vulkan.VkCommandBuffer;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Objects;
 
 import static org.lwjgl.util.vma.Vma.*;
@@ -93,7 +94,7 @@ public final class VulkanOutputBuffer implements AutoCloseable {
         int end = Math.toIntExact(offset + byteCount);
         source.position(start);
         source.limit(end);
-        return source.slice();
+        return source.slice().order(ByteOrder.LITTLE_ENDIAN);
     }
 
     private void validateRange(long offset, long byteCount) {
@@ -108,4 +109,3 @@ public final class VulkanOutputBuffer implements AutoCloseable {
         gpu.close();
     }
 }
-

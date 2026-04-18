@@ -9,6 +9,7 @@ import org.lwjgl.util.vma.VmaAllocationInfo;
 import org.lwjgl.vulkan.VkBufferCreateInfo;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static org.lwjgl.util.vma.Vma.*;
 import static org.lwjgl.vulkan.VK12.VK_SHARING_MODE_EXCLUSIVE;
@@ -69,7 +70,7 @@ public final class VulkanBuffer implements AutoCloseable {
                     );
                     mappedPtr = pMapped.get(0);
                 }
-                mappedData = MemoryUtil.memByteBuffer(mappedPtr, Math.toIntExact(size));
+                mappedData = MemoryUtil.memByteBuffer(mappedPtr, Math.toIntExact(size)).order(ByteOrder.LITTLE_ENDIAN);
             }
 
             return new VulkanBuffer(allocator, pBuffer.get(0), pAllocation.get(0), size, mappedData);
