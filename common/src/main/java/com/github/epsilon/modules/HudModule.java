@@ -73,6 +73,9 @@ public abstract class HudModule extends Module {
         horizontalAnchor = HorizontalAnchor.Left;
         verticalAnchor = VerticalAnchor.Top;
         applyRenderPosition(renderX, renderY, false);
+        // Legacy positions are raw top-left render coordinates.
+        this.anchorX = this.x;
+        this.anchorY = this.y;
     }
 
     public final void setAnchorState(HorizontalAnchor horizontalAnchor, VerticalAnchor verticalAnchor, float anchorX, float anchorY) {
@@ -112,8 +115,10 @@ public abstract class HudModule extends Module {
 
         this.x = clampedX;
         this.y = clampedY;
-        this.anchorX = HudLayoutHelper.toAnchorX(horizontalAnchor, clampedX, width, screenWidth);
-        this.anchorY = HudLayoutHelper.toAnchorY(verticalAnchor, clampedY, height, screenHeight);
+        if (updateAnchors) {
+            this.anchorX = HudLayoutHelper.toAnchorX(horizontalAnchor, clampedX, width, screenWidth);
+            this.anchorY = HudLayoutHelper.toAnchorY(verticalAnchor, clampedY, height, screenHeight);
+        }
     }
 
     private float getAnchoredRenderX() {
