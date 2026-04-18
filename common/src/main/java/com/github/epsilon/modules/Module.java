@@ -2,6 +2,7 @@ package com.github.epsilon.modules;
 
 import com.github.epsilon.assets.i18n.TranslateComponent;
 import com.github.epsilon.events.bus.EpsilonEventBus;
+import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.modules.impl.render.notification.Notifications;
 import com.github.epsilon.settings.Setting;
 import com.github.epsilon.settings.impl.*;
@@ -64,6 +65,10 @@ public class Module {
 
     protected boolean nullCheck() {
         return mc.player == null || mc.level == null;
+    }
+
+    protected boolean vulkanCheck() {
+        return !LuminRenderSystem.vulkanContext.isAvailable();
     }
 
     protected void onEnable() {

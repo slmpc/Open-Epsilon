@@ -19,7 +19,9 @@ import org.lwjgl.vulkan.*;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
+import java.util.List;
 
+import static org.lwjgl.vulkan.KHRSynchronization2.*;
 import static org.lwjgl.vulkan.VK12.*;
 
 public class ComputeTest extends Module {
@@ -53,19 +55,17 @@ public class ComputeTest extends Module {
     @Override
     protected void onEnable() {
         dispatched = false;
-        ensureInitialized();
     }
 
     @Override
     protected void onDisable() {
-        destroyResources();
-        initialized = false;
         dispatched = false;
     }
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
         if (nullCheck()) return;
+        if (vulkanCheck()) return;
         if (dispatched) return;
 
         ensureInitialized();
@@ -82,6 +82,7 @@ public class ComputeTest extends Module {
 
     private void ensureInitialized() {
         if (initialized) return;
+        if (vulkanCheck()) return;
 
         try {
             String computeSource = loadComputeShaderSource();
@@ -113,7 +114,7 @@ public class ComputeTest extends Module {
                     LuminRenderSystem.vulkanContext.device(),
                     pipeline.descriptorSetLayout(),
                     layoutSpec,
-                    java.util.List.of(
+                    List.of(
                             DescriptorSetWrite.storageBuffer(0, inputBuffer.gpuBuffer(), BUFFER_SIZE),
                             DescriptorSetWrite.storageBuffer(1, outputBuffer.gpuBuffer(), BUFFER_SIZE)
                     )
@@ -184,25 +185,23 @@ public class ComputeTest extends Module {
 
             inputBuffer.map(cmd);
 
-            var beforeCompute = VkBufferMemoryBarrier.calloc(1, stack)
-                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
-                    .srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT)
-                    .dstAccessMask(VK_ACCESS_SHADER_READ_BIT)
+            var beforeCompute = VkBufferMemoryBarrier2KHR.calloc(1, stack)
+                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR)
+                    .srcStageMask(VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR)
+                    .srcAccessMask(VK_ACCESS_2_TRANSFER_WRITE_BIT_KHR)
+                    .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR)
+                    .dstAccessMask(VK_ACCESS_2_SHADER_STORAGE_READ_BIT_KHR)
                     .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                     .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                     .buffer(inputBuffer.gpuBuffer())
                     .offset(0)
                     .size(BUFFER_SIZE);
 
-            vkCmdPipelineBarrier(
-                    cmd,
-                    VK_PIPELINE_STAGE_TRANSFER_BIT,
-                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                    0,
-                    null,
-                    beforeCompute,
-                    null
-            );
+            var beforeComputeDep = VkDependencyInfoKHR.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR)
+                    .pBufferMemoryBarriers(beforeCompute);
+
+            vkCmdPipelineBarrier2KHR(cmd, beforeComputeDep);
 
             vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.pipeline());
             vkCmdBindDescriptorSets(
@@ -216,25 +215,23 @@ public class ComputeTest extends Module {
 
             vkCmdDispatch(cmd, 2, 1, 1);
 
-            var beforeReadback = VkBufferMemoryBarrier.calloc(1, stack)
-                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER)
-                    .srcAccessMask(VK_ACCESS_SHADER_WRITE_BIT)
-                    .dstAccessMask(VK_ACCESS_TRANSFER_READ_BIT)
+            var beforeReadback = VkBufferMemoryBarrier2KHR.calloc(1, stack)
+                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR)
+                    .srcStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR)
+                    .srcAccessMask(VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT_KHR)
+                    .dstStageMask(VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR)
+                    .dstAccessMask(VK_ACCESS_2_TRANSFER_READ_BIT_KHR)
                     .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                     .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                     .buffer(outputBuffer.gpuBuffer())
                     .offset(0)
                     .size(BUFFER_SIZE);
 
-            vkCmdPipelineBarrier(
-                    cmd,
-                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                    VK_PIPELINE_STAGE_TRANSFER_BIT,
-                    0,
-                    null,
-                    beforeReadback,
-                    null
-            );
+            var beforeReadbackDep = VkDependencyInfoKHR.calloc(stack)
+                    .sType(VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR)
+                    .pBufferMemoryBarriers(beforeReadback);
+
+            vkCmdPipelineBarrier2KHR(cmd, beforeReadbackDep);
 
             outputBuffer.copyToReadback(cmd, BUFFER_SIZE);
             vkEndCommandBuffer(cmd);
@@ -272,6 +269,11 @@ public class ComputeTest extends Module {
     }
 
     private void destroyResources() {
+        if (vulkanCheck()) {
+            initialized = false;
+            return;
+        }
+
         if (fence != VK_NULL_HANDLE) {
             vkDestroyFence(LuminRenderSystem.vulkanContext.device(), fence, null);
             fence = VK_NULL_HANDLE;
@@ -296,5 +298,9 @@ public class ComputeTest extends Module {
             inputBuffer.close();
             inputBuffer = null;
         }
+
+        cmdBuf = null;
+        initialized = false;
+        dispatched = false;
     }
 }

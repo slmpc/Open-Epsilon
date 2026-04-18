@@ -74,6 +74,10 @@ public class LuminVulkanContext {
         return this.cmdPool;
     }
 
+    public boolean isAvailable() {
+        return this.device != null;
+    }
+
     public VulkanQueue graphicsQueue() {
         return this.graphicsQueue;
     }
