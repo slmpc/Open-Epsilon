@@ -40,27 +40,33 @@ repositories {
     }
 }
 
+val licenseFileName = "LICENSE_${modName}"
+
 tasks.named<Jar>("sourcesJar") {
     from(rootProject.file("LICENSE")) {
-        rename { "${it}_${modName}" }
+        // Avoid lambda-based rename to keep configuration cache serialization stable.
+        rename("LICENSE", licenseFileName)
     }
 }
 
 tasks.named<Jar>("jar") {
     from(rootProject.file("LICENSE")) {
-        rename { "${it}_${modName}" }
+        // Avoid lambda-based rename to keep configuration cache serialization stable.
+        rename("LICENSE", licenseFileName)
     }
 
     manifest {
-        attributes(mapOf(
-            "Specification-Title" to modName,
-            "Specification-Vendor" to modAuthor,
-            "Specification-Version" to archiveVersion,
-            "Implementation-Title" to project.name,
-            "Implementation-Version" to archiveVersion,
-            "Implementation-Vendor" to modAuthor,
-            "Built-On-Minecraft" to minecraftVersion
-        ))
+        attributes(
+            mapOf(
+                "Specification-Title" to modName,
+                "Specification-Vendor" to modAuthor,
+                "Specification-Version" to archiveVersion,
+                "Implementation-Title" to project.name,
+                "Implementation-Version" to archiveVersion,
+                "Implementation-Vendor" to modAuthor,
+                "Built-On-Minecraft" to minecraftVersion
+            )
+        )
     }
 }
 
