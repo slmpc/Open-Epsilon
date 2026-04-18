@@ -297,11 +297,11 @@ public class ModuleDetailPanel {
     }
 
     private float getBindModeControlWidth() {
-        return 96.0f;
+        return 72.0f;
     }
 
     private float getHiddenControlWidth() {
-        return 96.0f;
+        return 72.0f;
     }
 
     private PanelLayout.Rect getHiddenBounds() {
