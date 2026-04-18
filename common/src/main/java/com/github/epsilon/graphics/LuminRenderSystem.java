@@ -1,6 +1,7 @@
 package com.github.epsilon.graphics;
 
 import com.github.epsilon.assets.resources.ResourceLocationUtils;
+import com.github.epsilon.graphics.vulkan.LuminVulkanContext;
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -29,8 +30,14 @@ public class LuminRenderSystem {
     @Nullable
     private static LuminRenderTarget activeTarget = null;
 
+    public static final LuminVulkanContext vulkanContext = new LuminVulkanContext();
+
     public static void setActiveTarget(@Nullable LuminRenderTarget target) {
         activeTarget = target;
+    }
+
+    public static void destroyVulkanContext() {
+        vulkanContext.destroy();
     }
 
     @Nullable
