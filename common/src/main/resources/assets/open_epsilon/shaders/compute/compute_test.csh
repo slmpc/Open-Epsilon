@@ -12,8 +12,10 @@ layout(std430, set = 0, binding = 1) writeonly buffer OutputBuffer {
 
 void main() {
     uint index = gl_GlobalInvocationID.x;
+    uint inputLength = uint(inputData.data.length());
+    uint outputLength = uint(outputData.data.length());
 
-    if (index >= 128) {
+    if (index >= inputLength || index >= outputLength) {
         return;
     }
 
