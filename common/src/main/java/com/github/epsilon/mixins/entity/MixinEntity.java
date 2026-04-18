@@ -5,6 +5,8 @@ import com.github.epsilon.events.player.RaytraceEvent;
 import com.github.epsilon.events.movement.StrafeEvent;
 import com.github.epsilon.modules.impl.combat.AimAssist;
 import com.github.epsilon.modules.impl.combat.Velocity;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -12,28 +14,27 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Entity.class)
 public class MixinEntity {
 
-    @Redirect(method = "getViewVector", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;calculateViewVector(FF)Lnet/minecraft/world/phys/Vec3;"))
-    private Vec3 redirectGetViewYRot(Entity instance, float xRot, float yRot) {
+    @WrapOperation(method = "getViewVector", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;calculateViewVector(FF)Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 redirectGetViewYRot(Entity instance, float xRot, float yRot, Operation<Vec3> original) {
         if (instance == Minecraft.getInstance().player) {
             RaytraceEvent event = EpsilonEventBus.INSTANCE.post(new RaytraceEvent(instance, yRot, xRot));
-            return instance.calculateViewVector(event.getPitch(), event.getYaw());
+            return original.call(instance, event.getPitch(), event.getYaw());
         }
-        return instance.calculateViewVector(xRot, yRot);
+        return original.call(instance, xRot, yRot);
     }
 
-    @Redirect(method = "moveRelative", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getYRot()F"))
-    private float redirectGetYRotInMoveRelative(Entity instance) {
+    @WrapOperation(method = "moveRelative", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getYRot()F"))
+    private float redirectGetYRotInMoveRelative(Entity instance, Operation<Float> original) {
         if (instance == Minecraft.getInstance().player) {
             StrafeEvent event = EpsilonEventBus.INSTANCE.post(new StrafeEvent(instance.getYRot()));
             return event.getYaw();
         }
-        return instance.getYRot();
+        return original.call(instance);
     }
 
     @ModifyArgs(method = "push(Lnet/minecraft/world/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;push(DDD)V"))

@@ -6,6 +6,8 @@ import com.github.epsilon.events.world.AttackBlockEvent;
 import com.github.epsilon.events.world.DestroyBlockEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.impl.player.BreakCooldown;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.BlockPos;
@@ -17,34 +19,30 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MultiPlayerGameMode.class)
 public class MixinMultiPlayerGameMode {
 
-    @Shadow
-    private int destroyDelay;
-
     @Final
     @Shadow
     private Minecraft minecraft;
 
-    @Redirect(method = "lambda$useItem$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getYRot()F"))
-    private float redirectUseItemYaw(Player player) {
+    @WrapOperation(method = "lambda$useItem$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getYRot()F"))
+    private float redirectUseItemYaw(Player player, Operation<Float> original) {
         if (player == this.minecraft.player) {
             EpsilonEventBus.INSTANCE.post(new PlayerInteractEvent.RightClickItem());
             return RotationManager.INSTANCE.getYaw();
         }
-        return player.getYRot();
+        return original.call(player);
     }
 
-    @Redirect(method = "lambda$useItem$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getXRot()F"))
-    private float redirectUseItemPitch(Player player) {
+    @WrapOperation(method = "lambda$useItem$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getXRot()F"))
+    private float redirectUseItemPitch(Player player, Operation<Float> original) {
         if (player == this.minecraft.player) {
             return RotationManager.INSTANCE.getPitch();
         }
-        return player.getXRot();
+        return original.call(player);
     }
 
     @Inject(method = "destroyBlock", at = @At("RETURN"), cancellable = true)
@@ -63,34 +61,25 @@ public class MixinMultiPlayerGameMode {
         }
     }
 
-    @Redirect(method = "continueDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 2))
-    private void survivalBreakDelayChange(MultiPlayerGameMode instance, int value) {
+    @WrapOperation(method = "continueDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 2))
+    private void survivalBreakDelayChange(MultiPlayerGameMode instance, int value, Operation<Void> original) {
         BreakCooldown breakCooldown = BreakCooldown.INSTANCE;
-        if (breakCooldown.isEnabled()) {
-            destroyDelay = breakCooldown.cooldown.getValue();
-        } else {
-            destroyDelay = value;
-        }
+        int newValue = breakCooldown.isEnabled() ? breakCooldown.cooldown.getValue() : value;
+        original.call(instance, newValue);
     }
 
-    @Redirect(method = "continueDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
-    private void creativeBreakDelayChangeOne(MultiPlayerGameMode instance, int value) {
+    @WrapOperation(method = "continueDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
+    private void creativeBreakDelayChangeOne(MultiPlayerGameMode instance, int value, Operation<Void> original) {
         BreakCooldown breakCooldown = BreakCooldown.INSTANCE;
-        if (breakCooldown.isEnabled()) {
-            destroyDelay = breakCooldown.cooldown.getValue();
-        } else {
-            destroyDelay = value;
-        }
+        int newValue = breakCooldown.isEnabled() ? breakCooldown.cooldown.getValue() : value;
+        original.call(instance, newValue);
     }
 
-    @Redirect(method = "startDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD))
-    private void creativeBreakDelayChangeTwo(MultiPlayerGameMode instance, int value) {
+    @WrapOperation(method = "startDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD))
+    private void creativeBreakDelayChangeTwo(MultiPlayerGameMode instance, int value, Operation<Void> original) {
         BreakCooldown breakCooldown = BreakCooldown.INSTANCE;
-        if (breakCooldown.isEnabled()) {
-            destroyDelay = breakCooldown.cooldown.getValue();
-        } else {
-            destroyDelay = value;
-        }
+        int newValue = breakCooldown.isEnabled() ? breakCooldown.cooldown.getValue() : value;
+        original.call(instance, newValue);
     }
 
 }
