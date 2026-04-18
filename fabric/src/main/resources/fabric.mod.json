@@ -13,6 +13,9 @@
     "entrypoints": {
         "client": [
             "com.github.epsilon.fabric.EpsilonFabric"
+        ],
+        "open_epsilon:addon": [
+            "com.github.epsilon.fabric.addon.FabricSelfAddonEntrypoint"
         ]
     },
     "mixins": [

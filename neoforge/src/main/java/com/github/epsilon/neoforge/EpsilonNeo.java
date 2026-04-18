@@ -4,6 +4,7 @@ import com.github.epsilon.CommonListeners;
 import com.github.epsilon.Epsilon;
 import com.github.epsilon.addon.AddonBootstrap;
 import com.github.epsilon.neoforge.addon.EpsilonAddonSetupEvent;
+import com.github.epsilon.neoforge.addon.NeoForgeSelfAddonRegistrar;
 import com.github.epsilon.neoforge.compat.NeoForgePlatformCompat;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -21,6 +22,7 @@ public class EpsilonNeo {
         if (Epsilon.platform == null) {
             Epsilon.platform = new NeoForgePlatformCompat();
         }
+        NeoForgeSelfAddonRegistrar.register();
     }
 
     @SubscribeEvent
