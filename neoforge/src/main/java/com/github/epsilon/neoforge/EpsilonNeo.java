@@ -2,8 +2,8 @@ package com.github.epsilon.neoforge;
 
 import com.github.epsilon.CommonListeners;
 import com.github.epsilon.Epsilon;
-import com.github.epsilon.neoforge.addon.EpsilonAddon;
-import com.github.epsilon.neoforge.addon.EpsilonAddonSetupEvent;
+import com.github.epsilon.addon.AddonBootstrap;
+import com.github.epsilon.addon.EpsilonAddonSetupEvent;
 import com.github.epsilon.events.bus.EpsilonEventBus;
 import com.github.epsilon.neoforge.compat.NeoForgePlatformCompat;
 import net.neoforged.api.distmarker.Dist;
@@ -34,12 +34,9 @@ public class EpsilonNeo {
         Epsilon.init();
         CommonListeners.register();
 
-        // 发送 Addon 注册事件，允许第三方 Addon 注册 Module（仅NeoForge可用）
+        // 发送 Addon 注册事件，允许第三方 Addon 注册 Module
         EpsilonAddonSetupEvent addonEvent = EpsilonEventBus.INSTANCE.post(new EpsilonAddonSetupEvent());
-        for (EpsilonAddon addon : addonEvent.addons) {
-            addon.onSetup();
-            Epsilon.LOGGER.info("Loaded Epsilon addon: {}", addon.addonId);
-        }
+        AddonBootstrap.setupAddons(addonEvent);
     }
 
 }

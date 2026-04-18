@@ -5,10 +5,12 @@
         <a href="https://github.com/KonekokoHouse/Epsilon-Rewrite/blob/main/README_zh.md">中文</a>
     </p>
 </h4>
-A modern Minecraft utility client built on NeoForge 26.1.1 with advanced rendering system and modular architecture.
+A modern multi loader Minecraft utility client built on NeoForge & Fabric with advanced rendering system and modular architecture.
 
 ## 🚀 Addon System
 [Epsilon Addon Template](https://github.com/KonekokoHouse/Epsilon-Addon-Template)
+
+[Addon Development Guide](docs/addon-development.md)
 
 ## 🎨 Graphics System
 

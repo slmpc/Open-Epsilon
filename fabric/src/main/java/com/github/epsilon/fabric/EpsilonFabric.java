@@ -2,14 +2,18 @@ package com.github.epsilon.fabric;
 
 import com.github.epsilon.CommonListeners;
 import com.github.epsilon.Epsilon;
+import com.github.epsilon.addon.AddonBootstrap;
+import com.github.epsilon.addon.EpsilonAddonSetupEvent;
 import com.github.epsilon.assets.i18n.LanguageReloadListener;
 import com.github.epsilon.assets.resources.ResourceLocationUtils;
+import com.github.epsilon.fabric.addon.FabricEpsilonAddonEntrypoint;
 import com.github.epsilon.fabric.compat.FabricPlatformCompat;
 import com.github.epsilon.graphics.LuminRenderPipelines;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -19,6 +23,8 @@ import java.util.concurrent.Executor;
 
 public class EpsilonFabric implements ClientModInitializer {
 
+    public static final String ADDON_ENTRYPOINT_KEY = "open_epsilon:addon";
+
     @Override
     public void onInitializeClient() {
         Epsilon.VERSION = FabricLoader.getInstance().getModContainer(Epsilon.MODID).get()
@@ -27,6 +33,19 @@ public class EpsilonFabric implements ClientModInitializer {
 
         Epsilon.init();
         CommonListeners.register();
+
+        // Load addon providers registered through Fabric custom entrypoints.
+        EpsilonAddonSetupEvent addonEvent = new EpsilonAddonSetupEvent();
+        for (EntrypointContainer<FabricEpsilonAddonEntrypoint> container : FabricLoader.getInstance().getEntrypointContainers(ADDON_ENTRYPOINT_KEY, FabricEpsilonAddonEntrypoint.class)) {
+            String providerId = container.getProvider().getMetadata().getId();
+            try {
+                FabricEpsilonAddonEntrypoint entrypoint = container.getEntrypoint();
+                entrypoint.registerAddon(addonEvent);
+            } catch (Throwable t) {
+                Epsilon.LOGGER.error("Failed to register addon entrypoint from mod: {}", providerId, t);
+            }
+        }
+        AddonBootstrap.setupAddons(addonEvent);
 
         // Register render pipelines
         LuminRenderPipelines.registerAll(pipeline -> {
