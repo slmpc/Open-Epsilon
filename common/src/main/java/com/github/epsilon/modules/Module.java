@@ -85,16 +85,15 @@ public class Module {
             this.enabled = enabled;
             if (enabled) {
                 try {
-                    Notifications.addModuleNotification(this.getTranslatedName(), true);
                     EpsilonEventBus.INSTANCE.subscribe(this);
-
+                    Notifications.addModuleNotification(this.getTranslatedName(), true);
                 } catch (Exception ignored) {
                 }
                 onEnable();
             } else {
                 try {
-                    Notifications.addModuleNotification(this.getTranslatedName(), false);
                     EpsilonEventBus.INSTANCE.unsubscribe(this);
+                    Notifications.addModuleNotification(this.getTranslatedName(), false);
                 } catch (Exception ignored) {
                 }
                 onDisable();
