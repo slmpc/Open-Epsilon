@@ -1,6 +1,7 @@
 package com.github.epsilon.utils.render.esp;
 
 import com.github.epsilon.assets.resources.ResourceLocationUtils;
+import com.github.epsilon.graphics.immediate.LuminImmediateRenderer;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.*;
@@ -8,10 +9,6 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.rendertype.LayeringTransform;
-import net.minecraft.client.renderer.rendertype.OutputTarget;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,15 +28,8 @@ public class Firefly {
             .withCull(false)
             .build();
 
-    private static final RenderType fireflyLayer = RenderType.create("firefly_layer", RenderSetup.builder(fireflyPipeline)
-            .withTexture("Sampler0", FIREFLY_TEX)
-            .sortOnUpload()
-            .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-            .setOutputTarget(OutputTarget.MAIN_TARGET).createRenderSetup()
-    );
-
     public static void render(PoseStack matrices, LivingEntity target, int espLength, int factor, double shaking, double amplitude, Color color) {
-        Camera camera = mc.gameRenderer.getMainCamera();
+        Camera camera = mc.gameRenderer.mainCamera();
         float tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
         double tPosX = Mth.lerp(tickDelta, target.xOld, target.getX()) - camera.position().x;
@@ -47,7 +37,7 @@ public class Firefly {
         double tPosZ = Mth.lerp(tickDelta, target.zOld, target.getZ()) - camera.position().z;
         float iAge = (float) (target.tickCount - 1) + tickDelta;
 
-        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        LuminImmediateRenderer.PosTexColorQuads builder = LuminImmediateRenderer.beginPosTexColorQuads(fireflyPipeline, FIREFLY_TEX);
 
         for (int j = 0; j < 3; j++) {
             for (int i = 0; i <= espLength; i++) {
@@ -66,16 +56,16 @@ public class Firefly {
 
                 int renderColor = color.getRGB();
 
-                buffer.addVertex(matrix, -scale, scale, 0).setUv(0f, 1f).setColor(renderColor);
-                buffer.addVertex(matrix, scale, scale, 0).setUv(1f, 1f).setColor(renderColor);
-                buffer.addVertex(matrix, scale, -scale, 0).setUv(1f, 0f).setColor(renderColor);
-                buffer.addVertex(matrix, -scale, -scale, 0).setUv(0f, 0f).setColor(renderColor);
+                builder.vertex(matrix, -scale, scale, 0, 0f, 1f, renderColor);
+                builder.vertex(matrix, scale, scale, 0, 1f, 1f, renderColor);
+                builder.vertex(matrix, scale, -scale, 0, 1f, 0f, renderColor);
+                builder.vertex(matrix, -scale, -scale, 0, 0f, 0f, renderColor);
 
                 matrices.popPose();
             }
         }
 
-        fireflyLayer.draw(buffer.buildOrThrow());
+        builder.end();
     }
 
 }

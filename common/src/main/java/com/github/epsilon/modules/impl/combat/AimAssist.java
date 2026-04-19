@@ -11,6 +11,10 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.cubemob.Slime;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import com.github.epsilon.events.bus.EventHandler;
@@ -570,8 +574,8 @@ public class AimAssist extends Module {
     }
 
     private boolean isScreenPaused() {
-        return (ignoreScreen.getValue() && mc.screen != null) ||
-                (ignoreInventory.getValue() && (mc.screen instanceof AbstractContainerScreen));
+        return (ignoreScreen.getValue() && mc.gui.screen() != null) ||
+                (ignoreInventory.getValue() && (mc.gui.screen() instanceof AbstractContainerScreen));
     }
 
     private boolean shouldSkipRender() {
@@ -1109,13 +1113,13 @@ public class AimAssist extends Module {
         if (entity instanceof Player) {
             if (!player.getValue()) return false;
             if (entity.isInvisible() && !ignoreInvisible.getValue()) return false;
-        } else if (entity instanceof net.minecraft.world.entity.npc.villager.Villager) {
+        } else if (entity instanceof Villager) {
             if (!villager.getValue()) return false;
-        } else if (entity instanceof net.minecraft.world.entity.animal.Animal) {
+        } else if (entity instanceof Animal) {
             if (!animal.getValue()) return false;
-        } else if (entity instanceof net.minecraft.world.entity.monster.Slime) {
+        } else if (entity instanceof Slime) {
             if (!slime.getValue()) return false;
-        } else if (entity instanceof net.minecraft.world.entity.monster.Monster) {
+        } else if (entity instanceof Monster) {
             if (!mob.getValue()) return false;
         } else {
             return false;

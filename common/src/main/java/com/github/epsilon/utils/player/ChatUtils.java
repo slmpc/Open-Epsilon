@@ -17,7 +17,7 @@ public class ChatUtils {
     }
 
     public static void addChatMessage(boolean prefix, String message) {
-        mc.execute(() -> mc.gui.getChat().addMessage(
+        mc.execute(() -> mc.gui.hud.getChat().addMessage(
                 Component.literal((prefix ? CLIENT_PREFIX : "") + message),
                 null,
                 GuiMessageSource.SYSTEM_CLIENT,

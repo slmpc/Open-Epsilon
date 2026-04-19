@@ -4,6 +4,7 @@ import com.github.epsilon.PlatformCompat;
 import com.github.epsilon.compat.EquipmentSlotCompat;
 import com.github.epsilon.compat.KeyMappingCompat;
 import com.github.epsilon.compat.VertexFormatCompat;
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.KeyMapping;
@@ -49,8 +50,8 @@ public class FabricPlatformCompat implements PlatformCompat {
     }
 
     @Override
-    public VertexFormatElement registerVertexFormatElement(int id, int index, VertexFormatElement.Type type, boolean normalized, int count) {
-        return vertexFormatCompat.registerVertexFormatElement(id, index, type, normalized, count);
+    public VertexFormatElement registerVertexFormatElement(int id, int index, GpuFormat format) {
+        return vertexFormatCompat.registerVertexFormatElement(id, index, format);
     }
 
 }

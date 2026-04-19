@@ -13,10 +13,7 @@ import com.github.epsilon.modules.impl.combat.*;
 import com.github.epsilon.modules.impl.player.*;
 import com.github.epsilon.modules.impl.render.*;
 import com.github.epsilon.modules.impl.render.notification.Notifications;
-import com.github.epsilon.modules.impl.world.AutoAccount;
-import com.github.epsilon.modules.impl.world.AutoFarm;
-import com.github.epsilon.modules.impl.world.FakePlayer;
-import com.github.epsilon.modules.impl.world.Stealer;
+import com.github.epsilon.modules.impl.world.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 
@@ -89,6 +86,7 @@ public class ModuleManager {
                 Stealer.INSTANCE,
                 FakePlayer.INSTANCE,
                 AutoAccount.INSTANCE,
+                ComputeTest.INSTANCE,
 
                 // Hud
                 Notifications.INSTANCE,
@@ -122,9 +120,9 @@ public class ModuleManager {
     public void onKeyEvent(int keyCode, int action) {
         if (keyCode == ClientSetting.INSTANCE.guiKeybind.getValue()
                 && action == InputConstants.PRESS
-                && Minecraft.getInstance().screen == null
+                && Minecraft.getInstance().gui.screen() == null
         ) {
-            Minecraft.getInstance().setScreen(PanelScreen.INSTANCE);
+            Minecraft.getInstance().gui.setScreen(PanelScreen.INSTANCE);
         }
 
         for (final var module : modules) {

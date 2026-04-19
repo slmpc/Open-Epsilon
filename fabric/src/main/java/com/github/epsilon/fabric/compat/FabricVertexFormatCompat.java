@@ -1,6 +1,7 @@
 package com.github.epsilon.fabric.compat;
 
 import com.github.epsilon.compat.VertexFormatCompat;
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 import java.lang.reflect.Field;
@@ -31,14 +32,14 @@ public class FabricVertexFormatCompat implements VertexFormatCompat {
     }
 
     @Override
-    public VertexFormatElement registerVertexFormatElement(int id, int index, VertexFormatElement.Type type, boolean normalized, int count) {
+    public VertexFormatElement registerVertexFormatElement(int id, int index, GpuFormat format) {
         try {
             if (registerMethod == null) {
                 registerMethod = VertexFormatElement.class.getDeclaredMethod(
-                        "register", int.class, int.class, VertexFormatElement.Type.class, boolean.class, int.class);
+                        "register", int.class, int.class, GpuFormat.class);
                 registerMethod.setAccessible(true);
             }
-            return (VertexFormatElement) registerMethod.invoke(null, id, index, type, normalized, count);
+            return (VertexFormatElement) registerMethod.invoke(null, id, index, format);
         } catch (Exception e) {
             throw new RuntimeException("Failed to register VertexFormatElement", e);
         }

@@ -28,7 +28,7 @@ public class CommonListeners {
     @EventHandler
     public void onKeyPress(KeyInputEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || mc.screen != null || event.getKey() == GLFW.GLFW_KEY_UNKNOWN) return;
+        if (mc.level == null || mc.gui.screen() != null || event.getKey() == GLFW.GLFW_KEY_UNKNOWN) return;
         ModuleManager.INSTANCE.onKeyEvent(event.getKey(), event.getAction());
     }
 

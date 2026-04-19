@@ -9,6 +9,7 @@
     "debug.MixinGlDebug",
     "entity.MixinEntity",
     "entity.MixinLivingEntity",
+    "entity.MixinFireworkRocketEntity",
     "entity.MixinLocalPlayer",
     "entity.MixinPlayer",
     "level.MixinBlockCollisions",
@@ -23,7 +24,7 @@
     "render.MixinCamera",
     "render.MixinEntityRenderer",
     "render.MixinGameRenderer",
-    "render.MixinGui",
+    "render.MixinHud",
     "render.MixinGuiRenderer",
     "render.MixinHumanoidMobRenderer",
     "render.MixinLevelRenderer",
@@ -31,7 +32,8 @@
     "render.MixinLivingEntityRenderer",
     "render.MixinParticleManager",
     "render.MixinScreenEffectRenderer",
-    "render.MixinWindow"
+    "render.MixinWindow",
+    "render.MixinVulkanDevice"
   ],
   "injectors": {
     "defaultRequire": 1
@@ -40,6 +42,5 @@
     "requireAnnotations": true
   },
   "mixins": [
-    "entity.MixinFireworkRocketEntity"
   ]
 }

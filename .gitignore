@@ -18,7 +18,8 @@ build
 .gradle
 
 # other
-eclipse
+.kotlin
+.eclipse
 run
 runs
 run-data
@@ -28,6 +29,7 @@ repo
 # AI
 .vscode
 .trae
+致敬源码库
 
 # Mac OS
 .DS_Store

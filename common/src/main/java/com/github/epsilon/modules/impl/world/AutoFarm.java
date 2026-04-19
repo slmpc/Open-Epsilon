@@ -73,7 +73,7 @@ public class AutoFarm extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (nullCheck() || mc.screen != null) {
+        if (nullCheck() || mc.gui.screen() != null) {
             return;
         }
 

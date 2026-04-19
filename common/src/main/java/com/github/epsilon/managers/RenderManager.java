@@ -57,7 +57,7 @@ public class RenderManager {
     }
 
     public void callInGameGui(DeltaTracker tracker) {
-        final var screen = Minecraft.getInstance().screen;
+        final var screen = Minecraft.getInstance().gui.screen();
 
         if (!renderAfterWorldQueue.isEmpty()) {
             ArrayList<Consumer<DeltaTracker>> pending = new ArrayList<>(renderAfterWorldQueue);

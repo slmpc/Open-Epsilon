@@ -32,7 +32,7 @@ public class HudEditorScreen extends Screen {
 
     public static final HudEditorScreen INSTANCE = new HudEditorScreen();
 
-    private final RectRenderer rectRenderer = new RectRenderer();
+    private final RectRenderer rectRenderer = RectRenderer.create();
     private final HudEditorOverlayRenderer overlayRenderer = new HudEditorOverlayRenderer();
     private final HudEditorInspector inspector = new HudEditorInspector();
 
@@ -255,7 +255,7 @@ public class HudEditorScreen extends Screen {
         IMEFocusHelper.deactivate();
         ConfigManager.INSTANCE.saveNow();
         super.onClose();
-        minecraft.setScreen(PanelScreen.INSTANCE);
+        minecraft.gui.setScreen(PanelScreen.INSTANCE);
     }
 
     @Override

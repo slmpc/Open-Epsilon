@@ -8,11 +8,11 @@ import com.github.epsilon.gui.panel.PanelLayout;
 
 public final class PanelContentBuffer {
 
-    private final RoundRectRenderer roundRectRenderer = new RoundRectRenderer();
-    private final RectRenderer rectRenderer = new RectRenderer();
-    private final ShadowRenderer shadowRenderer = new ShadowRenderer();
-    private final TextRenderer textRenderer = new TextRenderer();
-    private final RoundRectRenderer scrollBarRenderer = new RoundRectRenderer();
+    private final RoundRectRenderer roundRectRenderer = RoundRectRenderer.create();
+    private final RectRenderer rectRenderer = RectRenderer.create();
+    private final ShadowRenderer shadowRenderer = ShadowRenderer.create();
+    private final TextRenderer textRenderer = TextRenderer.create();
+    private final RoundRectRenderer scrollBarRenderer = RoundRectRenderer.create();
 
     private boolean pending;
 

@@ -32,10 +32,10 @@ public class PanelScreen extends Screen {
 
     private final PanelState state = new PanelState();
     private final PanelDirtyState dirtyState = new PanelDirtyState();
-    private final TextRenderer textRenderer = new TextRenderer();
-    private final RectRenderer rectRenderer = new RectRenderer();
-    private final RoundRectRenderer roundRectRenderer = new RoundRectRenderer();
-    private final ShadowRenderer shadowRenderer = new ShadowRenderer();
+    private final TextRenderer textRenderer = TextRenderer.create();
+    private final RectRenderer rectRenderer = RectRenderer.create();
+    private final RoundRectRenderer roundRectRenderer = RoundRectRenderer.create();
+    private final ShadowRenderer shadowRenderer = ShadowRenderer.create();
     private final PanelPopupHost popupHost = new PanelPopupHost();
     private final PanelInputRouter inputRouter = new PanelInputRouter();
     private final CategoryRailPanel categoryRailPanel = new CategoryRailPanel(state, rectRenderer, roundRectRenderer, textRenderer);
@@ -194,7 +194,7 @@ public class PanelScreen extends Screen {
 
         PanelLayout.Layout layout = PanelLayout.compute(width, height, categoryRailPanel.getAnimatedWidth());
         if (!layout.panel().contains(mouseX, mouseY)) {
-            if (ClientSetting.INSTANCE.closeOnOutside.getValue()) minecraft.setScreen(null);
+            if (ClientSetting.INSTANCE.closeOnOutside.getValue()) minecraft.gui.setScreen(null);
             return true;
         }
         if (!state.isClientSettingMode()) {

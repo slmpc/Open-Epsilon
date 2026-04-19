@@ -36,7 +36,7 @@ public class ClientSetting extends Module {
     public final KeybindSetting guiKeybind = keybindSetting("Gui Keybind", GLFW.GLFW_KEY_RIGHT_SHIFT);
 
     private final ButtonSetting openHudEditor = buttonSetting("Open Hud Editor", () -> {
-        mc.setScreen(HudEditorScreen.INSTANCE);
+        mc.gui.setScreen(HudEditorScreen.INSTANCE);
     });
 
     public final BoolSetting i18nFallback = boolSetting("I18n Fallback", true);

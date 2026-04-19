@@ -74,7 +74,7 @@ public class AutoAccount extends Module {
         if (nullCheck()) return;
 
         mc.options.pauseOnLostFocus = false;
-        if (mc.screen == null) {
+        if (mc.gui.screen() == null) {
             mc.mouseHandler.releaseMouse();
         }
 

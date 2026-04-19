@@ -1,6 +1,7 @@
 package com.github.epsilon.utils.render.esp;
 
 import com.github.epsilon.assets.resources.ResourceLocationUtils;
+import com.github.epsilon.graphics.immediate.LuminImmediateRenderer;
 import com.github.epsilon.utils.render.ColorUtils;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
@@ -9,10 +10,6 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.rendertype.LayeringTransform;
-import net.minecraft.client.renderer.rendertype.OutputTarget;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,16 +30,6 @@ public class CaptureMark {
             .withCull(false)
             .build();
 
-    private static final RenderType TARGET_ICON_LAYER = RenderType.create(
-            "target_icon",
-            RenderSetup.builder(TARGET_ICON_PIPELINE)
-                    .withTexture("Sampler0", CAPTUREMARK)
-                    .sortOnUpload()
-                    .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                    .setOutputTarget(OutputTarget.MAIN_TARGET)
-                    .createRenderSetup()
-    );
-
     public static void render(PoseStack poseStack, LivingEntity target, double espSize, double rotSpeed, double waveSpeed, Color color1, Color color2) {
         float rotation = (float) (System.currentTimeMillis() / 1000.0 * rotSpeed) % 360f;
 
@@ -59,25 +46,25 @@ public class CaptureMark {
         poseStack.pushPose();
         poseStack.translate(ex, ey + entityHeight * 0.5, ez);
 
-        Camera camera = mc.gameRenderer.getMainCamera();
+        Camera camera = mc.gameRenderer.mainCamera();
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.yRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.xRot()));
         poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
 
         Matrix4f matrix = poseStack.last().pose();
-        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        LuminImmediateRenderer.PosTexColorQuads builder = LuminImmediateRenderer.beginPosTexColorQuads(TARGET_ICON_PIPELINE, CAPTUREMARK);
 
         Color c1 = getColorForProgress(0, waveSpeed, color1, color2);
         Color c2 = getColorForProgress(0.25f, waveSpeed, color1, color2);
         Color c3 = getColorForProgress(0.5f, waveSpeed, color1, color2);
         Color c4 = getColorForProgress(0.75f, waveSpeed, color1, color2);
 
-        buffer.addVertex(matrix, -size, -size, 0).setUv(0, 0).setColor(c1.getRGB());
-        buffer.addVertex(matrix, -size, size, 0).setUv(0, 1).setColor(c2.getRGB());
-        buffer.addVertex(matrix, size, size, 0).setUv(1, 1).setColor(c3.getRGB());
-        buffer.addVertex(matrix, size, -size, 0).setUv(1, 0).setColor(c4.getRGB());
+        builder.vertex(matrix, -size, -size, 0, 0, 0, c1.getRGB());
+        builder.vertex(matrix, -size, size, 0, 0, 1, c2.getRGB());
+        builder.vertex(matrix, size, size, 0, 1, 1, c3.getRGB());
+        builder.vertex(matrix, size, -size, 0, 1, 0, c4.getRGB());
 
-        TARGET_ICON_LAYER.draw(buffer.buildOrThrow());
+        builder.end();
 
         poseStack.popPose();
     }

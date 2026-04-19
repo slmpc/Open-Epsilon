@@ -128,7 +128,7 @@ public class CrystalAura extends Module {
     private float renderSelfDamage;
     private boolean renderHasTarget;
 
-    private final Supplier<TextRenderer> textRenderer = Suppliers.memoize(() -> new TextRenderer(128 * 1024));
+    private final Supplier<TextRenderer> textRenderer = Suppliers.memoize(() -> TextRenderer.create(8 * 1024));
 
     @Override
     protected void onEnable() {
