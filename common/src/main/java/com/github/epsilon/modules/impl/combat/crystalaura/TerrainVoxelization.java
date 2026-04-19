@@ -1,37 +1,43 @@
 package com.github.epsilon.modules.impl.combat.crystalaura;
 
+import com.github.epsilon.graphics.vulkan.buffer.Std430Writer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+
+import java.util.Arrays;
 
 /**
  * 地形体素化工具 —— 将玩家周围的方块存在信息编码为紧凑的位图，
  * 供 GPU Compute Shader 做爆炸射线遮挡查询。
  *
- * <h3>设计思路</h3>
- * 参考 VXGI 的 Voxelization，但不需要存储球谐 (SH) 系数，
- * 只需存储每个体素是否为实心方块（1 bit / voxel）。
- *
- * <h3>滚动窗口</h3>
- * 体素网格以玩家当前位置为中心，当玩家移动时网格整体滚动：
- * 仅需更新新进入区域的列，避免每帧全量重建。
- *
  * <h3>数据布局（std430 SSBO）</h3>
  * <pre>
- *   Header (16 bytes, vec4 对齐):
- *     ivec3 gridOrigin   — 网格世界空间起始坐标
- *     int   gridSize     — 单轴体素数量（gridSize^3 个体素）
+ *   Header (16 bytes):
+ *     int gridOriginX
+ *     int gridOriginY
+ *     int gridOriginZ
+ *     int gridSize
  *
  *   Body:
- *     uint voxelBits[]   — 每 uint 存 32 个体素的位图
- *                          总长 = ceil(gridSize^3 / 32)
+ *     uint voxelBits[BITMAP_UINT_COUNT]
+ *     — 每 uint 存 32 个体素
+ *     — flatIndex(x,y,z) = (z * GRID_SIZE + y) * GRID_SIZE + x
  * </pre>
+ *
+ * <h3>写入字节数</h3>
+ * Header: 4 × int = 16 bytes（Std430Writer 的 putInt 按 4 字节对齐，连续写无间隙）。
+ * Body:   BITMAP_UINT_COUNT × 4 bytes = 32768 bytes。
+ * 合计:   {@link #BUFFER_SIZE} = 32784 bytes。
+ * <p>
+ * {@link #writeTo(Std430Writer)} 写入恰好 {@link #BUFFER_SIZE} 字节。
  */
 public class TerrainVoxelization {
 
     private static final Minecraft mc = Minecraft.getInstance();
 
-    /** 单轴体素数量，必须为 32 的倍数以便位对齐 */
+    /** 单轴体素数量（必须为 32 的倍数） */
     public static final int GRID_SIZE = 64;
 
     /** 体素总数 */
@@ -40,16 +46,16 @@ public class TerrainVoxelization {
     /** 位图 uint 数量 */
     public static final int BITMAP_UINT_COUNT = TOTAL_VOXELS / 32;
 
-    /** Header 大小：ivec3 gridOrigin (3×4B) + int gridSize (4B) = 16B */
-    public static final int HEADER_BYTES = 16;
+    /** Header: 4 × int = 16 bytes */
+    public static final int HEADER_BYTES = 4 * Integer.BYTES;
 
-    /** Body 大小 */
+    /** Body: BITMAP_UINT_COUNT × 4 bytes */
     public static final int BODY_BYTES = BITMAP_UINT_COUNT * Integer.BYTES;
 
-    /** SSBO 总大小 */
+    /** SSBO 总大小（writeTo 写入的精确字节数） */
     public static final int BUFFER_SIZE = HEADER_BYTES + BODY_BYTES;
 
-    // ── 滚动状态 ──
+    // ── 状态 ──
 
     private int originX, originY, originZ;
     private final int[] voxelBits = new int[BITMAP_UINT_COUNT];
@@ -57,7 +63,7 @@ public class TerrainVoxelization {
 
     /**
      * 每帧调用：以玩家位置为中心更新体素网格。
-     * 返回 true 表示数据已变更，需重新上传 SSBO。
+     * 返回 true 表示数据已变更。
      */
     public boolean update() {
         if (mc.player == null || mc.level == null) return false;
@@ -82,15 +88,21 @@ public class TerrainVoxelization {
      * 完整重建体素网格。
      */
     private void rebuildFull() {
-        java.util.Arrays.fill(voxelBits, 0);
+        Arrays.fill(voxelBits, 0);
 
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-        for (int lx = 0; lx < GRID_SIZE; lx++) {
+        for (int lz = 0; lz < GRID_SIZE; lz++) {
+            int wz = originZ + lz;
             for (int ly = 0; ly < GRID_SIZE; ly++) {
-                for (int lz = 0; lz < GRID_SIZE; lz++) {
-                    mutable.set(originX + lx, originY + ly, originZ + lz);
+                int wy = originY + ly;
+                for (int lx = 0; lx < GRID_SIZE; lx++) {
+                    int wx = originX + lx;
+                    mutable.set(wx, wy, wz);
+
+                    // 用实际坐标查询碰撞体积，而非 BlockPos.ZERO
                     BlockState state = mc.level.getBlockState(mutable);
-                    if (isSolid(state)) {
+                    if (!state.isAir()
+                            && !state.getCollisionShape(mc.level, mutable, CollisionContext.empty()).isEmpty()) {
                         int idx = flatIndex(lx, ly, lz);
                         voxelBits[idx >> 5] |= (1 << (idx & 31));
                     }
@@ -100,33 +112,33 @@ public class TerrainVoxelization {
     }
 
     /**
-     * 判断方块是否应视为实心（遮挡射线）。
-     */
-    private static boolean isSolid(BlockState state) {
-        return !state.isAir() && !state.getCollisionShape(mc.level, BlockPos.ZERO).isEmpty();
-    }
-
-    /**
-     * 三维坐标 → 一维索引（Z-major 排列以利于 GPU 缓存）。
+     * Z-major 线性索引，与 shader 中 sampleVoxel 一致。
      */
     private static int flatIndex(int x, int y, int z) {
         return (z * GRID_SIZE + y) * GRID_SIZE + x;
     }
 
-    // ── 数据写入 ──
+    // ─── 数据写入 ────────────────────────────────────────────────────────────
 
     /**
-     * 将体素数据写入 Std430Writer（header + body）。
+     * 将体素数据写入 {@link Std430Writer}。
+     * <p>
+     * 写入精确 {@link #BUFFER_SIZE} 字节（16 header + 32768 body）。
+     * 使用 {@code putInt} 而非 {@code putUInt}，二者等价（4 字节对齐 + 4 字节写入）。
+     * 由于连续写 int 且起始 position 为 0（由调用方 clear），不会产生对齐填充。
      */
-    public void writeTo(com.github.epsilon.graphics.vulkan.buffer.Std430Writer writer) {
+    public void writeTo(Std430Writer writer) {
+        // Header: 4 × int = 16 bytes
         writer.putInt(originX);
         writer.putInt(originY);
         writer.putInt(originZ);
         writer.putInt(GRID_SIZE);
 
-        for (int bits : voxelBits) {
-            writer.putUInt(bits);
+        // Body: BITMAP_UINT_COUNT × int = 32768 bytes
+        for (int i = 0; i < BITMAP_UINT_COUNT; i++) {
+            writer.putInt(voxelBits[i]);
         }
+        // 此时 writer.writtenBytes() == BUFFER_SIZE
     }
 
     /**

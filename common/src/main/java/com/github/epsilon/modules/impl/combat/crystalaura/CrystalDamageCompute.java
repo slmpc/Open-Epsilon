@@ -5,40 +5,31 @@ import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.graphics.vulkan.buffer.VulkanOutputBuffer;
 import com.github.epsilon.graphics.vulkan.buffer.VulkanStd430Buffer;
 import com.github.epsilon.graphics.vulkan.compute.VulkanComputePipeline;
+import com.github.epsilon.graphics.vulkan.compute.VulkanComputeUtils;
 import com.github.epsilon.graphics.vulkan.descriptor.DescriptorLayoutSpec;
 import com.github.epsilon.graphics.vulkan.descriptor.DescriptorSetWrite;
 import com.github.epsilon.graphics.vulkan.descriptor.VulkanResourceManager;
 import com.github.epsilon.graphics.vulkan.shader.Glsl2SpirVCompiler;
-import com.mojang.blaze3d.vulkan.VulkanUtils;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.vulkan.*;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.vulkan.KHRSynchronization2.*;
 import static org.lwjgl.vulkan.VK12.*;
 
 /**
  * GPU 加速水晶爆炸伤害计算器。
  *
- * <h3>概述</h3>
- * 通过 Vulkan Compute Shader 并行计算多个 (放置点, 目标) 对的爆炸伤害，
- * 利用体素化地形做射线遮挡查询，替代 CPU 侧逐射线 clip 调用。
- *
  * <h3>SSBO 布局</h3>
  * <ul>
- *   <li>binding 0: 体素网格（由 {@link TerrainVoxelization} 填充）</li>
+ *   <li>binding 0: 体素网格（{@link TerrainVoxelization}）</li>
  *   <li>binding 1: 任务缓冲（放置点 + 目标信息）</li>
- *   <li>binding 2: 结果缓冲（每个任务对应一个 float 伤害值）</li>
+ *   <li>binding 2: 结果缓冲（每任务一个 float）</li>
  * </ul>
- *
- * @see TerrainVoxelization
  */
 public class CrystalDamageCompute {
 
@@ -66,8 +57,7 @@ public class CrystalDamageCompute {
     private @Nullable VulkanComputePipeline pipeline;
     private @Nullable VulkanResourceManager resourceManager;
     private @Nullable VulkanResourceManager.ManagedDescriptorSet descriptorSet;
-    private @Nullable VkCommandBuffer cmdBuf;
-    private long fence = VK_NULL_HANDLE;
+    private @Nullable VulkanComputeUtils computeUtils;
 
     private final DescriptorLayoutSpec layoutSpec = DescriptorLayoutSpec.builder()
             .addSsbo(0)
@@ -77,27 +67,15 @@ public class CrystalDamageCompute {
 
     private final TerrainVoxelization voxelization = new TerrainVoxelization();
 
-    // ── 任务写入状态 ──
-
     private int taskCount;
     private final List<GpuTask> pendingTasks = new ArrayList<>(MAX_TASKS);
 
     private record GpuTask(
-            Vec3 crystalPos,
-            float radius,
-            Vec3 targetPos,
-            float halfWidth,
-            float height,
-            float armor,
-            float toughness,
-            float enchantProt,
-            float difficulty,
-            float resistanceMultiplier,
-            float applyDifficulty
-    ) {
-    }
-
-    // ─── 初始化 ─────────────────────────────────────────────────────────────
+            Vec3 crystalPos, float radius,
+            Vec3 targetPos, float halfWidth, float height,
+            float armor, float toughness, float enchantProt,
+            float difficulty, float resistanceMultiplier, float applyDifficulty
+    ) {}
 
     public void ensureInitialized() {
         if (initialized) return;
@@ -155,8 +133,7 @@ public class CrystalDamageCompute {
                     )
             );
 
-            cmdBuf = allocateCommandBuffer();
-            fence = createFence();
+            computeUtils = new VulkanComputeUtils();
             initialized = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -167,8 +144,6 @@ public class CrystalDamageCompute {
     public boolean isInitialized() {
         return initialized;
     }
-
-    // ─── 任务提交 API ───────────────────────────────────────────────────────
 
     /**
      * 开始新一轮任务提交：更新体素网格，清空任务列表。
@@ -199,12 +174,9 @@ public class CrystalDamageCompute {
                        float armor, float toughness, float enchantProt,
                        float difficulty, float resistanceMultiplier, float applyDifficulty) {
         if (taskCount >= MAX_TASKS) return -1;
-
-        int idx = taskCount;
-        taskCount++;
+        int idx = taskCount++;
         pendingTasks.add(new GpuTask(
-                crystalPos, radius,
-                targetPos, halfWidth, height,
+                crystalPos, radius, targetPos, halfWidth, height,
                 armor, toughness, enchantProt, difficulty,
                 resistanceMultiplier, applyDifficulty
         ));
@@ -223,34 +195,39 @@ public class CrystalDamageCompute {
         };
     }
 
-    // ─── 执行 & 回读 ───────────────────────────────────────────────────────
-
     /**
-     * 提交所有任务到 GPU 并等待完成。
+     * 写入所有 buffer → dispatch → fence wait → 可安全 readResult。
      */
     public void dispatch() {
         if (!initialized || taskCount == 0) return;
-        if (cmdBuf == null || pipeline == null || voxelBuffer == null
-                || taskBuffer == null || resultBuffer == null || descriptorSet == null) return;
+        if (voxelBuffer == null || taskBuffer == null || resultBuffer == null
+                || pipeline == null || descriptorSet == null || computeUtils == null) return;
 
-        writeTaskBuffer();
-
-        // 上传体素数据
+        // 写入体素数据
         voxelBuffer.writer().clear();
         voxelization.writeTo(voxelBuffer.writer());
 
-        recordAndSubmit();
+        // 写入任务数据
+        writeTaskBuffer();
+
+        computeUtils.dispatchAndWait(
+                new VulkanStd430Buffer[]{ voxelBuffer, taskBuffer },
+                resultBuffer,
+                pipeline,
+                descriptorSet.handle(),
+                taskCount, 1, 1,
+                (long) taskCount * Float.BYTES
+        );
     }
 
     private void writeTaskBuffer() {
-        if (taskBuffer == null) return;
-
         var writer = taskBuffer.writer();
         writer.clear();
-        writer.putUInt(taskCount);
-        writer.putUInt(0);
-        writer.putUInt(0);
-        writer.putUInt(0);
+
+        writer.putInt(taskCount);
+        writer.putInt(0);
+        writer.putInt(0);
+        writer.putInt(0);
 
         for (GpuTask task : pendingTasks) {
             writer.putVec4((float) task.crystalPos.x, (float) task.crystalPos.y, (float) task.crystalPos.z, task.radius);
@@ -261,184 +238,36 @@ public class CrystalDamageCompute {
         }
     }
 
-    private void recordAndSubmit() {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            vkResetCommandBuffer(cmdBuf, 0);
-
-            var beginInfo = VkCommandBufferBeginInfo.calloc(stack)
-                    .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
-                    .flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-            vkBeginCommandBuffer(cmdBuf, beginInfo);
-
-            // 上传 voxel + task buffer
-            voxelBuffer.map(cmdBuf);
-            taskBuffer.map(cmdBuf);
-
-            // Barrier: transfer → compute
-            var barriers = VkBufferMemoryBarrier2KHR.calloc(2, stack);
-            barriers.get(0)
-                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR)
-                    .srcStageMask(VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR)
-                    .srcAccessMask(VK_ACCESS_2_TRANSFER_WRITE_BIT_KHR)
-                    .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR)
-                    .dstAccessMask(VK_ACCESS_2_SHADER_STORAGE_READ_BIT_KHR)
-                    .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                    .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                    .buffer(voxelBuffer.gpuBuffer())
-                    .offset(0)
-                    .size(TerrainVoxelization.BUFFER_SIZE);
-            barriers.get(1)
-                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR)
-                    .srcStageMask(VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR)
-                    .srcAccessMask(VK_ACCESS_2_TRANSFER_WRITE_BIT_KHR)
-                    .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR)
-                    .dstAccessMask(VK_ACCESS_2_SHADER_STORAGE_READ_BIT_KHR)
-                    .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                    .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                    .buffer(taskBuffer.gpuBuffer())
-                    .offset(0)
-                    .size(TASK_BUFFER_SIZE);
-
-            // 上一帧 readback 对 resultBuffer 的 TRANSFER_READ 与本帧 COMPUTE_WRITE 存在同资源依赖。
-            var resultWriteBarrier = VkBufferMemoryBarrier2KHR.calloc(1, stack)
-                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR)
-                    .srcStageMask(VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR)
-                    .srcAccessMask(VK_ACCESS_2_TRANSFER_READ_BIT_KHR)
-                    .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR)
-                    .dstAccessMask(VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT_KHR)
-                    .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                    .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                    .buffer(resultBuffer.gpuBuffer())
-                    .offset(0)
-                    .size((long) taskCount * Float.BYTES);
-
-            var dep = VkDependencyInfoKHR.calloc(stack)
-                    .sType(VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR)
-                    .pBufferMemoryBarriers(VkBufferMemoryBarrier2KHR.calloc(3, stack)
-                            .put(0, barriers.get(0))
-                            .put(1, barriers.get(1))
-                            .put(2, resultWriteBarrier.get(0)));
-            vkCmdPipelineBarrier2KHR(cmdBuf, dep);
-
-            // Bind & dispatch
-            vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.pipeline());
-            vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_COMPUTE,
-                    pipeline.pipelineLayout(), 0,
-                    stack.longs(descriptorSet.handle()), null);
-
-            // 每个 workgroup 处理一个 task（内部 64 线程并行追踪射线）
-            vkCmdDispatch(cmdBuf, taskCount, 1, 1);
-
-            // Barrier: compute → transfer
-            var readbackBarrier = VkBufferMemoryBarrier2KHR.calloc(1, stack)
-                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR)
-                    .srcStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR)
-                    .srcAccessMask(VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT_KHR)
-                    .dstStageMask(VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR)
-                    .dstAccessMask(VK_ACCESS_2_TRANSFER_READ_BIT_KHR)
-                    .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                    .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                    .buffer(resultBuffer.gpuBuffer())
-                    .offset(0)
-                    .size(RESULT_BUFFER_SIZE);
-
-            var readbackDep = VkDependencyInfoKHR.calloc(stack)
-                    .sType(VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR)
-                    .pBufferMemoryBarriers(readbackBarrier);
-            vkCmdPipelineBarrier2KHR(cmdBuf, readbackDep);
-
-            resultBuffer.copyToReadback(cmdBuf, (long) taskCount * Float.BYTES);
-            vkEndCommandBuffer(cmdBuf);
-
-            // Submit & wait
-            vkResetFences(LuminRenderSystem.vulkanContext.device(), stack.longs(fence));
-            var submitInfo = VkSubmitInfo.calloc(stack)
-                    .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
-                    .pCommandBuffers(stack.pointers(cmdBuf));
-            vkQueueSubmit(LuminRenderSystem.vulkanContext.graphicsQueue().vkQueue(), submitInfo, fence);
-            vkWaitForFences(LuminRenderSystem.vulkanContext.device(), stack.longs(fence), true, Long.MAX_VALUE);
-        }
-    }
-
     /**
      * 读取指定任务的计算结果。
-     *
-     * @param taskIndex addTask 返回的索引
-     * @return 计算的伤害值
+     * 必须在 {@link #dispatch()} 返回后调用。
      */
     public float readResult(int taskIndex) {
-        if (!initialized || resultBuffer == null || taskIndex < 0 || taskIndex >= taskCount) return 0f;
-        ByteBuffer result = resultBuffer.readMapped((long) taskIndex * Float.BYTES, Float.BYTES);
-        return result.getFloat(0);
+        if (!initialized || resultBuffer == null || computeUtils == null
+                || taskIndex < 0 || taskIndex >= taskCount) return 0f;
+        return computeUtils.readFloat(resultBuffer, taskIndex);
     }
 
     /**
      * 批量读取所有任务结果。
      */
     public float[] readAllResults() {
-        if (!initialized || resultBuffer == null || taskCount == 0) return new float[0];
-        ByteBuffer result = resultBuffer.readMapped((long) taskCount * Float.BYTES);
-        float[] damages = new float[taskCount];
-        for (int i = 0; i < taskCount; i++) {
-            damages[i] = result.getFloat(i * Float.BYTES);
-        }
-        return damages;
+        if (!initialized || resultBuffer == null || computeUtils == null || taskCount == 0) return new float[0];
+        return computeUtils.readFloats(resultBuffer, taskCount);
     }
 
     public int getTaskCount() {
         return taskCount;
     }
 
-    // ─── 资源管理 ───────────────────────────────────────────────────────────
-
-    private VkCommandBuffer allocateCommandBuffer() {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            var pCmd = stack.mallocPointer(1);
-            var allocInfo = VkCommandBufferAllocateInfo.calloc(stack)
-                    .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO)
-                    .commandPool(LuminRenderSystem.vulkanContext.cmdPool())
-                    .level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
-                    .commandBufferCount(1);
-            VulkanUtils.crashIfFailure(
-                    vkAllocateCommandBuffers(LuminRenderSystem.vulkanContext.device(), allocInfo, pCmd),
-                    "Failed to allocate command buffer for CrystalDamageCompute"
-            );
-            return new VkCommandBuffer(pCmd.get(0), LuminRenderSystem.vulkanContext.device());
-        }
-    }
-
-    private long createFence() {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            var pFence = stack.mallocLong(1);
-            var createInfo = VkFenceCreateInfo.calloc(stack)
-                    .sType(VK_STRUCTURE_TYPE_FENCE_CREATE_INFO);
-            VulkanUtils.crashIfFailure(
-                    vkCreateFence(LuminRenderSystem.vulkanContext.device(), createInfo, null, pFence),
-                    "Failed to create fence for CrystalDamageCompute"
-            );
-            return pFence.get(0);
-        }
-    }
-
     public void destroy() {
-        if (fence != VK_NULL_HANDLE) {
-            vkDestroyFence(LuminRenderSystem.vulkanContext.device(), fence, null);
-            fence = VK_NULL_HANDLE;
-        }
+        if (computeUtils != null) { computeUtils.close(); computeUtils = null; }
         if (descriptorSet != null) { descriptorSet.close(); descriptorSet = null; }
         if (resourceManager != null) { resourceManager.close(); resourceManager = null; }
         if (pipeline != null) { pipeline.close(); pipeline = null; }
         if (resultBuffer != null) { resultBuffer.close(); resultBuffer = null; }
         if (taskBuffer != null) { taskBuffer.close(); taskBuffer = null; }
         if (voxelBuffer != null) { voxelBuffer.close(); voxelBuffer = null; }
-        if (cmdBuf != null) {
-            vkFreeCommandBuffers(LuminRenderSystem.vulkanContext.device(),
-                    LuminRenderSystem.vulkanContext.cmdPool(), cmdBuf);
-            cmdBuf = null;
-        }
         initialized = false;
     }
 }
-
-
-

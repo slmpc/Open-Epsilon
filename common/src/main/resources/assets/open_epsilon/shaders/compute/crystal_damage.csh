@@ -1,18 +1,10 @@
 #version 450
 
 /*
- * crystal_damage.csh — GPU 加速水晶爆炸伤害计算
- *
- * 调度模型：
- *   - gl_WorkGroupID.x   = taskId（每个 workgroup 处理一个任务）
- *   - gl_LocalInvocationID.x = rayId（每个线程追踪一条射线）
- *   - local_size_x = 64，其中前 TOTAL_SAMPLES 条线程活跃
- *   - 通过 shared memory 做加权归约，thread 0 计算最终伤害并写出
- *
- * 设计原则：
- *   1. 最小化分支 —— step/mix/clamp 替代 if-else
- *   2. 注意力加权采样 —— 高斯衰减，中心射线权重高
- *   3. 无 bounce —— 仅直线遮挡判断
+ * gl_WorkGroupID.x   = taskId（每个 workgroup 处理一个任务）
+ * gl_LocalInvocationID.x = rayId（每个线程追踪一条射线）
+ * local_size_x = 64，其中前 TOTAL_SAMPLES 条线程活跃
+ * 通过 shared memory 做加权归约，thread 0 计算最终伤害并写出
  */
 
 layout(local_size_x = 64) in;

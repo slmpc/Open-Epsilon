@@ -37,10 +37,12 @@ CrystalAura 新增 **GPU Compute Mode**，利用 Vulkan Compute Shader 并行计
 
 | 文件 | 说明 |
 |------|------|
-| `TerrainVoxelization.java` | 地形体素化：将玩家周围 64³ 方块编码为位图 SSBO |
-| `CrystalDamageCompute.java` | GPU 计算管线管理：SSBO 创建、任务提交、dispatch、结果回读 |
-| `crystal_damage.csh` | GLSL 450 Compute Shader：体素 DDA 射线行进 + 爆炸伤害公式 |
+| `VulkanComputeUtils.java` | 通用 Vulkan Compute 同步工具：上传→barrier→dispatch→barrier→readback→fence 全流程 |
+| `TerrainVoxelization.java` | 地形体素化：将玩家周围 64³ 方块编码为位图 SSBO（精确 32784 字节） |
+| `CrystalDamageCompute.java` | GPU 伤害计算器：数据填充 + 调用 `VulkanComputeUtils` + 结果解释 |
+| `crystal_damage.csh` | GLSL 450 Compute Shader：确定性 DDA 射线行进 + 爆炸伤害公式 |
 | `CrystalAura.java` | 新增 `ComputeMode` 设置 (CPU/GPU)，GPU 模式下批量提交任务 |
+| `ComputeTest.java` | 已重构为使用 `VulkanComputeUtils` |
 
 ## 体素化 (TerrainVoxelization)
 
