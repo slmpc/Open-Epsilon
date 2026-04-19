@@ -31,11 +31,11 @@ public class EnumSelectPopup implements PanelPopupHost.Popup {
     private final float maxScroll;
     private float scroll;
 
-    private final RoundRectRenderer roundRectRenderer = new RoundRectRenderer();
-    private final ShadowRenderer shadowRenderer = new ShadowRenderer();
-    private final TextRenderer textRenderer = new TextRenderer();
-    private final RoundRectRenderer itemRoundRectRenderer = new RoundRectRenderer();
-    private final TextRenderer itemTextRenderer = new TextRenderer();
+    private final RoundRectRenderer roundRectRenderer = RoundRectRenderer.create();
+    private final ShadowRenderer shadowRenderer = ShadowRenderer.create();
+    private final TextRenderer textRenderer = TextRenderer.create();
+    private final RoundRectRenderer itemRoundRectRenderer = RoundRectRenderer.create();
+    private final TextRenderer itemTextRenderer = TextRenderer.create();
     private final Animation openAnimation = new Animation(Easing.EASE_OUT_CUBIC, 140L);
     private int hoveredIndex = -1;
 

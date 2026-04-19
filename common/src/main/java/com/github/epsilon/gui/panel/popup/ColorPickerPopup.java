@@ -38,10 +38,10 @@ public class ColorPickerPopup implements PanelPopupHost.Popup {
     private final PanelLayout.Rect bounds;
     private final PanelLayout.Rect anchorBounds;
     private final ColorSetting setting;
-    private final RoundRectRenderer roundRectRenderer = new RoundRectRenderer();
-    private final RectRenderer rectRenderer = new RectRenderer();
-    private final ShadowRenderer shadowRenderer = new ShadowRenderer();
-    private final TextRenderer textRenderer = new TextRenderer();
+    private final RoundRectRenderer roundRectRenderer = RoundRectRenderer.create();
+    private final RectRenderer rectRenderer = RectRenderer.create();
+    private final ShadowRenderer shadowRenderer = ShadowRenderer.create();
+    private final TextRenderer textRenderer = TextRenderer.create();
     private final Animation openAnimation = new Animation(Easing.EASE_OUT_CUBIC, 160L);
     private final Animation[] indicatorAnimations = new Animation[]{
             new Animation(Easing.EASE_OUT_CUBIC, 120L),

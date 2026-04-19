@@ -41,8 +41,8 @@ public class ModuleList extends HudModule {
     private final BoolSetting showCategory = boolSetting("Show Category", false);
     private final BoolSetting showIcon = boolSetting("Show Icon", true);
 
-    private final Supplier<TextRenderer> textRendererSupplier = Suppliers.memoize(TextRenderer::new);
-    private final Supplier<RoundRectRenderer> roundRectRendererSupplier = Suppliers.memoize(RoundRectRenderer::new);
+    private final Supplier<TextRenderer> textRendererSupplier = Suppliers.memoize(TextRenderer::create);
+    private final Supplier<RoundRectRenderer> roundRectRendererSupplier = Suppliers.memoize(RoundRectRenderer::create);
 
     @Override
     protected void updateBounds(DeltaTracker delta) {

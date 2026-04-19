@@ -26,7 +26,7 @@ import java.util.Map;
 public final class SettingListController {
 
     private final PanelPopupHost popupHost;
-    private final TextRenderer measureTextRenderer = new TextRenderer();
+    private final TextRenderer measureTextRenderer = TextRenderer.create();
     private final Map<Setting<?>, SettingRow<?>> rowCache = new HashMap<>();
     private final List<SettingEntry> settingEntries = new ArrayList<>();
 
