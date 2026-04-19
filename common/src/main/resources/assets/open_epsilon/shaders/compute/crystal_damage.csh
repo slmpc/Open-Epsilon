@@ -17,20 +17,17 @@
 
 layout(local_size_x = 64) in;
 
-// ─── Voxel Grid SSBO (binding 0) ────────────────────────────────────────────
-
 layout(std430, set = 0, binding = 0) readonly buffer VoxelGrid {
     ivec4 header;       // xyz = gridOrigin, w = gridSize
     uint  voxelBits[];
 } grid;
-
-// ─── Task Buffer SSBO (binding 1) ───────────────────────────────────────────
 
 struct Task {
     vec4 crystalPos;    // xyz = 爆炸中心, w = 半径
     vec4 targetPos;     // xyz = 目标脚底, w = unused
     vec4 targetSize;    // x = halfWidth, y = height
     vec4 params;        // x = armor, y = toughness, z = enchantProt, w = difficulty
+    vec4 extra;         // x = resistanceMultiplier, y = applyDifficulty(0/1)
 };
 
 layout(std430, set = 0, binding = 1) readonly buffer TaskBuffer {
@@ -41,30 +38,23 @@ layout(std430, set = 0, binding = 1) readonly buffer TaskBuffer {
     Task tasks[];
 } taskBuf;
 
-// ─── Result Buffer SSBO (binding 2) ─────────────────────────────────────────
-
 layout(std430, set = 0, binding = 2) writeonly buffer ResultBuffer {
     float damages[];
 } resultBuf;
-
-// ─── 常量 ───────────────────────────────────────────────────────────────────
 
 const float EPSILON = 1e-6;
 const int   RAY_STEPS = 64;
 
 // 注意力采样网格 (每轴)
 const int SAMPLE_X = 3;
-const int SAMPLE_Y = 4;
+const int SAMPLE_Y = 5;
 const int SAMPLE_Z = 3;
-const int TOTAL_SAMPLES = SAMPLE_X * SAMPLE_Y * SAMPLE_Z; // = 36
-
-// ─── Shared memory：每线程写入 (weightedHit, weight) ─────────────────────────
+const int TOTAL_SAMPLES = SAMPLE_X * SAMPLE_Y * SAMPLE_Z; // = 45
 
 shared float s_weightedHit[64];
 shared float s_weight[64];
 
-// ─── 体素查询（无分支） ─────────────────────────────────────────────────────
-
+// 采样体素值（0 或 1），越界返回 0
 float sampleVoxel(ivec3 worldPos) {
     ivec3 origin = grid.header.xyz;
     int   size   = grid.header.w;
@@ -82,51 +72,64 @@ float sampleVoxel(ivec3 worldPos) {
     return valid * bit;
 }
 
-// ─── DDA 射线行进（无分支循环体） ───────────────────────────────────────────
+// DDA 射线行进
 
 float traceRay(vec3 origin, vec3 target) {
     vec3 dir = target - origin;
     float maxDist = length(dir);
-    vec3 d = dir / max(maxDist, EPSILON);
+    if (maxDist <= EPSILON) return 1.0;
+
+    vec3 d = dir / maxDist;
 
     ivec3 pos = ivec3(floor(origin));
-    ivec3 stepDir = ivec3(sign(d));
-    vec3 tDelta = abs(vec3(1.0) / max(abs(d), vec3(EPSILON)));
+    ivec3 stepDir = ivec3(
+        d.x > 0.0 ? 1 : (d.x < 0.0 ? -1 : 0),
+        d.y > 0.0 ? 1 : (d.y < 0.0 ? -1 : 0),
+        d.z > 0.0 ? 1 : (d.z < 0.0 ? -1 : 0)
+    );
 
-    vec3 fracOrigin = origin - vec3(pos);
-    vec3 tMaxPos = (vec3(1.0) - fracOrigin) * tDelta;
-    vec3 tMaxNeg = fracOrigin * tDelta;
-    vec3 tMax = mix(tMaxNeg, tMaxPos, step(vec3(0.0), d));
+    vec3 tDelta = vec3(
+        d.x != 0.0 ? abs(1.0 / d.x) : 1e20,
+        d.y != 0.0 ? abs(1.0 / d.y) : 1e20,
+        d.z != 0.0 ? abs(1.0 / d.z) : 1e20
+    );
 
-    float visibility = 1.0;
+    vec3 fracOrigin = origin - floor(origin);
+    vec3 tMax = vec3(
+        stepDir.x > 0 ? (1.0 - fracOrigin.x) * tDelta.x : (stepDir.x < 0 ? fracOrigin.x * tDelta.x : 1e20),
+        stepDir.y > 0 ? (1.0 - fracOrigin.y) * tDelta.y : (stepDir.y < 0 ? fracOrigin.y * tDelta.y : 1e20),
+        stepDir.z > 0 ? (1.0 - fracOrigin.z) * tDelta.z : (stepDir.z < 0 ? fracOrigin.z * tDelta.z : 1e20)
+    );
+
+    float blocked = 0.0;
+    float active_ = 1.0;
 
     for (int i = 0; i < RAY_STEPS; i++) {
-        float tMinVal = min(tMax.x, min(tMax.y, tMax.z));
-        float withinRange = step(tMinVal, maxDist);
+        // 固定优先级 X -> Y -> Z，避免边界条件下的随机抖动。
+        float chooseX = float(tMax.x <= tMax.y && tMax.x <= tMax.z);
+        float chooseY = float(chooseX < 0.5 && tMax.y <= tMax.z);
+        float chooseZ = 1.0 - chooseX - chooseY;
 
-        float mx = step(tMax.x, min(tMax.y, tMax.z));
-        float my = (1.0 - mx) * step(tMax.y, tMax.z);
-        float mz = (1.0 - mx) * (1.0 - my);
+        float traveled = tMax.x * chooseX + tMax.y * chooseY + tMax.z * chooseZ;
 
-        pos += ivec3(vec3(mx, my, mz) * vec3(stepDir));
-        tMax += vec3(mx, my, mz) * tDelta;
+        pos += ivec3(vec3(chooseX, chooseY, chooseZ) * vec3(stepDir));
+        tMax += vec3(chooseX, chooseY, chooseZ) * tDelta;
 
+        float within = step(traveled, maxDist) * active_;
         float solid = sampleVoxel(pos);
-        visibility *= (1.0 - solid * withinRange);
+        blocked = max(blocked, solid * within);
+
+        active_ *= (1.0 - blocked) * within;
     }
 
-    return visibility;
+    return 1.0 - blocked;
 }
 
-// ─── 注意力权重（高斯衰减） ─────────────────────────────────────────────────
-
+// 等权采样
 float attentionWeight(vec3 uvw) {
-    vec3 centered = uvw - vec3(0.5);
-    float distSq = dot(centered, centered);
-    return exp(-distSq / 0.125);
+    // 为了与 CPU 逻辑对齐，曝光率使用等权采样。
+    return 1.0;
 }
-
-// ─── 伤害公式（无分支） ─────────────────────────────────────────────────────
 
 float applyArmor(float damage, float armor, float toughness) {
     float t = 2.0 + toughness / 4.0;
@@ -150,21 +153,14 @@ float applyDifficulty(float damage, float difficulty) {
          + hard     * isHard;
 }
 
-// ─── 主入口 ──────────────────────────────────────────────────────────────────
-
 void main() {
     uint taskId = gl_WorkGroupID.x;
     uint rayId  = gl_LocalInvocationID.x;
 
-    // 初始化 shared memory
     s_weightedHit[rayId] = 0.0;
     s_weight[rayId]      = 0.0;
 
-    // 越界 workgroup 直接写 0 并返回
     if (taskId >= taskBuf.taskCount) {
-        if (rayId == 0u) {
-            resultBuf.damages[taskId] = 0.0;
-        }
         return;
     }
 
@@ -181,37 +177,35 @@ void main() {
     vec3 bbSize = bbMax - bbMin;
     vec3 offset = (vec3(1.0) - floor((bbSize * 2.0 + vec3(1.0)) / vec3(1.0))
                    / (bbSize * 2.0 + vec3(1.0))) * 0.5;
-    // 简化 offset 计算：与原版 getSeenPercent 一致
     vec3 stepSize = vec3(1.0) / (bbSize * 2.0 + vec3(1.0));
     offset = (vec3(1.0) - floor(vec3(1.0) / stepSize) * stepSize) * 0.5;
     offset.y = 0.0;
 
-    // ── 每个线程追踪一条射线 ──
-    if (rayId < TOTAL_SAMPLES) {
-        // 将 rayId 解码为 (ix, iy, iz) 采样索引
-        uint iz = rayId / uint(SAMPLE_X * SAMPLE_Y);
-        uint rem = rayId % uint(SAMPLE_X * SAMPLE_Y);
-        uint iy = rem / uint(SAMPLE_X);
-        uint ix = rem % uint(SAMPLE_X);
+    // ── 每个线程追踪一条射线（超出采样数的线程按 0 权重参与） ──
+    float rayActive = float(rayId < uint(TOTAL_SAMPLES));
+    uint sampleId = min(rayId, uint(TOTAL_SAMPLES - 1));
 
-        float u = float(ix) / float(SAMPLE_X - 1);
-        float v = float(iy) / float(SAMPLE_Y - 1);
-        float w = float(iz) / float(SAMPLE_Z - 1);
+    uint iz = sampleId / uint(SAMPLE_X * SAMPLE_Y);
+    uint rem = sampleId % uint(SAMPLE_X * SAMPLE_Y);
+    uint iy = rem / uint(SAMPLE_X);
+    uint ix = rem % uint(SAMPLE_X);
 
-        vec3 samplePos = vec3(
-            mix(bbMin.x, bbMax.x, u) + offset.x,
-            mix(bbMin.y, bbMax.y, v),
-            mix(bbMin.z, bbMax.z, w) + offset.z
-        );
+    float u = float(ix) / float(SAMPLE_X - 1);
+    float v = float(iy) / float(SAMPLE_Y - 1);
+    float w = float(iz) / float(SAMPLE_Z - 1);
 
-        float att = attentionWeight(vec3(u, v, w));
-        float vis = traceRay(samplePos, crystalPos);
+    vec3 samplePos = vec3(
+        mix(bbMin.x, bbMax.x, u) + offset.x,
+        mix(bbMin.y, bbMax.y, v),
+        mix(bbMin.z, bbMax.z, w) + offset.z
+    );
 
-        s_weightedHit[rayId] = vis * att;
-        s_weight[rayId]      = att;
-    }
+    float att = attentionWeight(vec3(u, v, w));
+    float vis = traceRay(samplePos, crystalPos);
 
-    // ── shared memory 归约 ──
+    s_weightedHit[rayId] = vis * att * rayActive;
+    s_weight[rayId]      = att * rayActive;
+
     barrier();
 
     // 仅 thread 0 做最终归约和伤害计算
@@ -226,7 +220,7 @@ void main() {
         float exposure = totalWeightedHit / max(totalWeight, EPSILON);
 
         float doubleRadius = radius * 2.0;
-        float dist = distance(targetPos + vec3(0.0, height * 0.5, 0.0), crystalPos) / doubleRadius;
+        float dist = distance(targetPos, crystalPos) / doubleRadius;
         float inRange = step(dist, 1.0);
 
         float impact = (1.0 - dist) * exposure;
@@ -236,9 +230,13 @@ void main() {
         float armorTough  = task.params.y;
         float enchantProt = task.params.z;
         float difficulty  = task.params.w;
+        float resistanceMul = task.extra.x;
+        float applyDifficultyFlag = clamp(task.extra.y, 0.0, 1.0);
 
-        baseDamage = applyDifficulty(baseDamage, difficulty);
+        float difficultyScaled = applyDifficulty(baseDamage, difficulty);
+        baseDamage = mix(baseDamage, difficultyScaled, applyDifficultyFlag);
         baseDamage = applyArmor(baseDamage, totalArmor, armorTough);
+        baseDamage *= resistanceMul;
 
         float enchantClamped = clamp(enchantProt, 0.0, 20.0);
         baseDamage *= (1.0 - enchantClamped / 25.0);

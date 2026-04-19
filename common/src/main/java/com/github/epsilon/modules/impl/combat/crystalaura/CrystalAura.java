@@ -369,6 +369,9 @@ public class CrystalAura extends Module {
         float enchantProtTarget = getEnchantProtection(target, armorMode.getValue());
         float enchantProtSelf = getEnchantProtection(mc.player,
                 armorForSelf.getValue() ? armorMode.getValue() : DamageUtils.ArmorEnchantmentMode.None);
+        float targetResistanceMul = getResistanceMultiplier(target);
+        float selfResistanceMul = getResistanceMultiplier(mc.player);
+        float applyDifficultyTarget = target instanceof net.minecraft.world.entity.player.Player ? 1.0f : 0.0f;
 
         float diff = CrystalDamageCompute.difficultyToFloat(mc.player.level().getDifficulty());
 
@@ -397,10 +400,12 @@ public class CrystalAura extends Module {
 
                     int idxTarget = gpuCompute.addTask(crystalPos, DamageUtils.CRYSTAL_EXPLOSION_RADIUS,
                             predictedTargetPos, targetHalfWidth, targetHeight,
-                            totalArmorTarget, toughnessTarget, enchantProtTarget, diff);
+                            totalArmorTarget, toughnessTarget, enchantProtTarget, diff,
+                            targetResistanceMul, applyDifficultyTarget);
                     int idxSelf = gpuCompute.addTask(crystalPos, DamageUtils.CRYSTAL_EXPLOSION_RADIUS,
                             mc.player.position(), selfHalfWidth, selfHeight,
-                            totalArmorSelf, toughnessSelf, enchantProtSelf, diff);
+                            totalArmorSelf, toughnessSelf, enchantProtSelf, diff,
+                            selfResistanceMul, 1.0f);
 
                     preCandidates.add(new PreCandidate(supportPos, crystalPos, targetRotation,
                             !visible, wallBypassAllowed, idxTarget, idxSelf));
@@ -442,6 +447,16 @@ public class CrystalAura extends Module {
             case PPPP -> 4 * 1.0f * 4;
             case PPBP -> 4 * 1.0f * 3 + 4 * 2.0f;
         };
+    }
+
+    private static float getResistanceMultiplier(LivingEntity entity) {
+        if (!entity.hasEffect(MobEffects.RESISTANCE)) {
+            return 1.0f;
+        }
+        int amplifier = entity.getEffect(MobEffects.RESISTANCE).getAmplifier();
+        int reduction = (amplifier + 1) * 5;
+        int remaining = Math.max(0, 25 - reduction);
+        return remaining / 25.0f;
     }
 
     private List<PlaceCandidate> collectPlaceCandidatesCPU(Vec3 predictedTargetPos) {

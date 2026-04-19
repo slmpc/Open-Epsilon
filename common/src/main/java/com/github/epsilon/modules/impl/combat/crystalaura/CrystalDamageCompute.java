@@ -18,6 +18,7 @@ import org.lwjgl.vulkan.*;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.vulkan.KHRSynchronization2.*;
@@ -41,8 +42,8 @@ import static org.lwjgl.vulkan.VK12.*;
  */
 public class CrystalDamageCompute {
 
-    /** 每个 Task 的 std430 大小：4 × vec4 = 64 bytes */
-    private static final int TASK_STRIDE = 64;
+    /** 每个 Task 的 std430 大小：5 × vec4 = 80 bytes */
+    private static final int TASK_STRIDE = 80;
 
     /** Task header: uint taskCount + 3×uint padding = 16 bytes */
     private static final int TASK_HEADER_BYTES = 16;
@@ -79,6 +80,22 @@ public class CrystalDamageCompute {
     // ── 任务写入状态 ──
 
     private int taskCount;
+    private final List<GpuTask> pendingTasks = new ArrayList<>(MAX_TASKS);
+
+    private record GpuTask(
+            Vec3 crystalPos,
+            float radius,
+            Vec3 targetPos,
+            float halfWidth,
+            float height,
+            float armor,
+            float toughness,
+            float enchantProt,
+            float difficulty,
+            float resistanceMultiplier,
+            float applyDifficulty
+    ) {
+    }
 
     // ─── 初始化 ─────────────────────────────────────────────────────────────
 
@@ -157,15 +174,10 @@ public class CrystalDamageCompute {
      * 开始新一轮任务提交：更新体素网格，清空任务列表。
      */
     public void beginFrame() {
-        if (!initialized || taskBuffer == null) return;
+        if (!initialized) return;
         voxelization.update();
         taskCount = 0;
-        taskBuffer.writer().clear();
-        // 预留 header 空间（16 bytes）
-        taskBuffer.writer().putUInt(0); // taskCount placeholder
-        taskBuffer.writer().putUInt(0);
-        taskBuffer.writer().putUInt(0);
-        taskBuffer.writer().putUInt(0);
+        pendingTasks.clear();
     }
 
     /**
@@ -185,24 +197,17 @@ public class CrystalDamageCompute {
     public int addTask(Vec3 crystalPos, float radius,
                        Vec3 targetPos, float halfWidth, float height,
                        float armor, float toughness, float enchantProt,
-                       float difficulty) {
-        if (taskCount >= MAX_TASKS || taskBuffer == null) return -1;
+                       float difficulty, float resistanceMultiplier, float applyDifficulty) {
+        if (taskCount >= MAX_TASKS) return -1;
 
-        int idx = taskCount++;
-
-        // vec4 crystalPos (xyz + radius)
-        taskBuffer.writer().putVec4(
-                (float) crystalPos.x, (float) crystalPos.y, (float) crystalPos.z, radius
-        );
-        // vec4 targetPos (xyz + unused)
-        taskBuffer.writer().putVec4(
-                (float) targetPos.x, (float) targetPos.y, (float) targetPos.z, 0f
-        );
-        // vec4 targetSize (halfWidth, height, 0, 0)
-        taskBuffer.writer().putVec4(halfWidth, height, 0f, 0f);
-        // vec4 params (armor, toughness, enchantProt, difficulty)
-        taskBuffer.writer().putVec4(armor, toughness, enchantProt, difficulty);
-
+        int idx = taskCount;
+        taskCount++;
+        pendingTasks.add(new GpuTask(
+                crystalPos, radius,
+                targetPos, halfWidth, height,
+                armor, toughness, enchantProt, difficulty,
+                resistanceMultiplier, applyDifficulty
+        ));
         return idx;
     }
 
@@ -228,8 +233,7 @@ public class CrystalDamageCompute {
         if (cmdBuf == null || pipeline == null || voxelBuffer == null
                 || taskBuffer == null || resultBuffer == null || descriptorSet == null) return;
 
-        // 回写 taskCount 到 header
-        patchTaskCount();
+        writeTaskBuffer();
 
         // 上传体素数据
         voxelBuffer.writer().clear();
@@ -238,22 +242,22 @@ public class CrystalDamageCompute {
         recordAndSubmit();
     }
 
-    /**
-     * 直接 patch staging buffer 的第一个 uint 为 taskCount。
-     */
-    private void patchTaskCount() {
-        // taskBuffer 的 staging mapped data 的 offset 0 处写入 taskCount
-        // 这里利用 writer 已经写入了 placeholder 0，直接通过反射或直接操作
-        // 由于 Std430Writer 内部持有 ByteBuffer target，
-        // 我们在 beginFrame 时 position 0 写了 0，现在需要 putInt at position 0
-        // 安全方法：保存 position → seek → write → restore
-        try {
-            var writerField = com.github.epsilon.graphics.vulkan.buffer.Std430Writer.class.getDeclaredField("target");
-            writerField.setAccessible(true);
-            ByteBuffer buf = (ByteBuffer) writerField.get(taskBuffer.writer());
-            buf.putInt(0, taskCount); // absolute put at offset 0
-        } catch (Exception e) {
-            e.printStackTrace();
+    private void writeTaskBuffer() {
+        if (taskBuffer == null) return;
+
+        var writer = taskBuffer.writer();
+        writer.clear();
+        writer.putUInt(taskCount);
+        writer.putUInt(0);
+        writer.putUInt(0);
+        writer.putUInt(0);
+
+        for (GpuTask task : pendingTasks) {
+            writer.putVec4((float) task.crystalPos.x, (float) task.crystalPos.y, (float) task.crystalPos.z, task.radius);
+            writer.putVec4((float) task.targetPos.x, (float) task.targetPos.y, (float) task.targetPos.z, 0f);
+            writer.putVec4(task.halfWidth, task.height, 0f, 0f);
+            writer.putVec4(task.armor, task.toughness, task.enchantProt, task.difficulty);
+            writer.putVec4(task.resistanceMultiplier, task.applyDifficulty, 0f, 0f);
         }
     }
 
@@ -295,9 +299,25 @@ public class CrystalDamageCompute {
                     .offset(0)
                     .size(TASK_BUFFER_SIZE);
 
+            // 上一帧 readback 对 resultBuffer 的 TRANSFER_READ 与本帧 COMPUTE_WRITE 存在同资源依赖。
+            var resultWriteBarrier = VkBufferMemoryBarrier2KHR.calloc(1, stack)
+                    .sType(VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR)
+                    .srcStageMask(VK_PIPELINE_STAGE_2_TRANSFER_BIT_KHR)
+                    .srcAccessMask(VK_ACCESS_2_TRANSFER_READ_BIT_KHR)
+                    .dstStageMask(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR)
+                    .dstAccessMask(VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT_KHR)
+                    .srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                    .dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                    .buffer(resultBuffer.gpuBuffer())
+                    .offset(0)
+                    .size((long) taskCount * Float.BYTES);
+
             var dep = VkDependencyInfoKHR.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR)
-                    .pBufferMemoryBarriers(barriers);
+                    .pBufferMemoryBarriers(VkBufferMemoryBarrier2KHR.calloc(3, stack)
+                            .put(0, barriers.get(0))
+                            .put(1, barriers.get(1))
+                            .put(2, resultWriteBarrier.get(0)));
             vkCmdPipelineBarrier2KHR(cmdBuf, dep);
 
             // Bind & dispatch
