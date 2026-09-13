@@ -8,6 +8,7 @@ import com.github.epsilon.graphics.renderers.TextRenderer;
 import com.github.epsilon.modules.impl.combat.KillAura;
 import com.github.epsilon.modules.impl.movement.Scaffold;
 import com.github.epsilon.modules.impl.player.Timer;
+import com.github.epsilon.music.SmtcLyricsProvider;
 import com.github.epsilon.settings.impl.BoolSetting;
 import com.github.epsilon.settings.impl.ColorSetting;
 import com.github.epsilon.settings.impl.DoubleSetting;
@@ -38,6 +39,7 @@ public class Island extends HudModule {
     private final BoolSetting timerBalance = boolSetting("Timer Balance", true);
     private final BoolSetting tabList = boolSetting("Tab List", true);
     private final BoolSetting music = boolSetting("Music", true).platformOnly(PlatformRequirement.WINDOWS_X64);
+    private final BoolSetting lyric = boolSetting("Lyric", true, music::getValue).platformOnly(PlatformRequirement.WINDOWS_X64);
     public final ColorSetting backgroundColor = colorSetting("Background Color", new Color(15, 15, 15, 50));
     public final BoolSetting drawShadow = boolSetting("Drop Shadow", true);
     public final BoolSetting backgroundBlur = boolSetting("Background Blur", true);
@@ -77,6 +79,7 @@ public class Island extends HudModule {
         LandController.INSTANCE.removeInstances(TabListInstance.class);
         LandController.INSTANCE.removeInstances(MusicInstance.class);
         SmtcService.INSTANCE.stop();
+        SmtcLyricsProvider.reset();
         target = null;
     }
 
@@ -184,6 +187,7 @@ public class Island extends HudModule {
                 LandController.INSTANCE.post(new MusicInstance(
                         SmtcService.INSTANCE,
                         textRendererSupplier,
+                        lyric::getValue,
                         new CheckPattern(() -> {
                             SmtcSnapshot current = SmtcService.INSTANCE.snapshot();
                             return !music.getValue() || !current.available() || !current.isPlaying();
