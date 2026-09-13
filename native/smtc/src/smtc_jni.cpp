@@ -33,7 +33,7 @@ Java_me_sofurry_smtc_SmtcNativeBridge_pollNative(JNIEnv* env, jclass) {
     }
 
     jmethodID constructor = env->GetMethodID(result_class, "<init>",
-            "(ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJ[BLjava/lang/String;)V");
+            "(ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJ[BJJJILjava/lang/String;)V");
     if (constructor == nullptr) {
         return nullptr;
     }
@@ -54,6 +54,10 @@ Java_me_sofurry_smtc_SmtcNativeBridge_pollNative(JNIEnv* env, jclass) {
             static_cast<jint>(snapshot.playback_status),
             static_cast<jlong>(snapshot.thumbnail_revision),
             thumbnail,
+            static_cast<jlong>(snapshot.position_ms),
+            static_cast<jlong>(snapshot.duration_ms),
+            static_cast<jlong>(snapshot.position_updated_at_ms),
+            static_cast<jint>(snapshot.controls),
             error);
 
     env->DeleteLocalRef(title);
@@ -71,6 +75,12 @@ Java_me_sofurry_smtc_SmtcNativeBridge_pollNative(JNIEnv* env, jclass) {
 extern "C" JNIEXPORT void JNICALL
 Java_me_sofurry_smtc_SmtcNativeBridge_resetNative(JNIEnv*, jclass) {
     epsilon::smtc::reset();
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_me_sofurry_smtc_SmtcNativeBridge_sendCommandNative(JNIEnv*, jclass, jint command, jlong position_ms) {
+    return static_cast<jboolean>(epsilon::smtc::send_command(
+            static_cast<epsilon::smtc::Command>(command), static_cast<std::int64_t>(position_ms)));
 }
 
 extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM*, void*) {

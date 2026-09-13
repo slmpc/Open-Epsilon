@@ -1,6 +1,6 @@
 # Epsilon SMTC bridge
 
-该目录包含 Windows x64 的 C++/WinRT SMTC 读取核心、JNI 桥接和独立探针。桥接返回当前媒体会话的标题、艺术家、专辑、来源应用、播放状态与变更后的封面字节，不计算或上报精确播放进度。
+该目录包含 Windows x64 的 C++/WinRT SMTC 读取核心、JNI 桥接和独立探针。桥接返回当前媒体会话的标题、艺术家、专辑、来源应用、播放状态、时间线（位置/时长/采样时刻，播放器不上报时间线时恒为 0，由 Java 侧回退为无进度条展示）、播放控制能力位与变更后的封面字节，并提供 play/pause/next/previous/stop/seek 控制命令。播放位置的外推（本地时钟插值）在 Java 侧 `SmtcSnapshot#estimatedPositionMs` 完成。
 
 ## Build
 

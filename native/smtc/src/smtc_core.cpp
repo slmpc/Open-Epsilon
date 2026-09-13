@@ -63,6 +63,17 @@ std::uint64_t hash_text(std::uint64_t value, std::wstring_view text) {
     return hash_bytes(value, text.data(), text.size() * sizeof(wchar_t));
 }
 
+// WinRT TimeSpan 以 100ns 为单位。
+std::int64_t timespan_to_ms(winrt::Windows::Foundation::TimeSpan span) {
+    return span.count() / 10000;
+}
+
+// WinRT DateTime 纪元为 1601-01-01（100ns），换算到 Unix 纪元毫秒。
+std::int64_t datetime_to_unix_ms(winrt::Windows::Foundation::DateTime time) {
+    constexpr std::int64_t kUnixEpochOffsetTicks = 11644473600000LL * 10000LL;
+    return (time.time_since_epoch().count() - kUnixEpochOffsetTicks) / 10000;
+}
+
 std::wstring build_track_key(const Snapshot& snapshot) {
     std::wstring key;
     key.reserve(snapshot.source_app_id.size() + snapshot.title.size() + snapshot.artist.size()
@@ -155,6 +166,28 @@ Snapshot poll() {
         snapshot.source_app_id = session.SourceAppUserModelId().c_str();
         snapshot.playback_status = static_cast<int>(playback.PlaybackStatus());
 
+        // 时间线与控制能力是可选信息：部分播放器（如未装 SMTC 增强插件的网易云）
+        // 不上报时间线，读取失败时保持 0，由 Java 侧回退为无进度条展示。
+        try {
+            auto timeline = session.GetTimelineProperties();
+            snapshot.position_ms = timespan_to_ms(timeline.Position());
+            snapshot.duration_ms = timespan_to_ms(timeline.EndTime());
+            snapshot.position_updated_at_ms = datetime_to_unix_ms(timeline.LastUpdatedTime());
+        } catch (...) {
+        }
+        try {
+            auto controls = playback.Controls();
+            if (controls) {
+                if (controls.IsPlayEnabled()) snapshot.controls |= kControlPlay;
+                if (controls.IsPauseEnabled()) snapshot.controls |= kControlPause;
+                if (controls.IsNextEnabled()) snapshot.controls |= kControlNext;
+                if (controls.IsPreviousEnabled()) snapshot.controls |= kControlPrevious;
+                if (controls.IsStopEnabled()) snapshot.controls |= kControlStop;
+                if (controls.IsPlaybackPositionEnabled()) snapshot.controls |= kControlSeek;
+            }
+        } catch (...) {
+        }
+
         const std::wstring track_key = build_track_key(snapshot);
         const auto now = std::chrono::steady_clock::now();
         const bool changed_track = track_key != state.track_key;
@@ -185,6 +218,52 @@ Snapshot poll() {
 
 void reset() {
     process_context().reset_requested.store(true, std::memory_order_release);
+}
+
+bool send_command(Command command, std::int64_t position_ms) {
+    Context& context = process_context();
+    std::scoped_lock lock(context.mutex);
+    try {
+        ensure_apartment();
+        State& state = context.state;
+        if (!state.manager) {
+            state.manager = GlobalSystemMediaTransportControlsSessionManager::RequestAsync().get();
+        }
+
+        auto session = state.manager.GetCurrentSession();
+        if (!session) return false;
+
+        // Try*Async 在 MTA 线程上以 .get() 等待完成；调用方为 SMTC 轮询线程，
+        // 与 poll() 共用互斥锁串行执行，不会交叉访问会话。
+        switch (command) {
+            case Command::Play:
+                session.TryPlayAsync().get();
+                break;
+            case Command::Pause:
+                session.TryPauseAsync().get();
+                break;
+            case Command::Next:
+                session.TrySkipNextAsync().get();
+                break;
+            case Command::Previous:
+                session.TrySkipPreviousAsync().get();
+                break;
+            case Command::Stop:
+                session.TryStopAsync().get();
+                break;
+            case Command::Seek:
+                // 播放位置以 100ns 为单位传递。
+                session.TryChangePlaybackPositionAsync(position_ms * 10000).get();
+                break;
+            default:
+                return false;
+        }
+        return true;
+    } catch (const winrt::hresult_error&) {
+        return false;
+    } catch (...) {
+        return false;
+    }
 }
 
 } // namespace epsilon::smtc
