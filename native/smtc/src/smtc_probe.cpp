@@ -19,6 +19,10 @@ int main() {
               << "album=" << utf8(snapshot.album_title) << '\n'
               << "source=" << utf8(snapshot.source_app_id) << '\n'
               << "playback_status=" << snapshot.playback_status << '\n'
+              << "position_ms=" << snapshot.position_ms << '\n'
+              << "duration_ms=" << snapshot.duration_ms << '\n'
+              << "position_updated_at_ms=" << snapshot.position_updated_at_ms << '\n'
+              << "controls=0x" << std::hex << snapshot.controls << std::dec << '\n'
               << "thumbnail_revision=" << snapshot.thumbnail_revision << '\n'
               << "thumbnail_bytes="
               << (snapshot.thumbnail.has_value() ? snapshot.thumbnail->size() : 0) << '\n';

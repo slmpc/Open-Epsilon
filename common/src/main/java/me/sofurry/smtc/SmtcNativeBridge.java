@@ -18,6 +18,14 @@ public class SmtcNativeBridge {
     private static final String RESOURCE_PATH = "/natives/windows-x86_64/epsilon_smtc.dll";
     private static final boolean AVAILABLE = loadLibrary();
 
+    // 命令 ID 与原生侧 epsilon::smtc::Command 枚举保持一致。
+    public static final int COMMAND_PLAY = 0;
+    public static final int COMMAND_PAUSE = 1;
+    public static final int COMMAND_NEXT = 2;
+    public static final int COMMAND_PREVIOUS = 3;
+    public static final int COMMAND_STOP = 4;
+    public static final int COMMAND_SEEK = 5;
+
     private SmtcNativeBridge() {
     }
 
@@ -36,9 +44,20 @@ public class SmtcNativeBridge {
         }
     }
 
+    /**
+     * 向当前媒体会话发送播放控制命令。
+     * 会话不存在、命令不被支持或原生调用失败时返回 false。
+     */
+    public static boolean sendCommand(int command, long positionMs) {
+        if (!AVAILABLE) return false;
+        return sendCommandNative(command, positionMs);
+    }
+
     private static native SmtcNativeResult pollNative();
 
     private static native void resetNative();
+
+    private static native boolean sendCommandNative(int command, long positionMs);
 
     private static boolean loadLibrary() {
         if (!ClientPlatform.isWindowsX64()) {

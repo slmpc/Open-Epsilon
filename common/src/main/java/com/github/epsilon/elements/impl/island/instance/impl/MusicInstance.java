@@ -10,6 +10,8 @@ import com.github.epsilon.graphics.text.IconChars;
 import com.github.epsilon.graphics.text.StaticFontLoader;
 import com.github.epsilon.gui.lib.UiRect;
 import com.github.epsilon.gui.lib.UiTree;
+import com.github.epsilon.music.ParsedLyrics;
+import com.github.epsilon.music.SmtcLyricsProvider;
 import com.mojang.blaze3d.platform.NativeImage;
 import me.sofurry.smtc.SmtcService;
 import me.sofurry.smtc.SmtcSnapshot;
@@ -22,6 +24,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
 
@@ -29,6 +32,9 @@ import static com.github.epsilon.Constants.mc;
 
 /**
  * 将 Windows SMTC 当前媒体会话绘制为 Island 内容。
+ * <p>
+ * 时间线（进度/时长）是可选信息：部分播放器（如未装 SMTC 增强插件的网易云）
+ * 不上报时间线，此时不绘制进度条与歌词行，保持原始三行布局。
  */
 public class MusicInstance extends LandInstance {
 
@@ -43,28 +49,40 @@ public class MusicInstance extends LandInstance {
     private static final float TITLE_SCALE = 1.0f;
     private static final float ARTIST_SCALE = 0.78f;
     private static final float META_SCALE = 0.68f;
+    private static final float LYRIC_SCALE = 0.8f;
+    private static final float TIME_SCALE = 0.62f;
     private static final float ICON_SCALE = 0.78f;
     private static final float WAVE_WIDTH = 18f;
     private static final float TITLE_STATUS_GAP = 8f;
     private static final float MARQUEE_SPEED = 22f;
     private static final float MARQUEE_START_HOLD_SECONDS = 1.25f;
     private static final float MARQUEE_GAP = 28f;
+    private static final float LYRIC_TOP_GAP = 3f;
+    private static final float LYRIC_ROW_HEIGHT = 11f;
+    private static final float PROGRESS_TOP_GAP = 2f;
+    private static final float PROGRESS_ROW_HEIGHT = 11f;
+    private static final float PROGRESS_BAR_HEIGHT = 3.5f;
+    private static final float PROGRESS_TEXT_GAP = 6f;
     private static final int COVER_TEXTURE_SIZE = 256;
 
     private final SmtcService service;
     private final Supplier<TextRenderer> textRendererSupplier;
+    private final Supplier<Boolean> lyricEnabled;
 
     private SmtcSnapshot snapshot = SmtcSnapshot.UNAVAILABLE;
     private long coverRevision = Long.MIN_VALUE;
     private DynamicTexture coverTexture;
     private boolean coverAvailable;
-    private String marqueeTitle = "";
-    private long marqueeStartedAtNs = System.nanoTime();
+    private final MarqueeState titleMarquee = new MarqueeState();
+    private final MarqueeState lyricMarquee = new MarqueeState();
+    private String lyricLine = "";
 
-    public MusicInstance(SmtcService service, Supplier<TextRenderer> textRendererSupplier, LCPattern pattern) {
+    public MusicInstance(SmtcService service, Supplier<TextRenderer> textRendererSupplier,
+                         Supplier<Boolean> lyricEnabled, LCPattern pattern) {
         super(pattern, 1);
         this.service = service;
         this.textRendererSupplier = textRendererSupplier;
+        this.lyricEnabled = lyricEnabled;
     }
 
     @Override
@@ -72,14 +90,23 @@ public class MusicInstance extends LandInstance {
         snapshot = service.snapshot();
         updateCoverTexture(snapshot);
 
-        String nextTitle = title(snapshot);
-        if (!nextTitle.equals(marqueeTitle)) {
-            marqueeTitle = nextTitle;
-            marqueeStartedAtNs = System.nanoTime();
+        titleMarquee.advance(title(snapshot));
+
+        // 歌词反查幂等，可按帧调用；实际请求在工作线程执行。
+        lyricLine = "";
+        if (lyricEnabled.get() && snapshot.hasTimeline()) {
+            SmtcLyricsProvider.onSongChanged(displayKey(snapshot));
+            lyricLine = currentLyricLine();
         }
+        lyricMarquee.advance(lyricLine);
 
         targetRadius = 0.42f;
-        targetHeight = PADDING * 2f + COVER_SIZE;
+        boolean showLyric = !lyricLine.isEmpty();
+        boolean showProgress = snapshot.hasTimeline();
+        float contentBottom = PADDING + COVER_SIZE;
+        if (showLyric) contentBottom += LYRIC_TOP_GAP + LYRIC_ROW_HEIGHT;
+        if (showProgress) contentBottom += PROGRESS_TOP_GAP + PROGRESS_ROW_HEIGHT;
+        targetHeight = contentBottom + PADDING;
 
         TextRenderer textRenderer = textRendererSupplier.get();
         String title = title(snapshot);
@@ -106,16 +133,52 @@ public class MusicInstance extends LandInstance {
         float titleRight = contentRight - WAVE_WIDTH - TITLE_STATUS_GAP;
         float titleViewport = Math.max(1f, titleRight - textX);
 
+        // 三行基础内容始终约束在封面区域内；附加行在封面下方全宽展开。
         float titleY = PADDING + 1f;
-        drawMarqueeTitle(scope, textRenderer, title(snapshot), textX, titleY, titleViewport);
+        drawMarqueeText(scope, textRenderer, title(snapshot), TITLE_SCALE, IslandPalette.TEXT_PRIMARY,
+                titleMarquee, textX, titleY, titleViewport);
         drawPlaybackWave(scope, contentRight - WAVE_WIDTH, titleY + 1f, WAVE_WIDTH, 9f);
 
         float artistY = titleY + textRenderer.getHeight(TITLE_SCALE) + 3f;
         drawIconText(scope, IconChars.ARTIST, artist(snapshot), textX, artistY,
                 Math.max(1f, contentRight - textX), ARTIST_SCALE, IslandPalette.TEXT_SECONDARY);
 
-        float metaY = height - PADDING - textRenderer.getHeight(META_SCALE) - 1f;
+        float metaY = PADDING + COVER_SIZE - textRenderer.getHeight(META_SCALE) - 1f;
         drawIconText(scope, snapshot.albumTitle().isBlank() ? IconChars.AUDIO_FILE : IconChars.ALBUM, metadata(snapshot), textX, metaY, Math.max(1f, contentRight - textX), META_SCALE, IslandPalette.TEXT_MUTED);
+
+        float contentBottom = PADDING + COVER_SIZE;
+        if (!lyricLine.isEmpty()) {
+            float lyricY = contentBottom + LYRIC_TOP_GAP;
+            drawMarqueeText(scope, textRenderer, lyricLine, LYRIC_SCALE, IslandPalette.TEXT_PRIMARY,
+                    lyricMarquee, PADDING, lyricY, Math.max(1f, width - PADDING * 2f));
+            contentBottom = lyricY + LYRIC_ROW_HEIGHT;
+        }
+
+        if (snapshot.hasTimeline()) {
+            drawProgress(scope, textRenderer, contentBottom + PROGRESS_TOP_GAP, width);
+        }
+    }
+
+    private void drawProgress(UiTree.Scope scope, TextRenderer textRenderer, float y, float width) {
+        long positionMs = snapshot.estimatedPositionMs();
+        float fraction = snapshot.durationMs() > 0L
+                ? Mth.clamp(positionMs / (float) snapshot.durationMs(), 0f, 1f)
+                : 0f;
+
+        String timeText = formatTime(positionMs) + " / " + formatTime(snapshot.durationMs());
+        float timeWidth = textRenderer.getWidth(timeText, TIME_SCALE);
+        float timeY = y + (PROGRESS_ROW_HEIGHT - textRenderer.getHeight(TIME_SCALE)) * 0.5f;
+        scope.text(timeText, width - PADDING - timeWidth, timeY, TIME_SCALE, fade(IslandPalette.TEXT_MUTED));
+
+        float barWidth = Math.max(1f, (width - PADDING - PROGRESS_TEXT_GAP - timeWidth) - PADDING * 2f);
+        float barY = y + (PROGRESS_ROW_HEIGHT - PROGRESS_BAR_HEIGHT) * 0.5f;
+        scope.roundRect(PADDING, barY, barWidth, PROGRESS_BAR_HEIGHT, PROGRESS_BAR_HEIGHT * 0.5f, fade(IslandPalette.TRACK));
+
+        float fillWidth = barWidth * fraction;
+        if (fillWidth >= 2f) {
+            scope.roundRectHorizontalGradient(PADDING, barY, fillWidth, PROGRESS_BAR_HEIGHT,
+                    Math.min(PROGRESS_BAR_HEIGHT * 0.5f, fillWidth * 0.5f), fade(IslandPalette.ACCENT), fade(IslandPalette.ACCENT_ALT));
+        }
     }
 
     private void drawCover(UiTree.Scope scope) {
@@ -133,22 +196,22 @@ public class MusicInstance extends LandInstance {
         }
     }
 
-    private void drawMarqueeTitle(UiTree.Scope scope, TextRenderer textRenderer, String title,
-                                  float x, float y, float viewportWidth) {
-        float textWidth = textRenderer.getWidth(title, TITLE_SCALE);
+    private void drawMarqueeText(UiTree.Scope scope, TextRenderer textRenderer, String text, float scale,
+                                 Color color, MarqueeState state, float x, float y, float viewportWidth) {
+        float textWidth = textRenderer.getWidth(text, scale);
         if (textWidth <= viewportWidth) {
-            scope.text(title, x, y, TITLE_SCALE, fade(IslandPalette.TEXT_PRIMARY));
+            scope.text(text, x, y, scale, fade(color));
             return;
         }
 
-        float elapsedSeconds = (System.nanoTime() - marqueeStartedAtNs) / 1_000_000_000.0f;
+        float elapsedSeconds = (System.nanoTime() - state.startedAtNs) / 1_000_000_000.0f;
         float scrollSeconds = Math.max(0f, elapsedSeconds - MARQUEE_START_HOLD_SECONDS);
         float cycle = textWidth + MARQUEE_GAP;
         float offset = -(scrollSeconds * MARQUEE_SPEED % cycle);
-        UiRect clip = new UiRect(x, y - 1f, viewportWidth, textRenderer.getHeight(TITLE_SCALE) + 2f);
+        UiRect clip = new UiRect(x, y - 1f, viewportWidth, textRenderer.getHeight(scale) + 2f);
         scope.scissor(clip, inner -> {
-            inner.text(title, x + offset, y, TITLE_SCALE, fade(IslandPalette.TEXT_PRIMARY));
-            inner.text(title, x + offset + cycle, y, TITLE_SCALE, fade(IslandPalette.TEXT_PRIMARY));
+            inner.text(text, x + offset, y, scale, fade(color));
+            inner.text(text, x + offset + cycle, y, scale, fade(color));
         });
     }
 
@@ -170,15 +233,37 @@ public class MusicInstance extends LandInstance {
         float barWidth = 2f;
         float gap = (width - bars * barWidth) / (bars - 1);
         double time = System.nanoTime() / 1_000_000_000.0;
+        boolean playing = snapshot.isPlaying();
 
         for (int index = 0; index < bars; index++) {
-            float amplitude = 0.28f + 0.72f * (float) ((Math.sin(time * 4.8 + index * 1.7) + 1.0) * 0.5);
+            // 暂停时波形静止在低位，避免“已暂停但仍跳动”的误导。
+            float amplitude = playing
+                    ? 0.28f + 0.72f * (float) ((Math.sin(time * 4.8 + index * 1.7) + 1.0) * 0.5)
+                    : 0.34f;
             float barHeight = Math.max(2f, height * amplitude);
             float barX = x + index * (barWidth + gap);
             float barY = y + (height - barHeight) * 0.5f;
             Color color = index < 2 ? IslandPalette.ACCENT : IslandPalette.ACCENT_ALT;
             scope.roundRect(barX, barY, barWidth, barHeight, barWidth * 0.5f, fade(color));
         }
+    }
+
+    /** 按当前播放位置定位歌词行；时间线不可用或无缓存歌词时返回空串。 */
+    private String currentLyricLine() {
+        ParsedLyrics lyrics = SmtcLyricsProvider.lyrics();
+        if (lyrics.isEmpty()) return "";
+
+        long position = snapshot.estimatedPositionMs();
+        List<Long> timestamps = lyrics.timestamps();
+        int index = -1;
+        for (int i = 0; i < timestamps.size(); i++) {
+            if (position >= timestamps.get(i)) {
+                index = i;
+            } else {
+                break;
+            }
+        }
+        return index < 0 ? "" : lyrics.lines().get(index);
     }
 
     private void updateCoverTexture(SmtcSnapshot next) {
@@ -272,6 +357,17 @@ public class MusicInstance extends LandInstance {
         return snapshot.albumTitle() + "  /  " + source;
     }
 
+    /** 歌词反查键：艺术家为空时仅用标题，避免把回退文案带进搜索词。 */
+    private static String displayKey(SmtcSnapshot snapshot) {
+        if (snapshot.title().isBlank()) return "";
+        return snapshot.artist().isBlank() ? snapshot.title() : snapshot.artist() + " - " + snapshot.title();
+    }
+
+    private static String formatTime(long milliseconds) {
+        long totalSeconds = Math.max(0L, milliseconds) / 1000L;
+        return totalSeconds / 60 + ":" + String.format(Locale.ROOT, "%02d", totalSeconds % 60);
+    }
+
     private static String sourceName(String sourceAppId) {
         if (sourceAppId == null || sourceAppId.isBlank()) return "Windows media";
 
@@ -289,6 +385,22 @@ public class MusicInstance extends LandInstance {
     @Override
     public void onRemoved() {
         releaseCoverTexture();
+    }
+
+    /**
+     * 跑马灯状态：文本变化时重置滚动起点，未溢出时不需要滚动。
+     */
+    private static final class MarqueeState {
+
+        private String text = "";
+        private long startedAtNs = System.nanoTime();
+
+        void advance(String next) {
+            if (next.equals(text)) return;
+            text = next;
+            startedAtNs = System.nanoTime();
+        }
+
     }
 
 }

@@ -140,6 +140,16 @@ public class Http {
             return this;
         }
 
+        public Request header(String name, String value) {
+            builder.header(name, value);
+            return this;
+        }
+
+        public Request timeout(Duration duration) {
+            builder.timeout(duration);
+            return this;
+        }
+
         public Request bodyForm(String string) {
             builder.header("Content-Type", "application/x-www-form-urlencoded");
             return body(string);
